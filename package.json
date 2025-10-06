@@ -1,0 +1,24 @@
+{
+  "name": "consync",
+  "version": "1.0.0",
+  "description": "NICE Innovation Challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dixonsilveroff/ConSync.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dixonsilveroff/ConSync/issues"
+  },
+  "homepage": "https://github.com/dixonsilveroff/ConSync#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
