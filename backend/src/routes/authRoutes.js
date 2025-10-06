@@ -43,6 +43,15 @@ router.post("/login", async (req, res) => {
 // Other routes
 router.post("/refresh", authController.refresh);
 router.post("/logout", authController.logout);
-router.get("/me", authMiddleware, authController.me);
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 export default router;
