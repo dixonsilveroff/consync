@@ -1,12 +1,17 @@
 import { useState } from "react";
-import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Register() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: "Client",
+    // role must match backend enum values (lowercase)
+    role: "client",
   });
   const [message, setMessage] = useState("");
 
@@ -17,17 +22,19 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", formData);
-      setMessage("User registered successfully!");
-      console.log(res.data);
+      await register(formData);
+      // redirect back if we were sent here from a protected route
+      const dest = location.state?.from?.pathname || "/";
+      navigate(dest, { replace: true });
+      setMessage("User registered and logged in!");
     } catch (err) {
-      console.error(err.response?.data || err.message);
-      setMessage("Registration failed");
+      console.error(err.message || err);
+      setMessage(err.message || "Registration failed");
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
+    <div className="flex items-center justify-center">
       <div className="bg-white p-8 rounded-2xl shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
           Create a ConSync Account
@@ -66,10 +73,11 @@ export default function Register() {
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="Client">Client</option>
-            <option value="Contractor">Contractor</option>
-            <option value="Supplier">Supplier</option>
-            <option value="Project Engineer">Project Engineer</option>
+            {/* Values must match backend enum: ["admin","engineer","client","contractor"] */}
+            <option value="client">Client</option>
+            <option value="contractor">Contractor</option>
+            <option value="engineer">Project Engineer</option>
+            <option value="admin">Admin</option>
           </select>
           <button
             type="submit"

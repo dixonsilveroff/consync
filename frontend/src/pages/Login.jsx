@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -11,7 +14,9 @@ export default function Login() {
     e.preventDefault();
     try {
       await login(email, password);
-      alert("Login successful!");
+      // redirect to previous page if present
+      const dest = location.state?.from?.pathname || "/";
+      navigate(dest, { replace: true });
     } catch (err) {
       console.error(err);
       setError("Invalid credentials");
@@ -49,3 +54,4 @@ export default function Login() {
     </div>
   );
 }
+
