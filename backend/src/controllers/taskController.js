@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Task from '../models/taskModel.js';
 import Project from '../models/projectModel.js';
+import { logActivity } from '../middleware/activityLogger.js';
 
 // Test route
 export const testRoute = (req, res) => {
@@ -48,6 +49,16 @@ export const createTask = async (req, res, next) => {
             const hasBlockingDependency = dependencyTasks.some(task => task.status !== 'done');
             if (hasBlockingDependency) {
                 req.body.status = 'blocked';
+                
+                // Log blocked status
+                await logActivity(
+                    'TASK_BLOCKED',
+                    'Task',
+                    task._id,
+                    req.user._id,
+                    `Task blocked due to dependencies`,
+                    project
+                );
             }
         }
 
@@ -62,6 +73,17 @@ export const createTask = async (req, res, next) => {
             { path: 'project', select: 'title status' },
             { path: 'assignedTo', select: 'name email' }
         ]);
+
+        // Log task creation
+        await logActivity(
+            'TASK_CREATED',
+            'Task',
+            task._id,
+            req.user._id,
+            `Task "${task.title}" created`,
+            task.project,
+            { status: task.status, priority: task.priority }
+        );
 
         res.status(201).json({
             success: true,
@@ -228,6 +250,9 @@ export const updateTask = async (req, res, next) => {
             });
         }
 
+        // Store old status for comparison
+        const oldStatus = task.status;
+
         // Check authorization
         if (req.user.role !== 'admin') {
             const isAuthorized = 
@@ -272,6 +297,32 @@ export const updateTask = async (req, res, next) => {
             { path: 'assignedTo', select: 'name email' },
             { path: 'createdBy', select: 'name email' }
         ]);
+
+        // Log status change if it occurred
+        if (oldStatus !== updatedTask.status) {
+            await logActivity(
+                'TASK_STATUS_UPDATED',
+                'Task',
+                updatedTask._id,
+                req.user._id,
+                `Task "${updatedTask.title}" status changed from ${oldStatus} to ${updatedTask.status}`,
+                updatedTask.project,
+                { oldStatus, newStatus: updatedTask.status }
+            );
+        }
+
+        // Log general update if other fields changed
+        if (Object.keys(updates).length > (updates.status ? 1 : 0)) {
+            await logActivity(
+                'TASK_UPDATED',
+                'Task',
+                updatedTask._id,
+                req.user._id,
+                `Task "${updatedTask.title}" updated`,
+                updatedTask.project,
+                { updatedFields: Object.keys(updates).filter(k => k !== 'status') }
+            );
+        }
 
         res.status(200).json({
             success: true,

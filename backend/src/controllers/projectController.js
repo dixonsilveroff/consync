@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Project from '../models/projectModel.js';
 import User from '../models/User.js';
+import { logActivity } from '../middleware/activityLogger.js';
 
 /**
  * Simple test route to verify projects router is mounted.
@@ -27,6 +28,16 @@ export const createProject = async (req, res, next) => {
 
     const project = await Project.create(payload);
     await project.populate([{ path: 'client', select: 'name email' }, { path: 'owner', select: 'name email' }, { path: 'assignedUsers', select: 'name email' }]);
+
+    // Log project creation activity
+    await logActivity(
+      'PROJECT_CREATED',
+      'Project',
+      project._id,
+      req.user._id,
+      `Project "${project.title}" created`,
+      project._id
+    );
 
     return res.status(201).json({ success: true, data: project });
   } catch (err) {

@@ -38,6 +38,8 @@ const projectSchema = new Schema({
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   archived: { type: Boolean, default: false },
+  progressPercent: { type: Number, default: 0 },
+  lastProgressUpdate: { type: Date },
 }, { timestamps: true });
 
 // Full text search on title and description
