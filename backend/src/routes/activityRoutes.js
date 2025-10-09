@@ -1,6 +1,6 @@
 import express from 'express';
-import auth from '../middleware/auth.js';
-import authorizeRoles from '../middleware/authorizeRoles.js';
+import protect from '../middleware/auth.js';
+import authorize from '../middleware/authorizeRoles.js';
 import {
   getActivities,
   getActivityById,
