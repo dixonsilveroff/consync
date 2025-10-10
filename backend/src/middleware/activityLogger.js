@@ -1,5 +1,5 @@
 import Activity from '../models/activityModel.js';
-import { calculateProjectProgress } from '../utils/progressCalculator.js';
+import calculateProjectProgress from '../utils/progressCalculator.js';
 
 /**
  * Log an activity in the system
@@ -12,7 +12,7 @@ import { calculateProjectProgress } from '../utils/progressCalculator.js';
  * @param {Object} [metadata] - Optional additional data about the action
  * @returns {Promise<Activity>} The created activity document
  */
-export const logActivity = async (action, entityType, entityId, userId, message, projectId = null, metadata = {}) => {
+const logActivity = async (action, entityType, entityId, userId, message, projectId = null, metadata = {}) => {
   try {
     // Create the activity document
     const activity = await Activity.create({
@@ -37,6 +37,4 @@ export const logActivity = async (action, entityType, entityId, userId, message,
   }
 };
 
-export default {
-  logActivity
-};
+export default logActivity;

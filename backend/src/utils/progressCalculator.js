@@ -6,7 +6,7 @@ import Task from '../models/taskModel.js';
  * @param {string} projectId - The ID of the project to calculate progress for
  * @returns {Promise<number>} The calculated progress percentage
  */
-export const calculateProjectProgress = async (projectId) => {
+const calculateProjectProgress = async (projectId) => {
   try {
     // Find all tasks for the project
     const tasks = await Task.find({ project: projectId });
@@ -40,6 +40,4 @@ export const calculateProjectProgress = async (projectId) => {
   }
 };
 
-export default {
-  calculateProjectProgress
-};
+export default calculateProjectProgress;

@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import mongoose from 'mongoose';
 import CostLine from '../models/costLineModel.js';
 import Project from '../models/projectModel.js';
-import { logActivity } from '../middleware/activityLogger.js';
+import logActivity from '../middleware/activityLogger.js';
 
 // ✅ TEST ROUTE
 export const testRoute = (req, res) => {

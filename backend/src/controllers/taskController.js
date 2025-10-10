@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Task from '../models/taskModel.js';
 import Project from '../models/projectModel.js';
-import { logActivity } from '../middleware/activityLogger.js';
+import logActivity from '../middleware/activityLogger.js';
 
 // Test route
 export const testRoute = (req, res) => {

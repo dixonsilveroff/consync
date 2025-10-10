@@ -1,5 +1,6 @@
 import express from 'express';
-import { protect, authorize } from '../middleware/auth.js';
+import protect from '../middleware/auth.js';
+import authorizeRoles from '../middleware/authorizeRoles.js';
 import {
   testRoute,
   createCostLine,
@@ -11,9 +12,9 @@ import {
 const router = express.Router();
 
 router.get('/test', testRoute);
-router.post('/', protect, authorize(['admin','engineer']), createCostLine);
+router.post('/', protect, authorizeRoles('admin', 'engineer'), createCostLine);
 router.get('/', protect, getCostLines);
 router.get('/summary/:id', protect, getProjectCostSummary);
-router.delete('/:id', protect, authorize(['admin']), deleteCostLine);
+router.delete('/:id', protect, authorizeRoles('admin'), deleteCostLine);
 
 export default router;

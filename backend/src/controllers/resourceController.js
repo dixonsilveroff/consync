@@ -1,7 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import MaterialRequest from '../models/materialRequestModel.js';
 import Vendor from '../models/vendorModel.js';
-import { logActivity } from '../middleware/activityLogger.js';
+import logActivity from '../middleware/activityLogger.js';
 
 // ✅ TEST ROUTE
 export const testRoute = (req, res) => {

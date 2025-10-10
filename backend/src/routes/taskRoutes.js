@@ -1,6 +1,6 @@
 import express from 'express';
 import protect from '../middleware/auth.js';
-import authorize from '../middleware/authorizeRoles.js';
+import authorizeRoles from '../middleware/authorizeRoles.js';
 import {
     testRoute,
     createTask,
@@ -20,16 +20,16 @@ router.get('/test', testRoute);
 // Protected routes
 router
     .route('/')
-    .post(protect, authorize(['admin', 'engineer']), createTask)
+    .post(protect, authorizeRoles('admin', 'engineer'), createTask)
     .get(protect, getTasks);
 
 router
     .route('/:id')
     .get(protect, getTaskById)
-    .put(protect, authorize(['admin', 'engineer']), updateTask)
-    .delete(protect, authorize(['admin']), deleteTask);
+    .put(protect, authorizeRoles('admin', 'engineer'), updateTask)
+    .delete(protect, authorizeRoles('admin'), deleteTask);
 
-router.patch('/bulk-status', protect, authorize(['admin', 'engineer']), bulkUpdateStatus);
-router.patch('/:id/archive', protect, authorize(['admin', 'engineer']), archiveTask);
+router.patch('/bulk-status', protect, authorizeRoles('admin', 'engineer'), bulkUpdateStatus);
+router.patch('/:id/archive', protect, authorizeRoles('admin', 'engineer'), archiveTask);
 
 export default router;
