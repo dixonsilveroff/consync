@@ -1,6 +1,6 @@
 import express from 'express';
-import authMiddleware from '../middleware/auth.js';
-import authorizeRoles from '../middleware/authorizeRoles.js';
+import protect from '../middleware/auth.js';
+import authorize from '../middleware/authorizeRoles.js';
 import * as projectController from '../controllers/projectController.js';
 import { validate, createProjectSchema, updateProjectSchema } from '../validators/projectValidator.js';
 
