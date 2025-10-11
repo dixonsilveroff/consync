@@ -14,8 +14,8 @@ const router = express.Router();
 router.get('/test', testRoute);
 
 // Protected routes
-router.get('/', auth, getActivities);
-router.get('/:id', auth, getActivityById);
-router.delete('/:id', auth, authorizeRoles('admin'), deleteActivity);
+router.get('/', protect, getActivities);
+router.get('/:id', protect, getActivityById);
+router.delete('/:id', protect, authorize('admin'), deleteActivity);
 
 export default router;

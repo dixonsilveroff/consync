@@ -1,6 +1,7 @@
 import express from 'express';
 import protect from '../middleware/auth.js';
-import authorize from '../middleware/authorizeRoles.js';
+import authorizeRoles from '../middleware/authorizeRoles.js';
+import authMiddleware from "../middleware/auth.js";
 import * as projectController from '../controllers/projectController.js';
 import { validate, createProjectSchema, updateProjectSchema } from '../validators/projectValidator.js';
 
@@ -10,13 +11,13 @@ const router = express.Router();
 router.get('/test', projectController.testRoute);
 
 // Create project - only admin & engineer
-router.post('/', authMiddleware, authorizeRoles('admin', 'engineer'), validate(createProjectSchema), projectController.createProject);
+router.post('/', protect, authorizeRoles('admin', 'engineer'), validate(createProjectSchema), projectController.createProject);
 
 // List projects - protected
-router.get('/', authMiddleware, projectController.getProjects);
+router.get('/', protect, projectController.getProjects);
 
 // Get single project
-router.get('/:id', authMiddleware, projectController.getProjectById);
+router.get('/:id', protect, projectController.getProjectById);
 
 // Update project - admin/engineer/owner (authorizeRoles middleware checks role names only;
 // owner access is enforced in controller)

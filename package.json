@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dixonsilveroff/ConSync.git"
+    "url": "git+https://github.com/dixonsilveroff/consync.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/dixonsilveroff/ConSync/issues"
+    "url": "https://github.com/dixonsilveroff/consync/issues"
   },
-  "homepage": "https://github.com/dixonsilveroff/ConSync#readme",
+  "homepage": "https://github.com/dixonsilveroff/consync#readme",
   "devDependencies": {
     "nodemon": "^3.1.10"
   }
