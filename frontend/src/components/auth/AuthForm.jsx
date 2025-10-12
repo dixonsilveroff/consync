@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import InputField from './InputField';
-import ConSyncLogo from '../../assets/images/logo-black.png';
+import ConSyncLogo from '../../assets/images/logo-white.png';
 
 const AuthForm = ({
   isLogin = true,
