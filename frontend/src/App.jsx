@@ -9,6 +9,8 @@ import AdminPage from "./pages/AdminPage";
 import EngineerPage from "./pages/EngineerPage";
 import ClientPage from "./pages/ClientPage";
 import Unauthorized from "./pages/Unauthorized";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectDetails from "./pages/ProjectDetails";
 
 const AppContent = () => {
 
@@ -53,6 +55,18 @@ const AppContent = () => {
             <Route path="/client" element={
               <ProtectedRoute roles={["client"]}>
                 <ClientPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <ProjectsPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/projects/:id" element={
+              <ProtectedRoute>
+                <ProjectDetails />
               </ProtectedRoute>
             } />
           </Routes>
