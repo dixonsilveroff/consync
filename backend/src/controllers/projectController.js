@@ -94,13 +94,13 @@ export const getProjects = async (req, res, next) => {
     if (role === 'admin') {
       // no extra constraints
     } else if (role === 'client') {
-      filter.client = mongoose.Types.ObjectId(userId);
+      filter.client = userId; // MongoDB will handle the type conversion
     } else {
       // engineer/contractor/other: assigned, owner, or createdBy
       filter.$or = [
-        { assignedUsers: mongoose.Types.ObjectId(userId) },
-        { owner: mongoose.Types.ObjectId(userId) },
-        { createdBy: mongoose.Types.ObjectId(userId) },
+        { assignedUsers: new mongoose.Types.ObjectId(userId) },
+        { owner: new mongoose.Types.ObjectId(userId) },
+        { createdBy: new mongoose.Types.ObjectId(userId) },
       ];
     }
 

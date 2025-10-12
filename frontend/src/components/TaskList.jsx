@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { CheckCircle, Circle } from 'lucide-react';
+import api from '../api/apiClient';
 
-export default function TaskList({ projectId }) {
+export default function TaskList({ projectId, onUpdate }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get(`/api/tasks/project/${projectId}`, { withCredentials: true });
+      const res = await api.get(`/api/tasks/project/${projectId}`);
       setTasks(res.data.data || []);
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
@@ -19,16 +18,14 @@ export default function TaskList({ projectId }) {
 
   useEffect(() => {
     fetchTasks();
-  }, [projectId]);
+  }, [projectId, onUpdate]);
 
   const toggleTaskStatus = async (taskId, completed) => {
     try {
-      await axios.patch(
-        `/api/tasks/${taskId}`,
-        { completed },
-        { withCredentials: true }
-      );
-      fetchTasks();
+      await api.patch(`/api/tasks/${taskId}`, { 
+        status: completed ? 'completed' : 'pending' 
+      });
+      onUpdate();
     } catch (error) {
       console.error('Failed to update task:', error);
     }
@@ -54,10 +51,10 @@ export default function TaskList({ projectId }) {
           className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow"
         >
           <button
-            onClick={() => toggleTaskStatus(task._id, !task.completed)}
+            onClick={() => toggleTaskStatus(task._id, task.status !== 'completed')}
             className="text-gray-400 hover:text-blue-600"
           >
-            {task.completed ? (
+            {task.status === 'completed' ? (
               <CheckCircle className="w-5 h-5 text-green-600" />
             ) : (
               <Circle className="w-5 h-5" />
@@ -65,7 +62,7 @@ export default function TaskList({ projectId }) {
           </button>
           
           <div className="flex-1 min-w-0">
-            <h4 className={`font-medium ${task.completed ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+            <h4 className={`font-medium ${task.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
               {task.title}
             </h4>
             {task.assignedTo && (

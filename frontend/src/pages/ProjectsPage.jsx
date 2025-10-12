@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/apiClient';
 import ProjectCard from '../components/ProjectCard';
 import AddProjectModal from '../components/AddProjectModal';
 import { useAuth } from '../context/AuthContext';
@@ -8,11 +8,15 @@ import { Plus } from 'lucide-react';
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const fetchProjects = async () => {
-    const res = await axios.get('/api/projects', { withCredentials: true });
-    setProjects(res.data.data || []);
+    try {
+      const res = await api.get('/api/projects');
+      setProjects(res.data.data || []);
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+    }
   };
 
   useEffect(() => { fetchProjects(); }, []);
@@ -21,7 +25,7 @@ export default function ProjectsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold text-gray-800">Projects</h1>
-        {user?.role === 'admin' && (
+        {!authLoading && user?.role === 'admin' && (
           <button
             onClick={() => setOpenModal(true)}
             className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"

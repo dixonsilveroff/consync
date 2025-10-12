@@ -12,13 +12,21 @@ export const testRoute = (req, res) => {
 // Create new task
 export const createTask = async (req, res, next) => {
     try {
-        const { title, project, dependencies = [] } = req.body;
+        const { title, project, dependencies = [], status = 'todo', createdBy } = req.body;
 
         // Validate required fields
         if (!title || !project) {
             return res.status(400).json({
                 success: false,
                 message: 'Title and project are required'
+            });
+        }
+
+        // Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(project)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid project ID format'
             });
         }
 
@@ -29,6 +37,11 @@ export const createTask = async (req, res, next) => {
                 success: false,
                 message: 'Project not found'
             });
+        }
+
+        // Ensure createdBy is set
+        if (!createdBy && req.user) {
+            createdBy = req.user.id;
         }
 
         // Validate dependencies if provided
@@ -66,7 +79,7 @@ export const createTask = async (req, res, next) => {
         // Create task
         const task = await Task.create({
             ...req.body,
-            createdBy: req.user._id
+            createdBy: createdBy || req.user._id
         });
 
         // Return populated task

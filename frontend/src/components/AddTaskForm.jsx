@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api/apiClient';
+import { useAuth } from '../context/AuthContext';
 
-export default function AddTaskForm({ projectId }) {
+export default function AddTaskForm({ projectId, onAdd }) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     assignedTo: '',
@@ -14,10 +16,12 @@ export default function AddTaskForm({ projectId }) {
     setLoading(true);
 
     try {
-      await axios.post('/api/tasks', {
+      await api.post('/api/tasks', {
         ...formData,
-        projectId
-      }, { withCredentials: true });
+        project: projectId,
+        createdBy: user.id,
+        status: 'todo'
+      });
       
       // Reset form
       setFormData({
@@ -26,7 +30,8 @@ export default function AddTaskForm({ projectId }) {
         deadline: ''
       });
       
-      // Refresh task list (you can implement this via a prop or context)
+      // Notify parent component to refresh task list
+      onAdd();
     } catch (error) {
       console.error('Failed to create task:', error);
     } finally {
