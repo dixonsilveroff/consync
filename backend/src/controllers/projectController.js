@@ -25,7 +25,9 @@ export const createProject = async (req, res, next) => {
     if (!title || !title.trim()) return res.status(400).json({ success: false, message: 'Title is required' });
 
     const payload = { ...req.body };
-    payload.createdBy = req.user._id || req.user.id;
+    // Ensure we have the correct user ID format
+    const userId = req.user.id || req.user._id;
+    payload.createdBy = userId;
 
     const project = await Project.create(payload);
     await project.populate([{ path: 'client', select: 'name email' }, { path: 'owner', select: 'name email' }, { path: 'assignedUsers', select: 'name email' }]);
@@ -57,7 +59,7 @@ export const createProject = async (req, res, next) => {
       'PROJECT_CREATED',
       'Project',
       project._id,
-      req.user._id,
+      userId, // Use the same userId we verified earlier
       `Project "${project.title}" created`,
       project._id
     );
