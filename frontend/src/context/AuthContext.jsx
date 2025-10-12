@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import api, { setAccessToken } from "../api/apiClient";
 
@@ -20,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     try {
       if (token) localStorage.setItem("accessToken", token);
       else localStorage.removeItem("accessToken");
-    } catch (e) {
+    } catch (_) {
       // ignore storage errors
     }
   };
@@ -44,36 +46,57 @@ export const AuthProvider = ({ children }) => {
   // initialize: try local access token first, otherwise try refresh endpoint
   useEffect(() => {
     let mounted = true;
+    let timeoutId;
 
     const init = async () => {
       setLoading(true);
       try {
-        const stored = localStorage.getItem("accessToken");
-        if (stored) {
-          handleSetToken(stored);
-          await fetchProfile();
-          return;
-        }
+        // Set a timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(new Error('Authentication timeout'));
+          }, 5000); // 5 second timeout
+        });
 
-        // try refresh (server-side refresh cookie)
-        try {
+        const authProcess = async () => {
+          const stored = localStorage.getItem("accessToken");
+          if (stored) {
+            handleSetToken(stored);
+            await fetchProfile();
+            return;
+          }
+
+          // try refresh (server-side refresh cookie)
           const r = await api.post("/api/auth/refresh");
           const newToken = r.data.accessToken || r.data.token;
           if (newToken) {
             handleSetToken(newToken);
             await fetchProfile();
-            return;
+          } else {
+            throw new Error('No token received');
           }
-        } catch (e) {
-          // no valid refresh token or other error -> user is not logged in
-        }
+        };
+
+        // Race between timeout and auth process
+        await Promise.race([authProcess(), timeoutPromise]);
+      } catch (e) {
+        // Clear any existing token on error
+        handleSetToken(null);
+        setUser(null);
+        console.error('Auth initialization failed:', e.message);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          if (timeoutId) clearTimeout(timeoutId);
+        }
       }
     };
 
     init();
-    return () => (mounted = false);
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [fetchProfile]);
 
   // login
