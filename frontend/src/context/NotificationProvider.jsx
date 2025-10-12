@@ -1,11 +1,9 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { NotificationContext } from './NotificationContext';
 
-export const NotificationContext = createContext();
-
-export const NotificationProvider = ({ children }) => {
+export function NotificationProvider({ children }) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -19,11 +17,14 @@ export const NotificationProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await axios.get('/api/notifications/me', { withCredentials: true });
-      setNotifications(res.data.data);
-      const unread = res.data.data.filter(n => !n.isRead).length;
+      const notifications = res.data?.data || [];
+      setNotifications(notifications);
+      const unread = notifications.filter(n => !n.isRead).length;
       setUnreadCount(unread);
     } catch (err) {
       console.error('Error fetching notifications:', err);
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
@@ -68,12 +69,4 @@ export const NotificationProvider = ({ children }) => {
       {children}
     </NotificationContext.Provider>
   );
-};
-
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
-};
+}

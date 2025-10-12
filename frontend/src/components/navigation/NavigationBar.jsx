@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { NotificationBell } from '../NotificationBell';
 
 const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -74,6 +75,7 @@ const NavigationBar = () => {
           <div className="flex items-center">
             {user && (
               <div className="hidden sm:flex items-center space-x-4">
+                <NotificationBell />
                 <span className="text-sm text-gray-700">
                   {user.name || user.email}
                 </span>
