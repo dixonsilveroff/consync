@@ -11,18 +11,27 @@ const NavigationBar = () => {
     return location.pathname === path;
   };
 
-  const navigationItems = [
-    { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'engineer', 'client', 'contractor'] },
-    { name: 'Projects', path: '/projects', roles: ['admin', 'engineer', 'client', 'contractor'] },
-    { name: 'Tasks', path: '/tasks', roles: ['admin', 'engineer', 'contractor'] },
-    { name: 'Resources', path: '/resources', roles: ['admin', 'engineer'] },
-    { name: 'Reports', path: '/reports', roles: ['admin', 'engineer', 'client'] },
-    { name: 'Admin', path: '/admin', roles: ['admin'] },
-  ];
+  const getNavigationItems = () => {
+    const authNavItems = [
+      { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'engineer', 'client', 'contractor'] },
+      { name: 'Projects', path: '/projects', roles: ['admin', 'engineer', 'client', 'contractor'] },
+      { name: 'Tasks', path: '/tasks', roles: ['admin', 'engineer', 'contractor'] },
+      { name: 'Resources', path: '/resources', roles: ['admin', 'engineer'] },
+      { name: 'Reports', path: '/reports', roles: ['admin', 'engineer', 'client'] },
+      { name: 'Admin', path: '/admin', roles: ['admin'] },
+    ];
 
-  const filteredNavItems = navigationItems.filter(item => 
-    item.roles.includes(user?.role || 'client')
-  );
+    const guestNavItems = [
+      { name: 'Home', path: '/', roles: [] },
+      { name: 'Login', path: '/login', roles: [] },
+      { name: 'Register', path: '/register', roles: [] },
+    ];
+
+    if (!user) return guestNavItems;
+    return authNavItems.filter(item => item.roles.includes(user.role || 'client'));
+  };
+
+  const filteredNavItems = getNavigationItems();
 
   const NavLink = ({ item }) => (
     <Link
@@ -46,8 +55,8 @@ const NavigationBar = () => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center space-x-2">
                 <img
-                  className="h-8 w-auto"
-                  src="/src/assets/images/logo-black.png"
+                  className="h-12 w-auto"
+                  src="/src/assets/images/logo-white.png"
                   alt="ConSync"
                 />
               </Link>

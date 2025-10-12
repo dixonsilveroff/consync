@@ -14,7 +14,7 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     company: "",
-    role: "client",
+    role: "admin",
   });
   const [errors, setErrors] = useState({});
 
