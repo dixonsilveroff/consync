@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 import AdminPage from "./pages/AdminPage";
 import EngineerPage from "./pages/EngineerPage";
 import ClientPage from "./pages/ClientPage";
@@ -15,6 +16,7 @@ export default function App() {
         <div className="min-h-screen bg-gray-50">
           <nav className="p-4 bg-white shadow">
             <Link to="/" className="mr-4 text-blue-600">Home</Link>
+            <Link to="/dashboard" className="mr-4">Dashboard</Link>
             <Link to="/admin" className="mr-4">Admin</Link>
             <Link to="/engineer" className="mr-4">Engineer</Link>
             <Link to="/client" className="mr-4">Client</Link>
@@ -27,6 +29,12 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
+
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
 
             <Route path="/admin" element={
               <ProtectedRoute roles={["Admin", "admin"]}>
