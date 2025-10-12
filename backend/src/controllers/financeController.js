@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import mongoose from 'mongoose';
 import CostLine from '../models/costLineModel.js';
 import Project from '../models/projectModel.js';
+import Notification from '../models/notificationModel.js';
 import logActivity from '../middleware/activityLogger.js';
 
 // ✅ TEST ROUTE
@@ -28,6 +29,28 @@ export const createCostLine = asyncHandler(async (req, res) => {
   });
 
   await logActivity('COST_LINE_CREATED', 'Finance', costLine._id, req.user._id, `${type} recorded for project`, project);
+
+  // Check if it's an expense and if there's a budget overrun
+  if (type === 'expense') {
+    const projectDetails = await Project.findById(project);
+    if (projectDetails && projectDetails.budget) {
+      const totalExpenses = await CostLine.aggregate([
+        { $match: { project: new mongoose.Types.ObjectId(project), type: 'expense' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]);
+      
+      const totalSpent = totalExpenses[0]?.total || 0;
+      if (totalSpent > projectDetails.budget) {
+        await Notification.create({
+          title: 'Budget Overrun Alert',
+          message: `Project ${projectDetails.title} has exceeded its budget by ${(totalSpent - projectDetails.budget).toFixed(2)}`,
+          type: 'warning',
+          relatedProject: project,
+          user: projectDetails.owner // Notify project owner
+        });
+      }
+    }
+  }
 
   res.status(201).json({ success: true, data: costLine });
 });

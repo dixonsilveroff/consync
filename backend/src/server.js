@@ -11,6 +11,7 @@ import activityRoutes from "./routes/activityRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use("/api/activities", activityRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // generic error handler
 app.use((err, req, res, next) => {
