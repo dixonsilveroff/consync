@@ -1,93 +1,108 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import AuthForm from '../components/auth/AuthForm';
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
     password: "",
-    // role must match backend enum values (lowercase)
+    confirmPassword: "",
+    company: "",
     role: "client",
   });
-  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.fullName) {
+      newErrors.fullName = 'Full name is required';
+    }
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
+    }
+
+    if (!formData.company) {
+      newErrors.company = 'Company name is required';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    
     try {
-      await register(formData);
-      // redirect back if we were sent here from a protected route
-      const dest = location.state?.from?.pathname || "/";
+      const registerData = {
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        company: formData.company,
+        role: formData.role
+      };
+      
+      await register(registerData);
+      const dest = location.state?.from?.pathname || "/dashboard";
       navigate(dest, { replace: true });
-      setMessage("User registered and logged in!");
     } catch (err) {
-      console.error(err.message || err);
-      setMessage(err.message || "Registration failed");
+      setErrors({
+        ...errors,
+        submit: err.message || "Registration failed. Please try again."
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-96">
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
-          Create a ConSync Account
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Full Name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {/* Values must match backend enum: ["admin","engineer","client","contractor"] */}
-            <option value="client">Client</option>
-            <option value="contractor">Contractor</option>
-            <option value="engineer">Project Engineer</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Register
-          </button>
-        </form>
-        {message && <p className="text-center mt-4 text-sm text-gray-700">{message}</p>}
-      </div>
-    </div>
+    <AuthForm
+      isLogin={false}
+      formData={formData}
+      errors={errors}
+      handleChange={handleChange}
+      handleSubmit={handleSubmit}
+      isLoading={isLoading}
+    />
   );
 }

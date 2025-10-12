@@ -1,57 +1,84 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import AuthForm from '../components/auth/AuthForm';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    
     try {
-      await login(email, password);
+      await login(formData.email, formData.password);
       // redirect to previous page if present
-      const dest = location.state?.from?.pathname || "/";
+      const dest = location.state?.from?.pathname || "/dashboard";
       navigate(dest, { replace: true });
-    } catch (err) {
-      console.error(err);
-      setError("Invalid credentials");
+    } catch (error) {
+      setErrors({
+        ...errors,
+        submit: 'Invalid credentials. Please try again.'
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-md w-96">
-      <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Login to ConSync</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Login
-        </button>
-      </form>
-    </div>
+    <AuthForm
+      isLogin={true}
+      formData={formData}
+      errors={errors}
+      handleChange={handleChange}
+      handleSubmit={handleSubmit}
+      isLoading={isLoading}
+    />
   );
 }
 

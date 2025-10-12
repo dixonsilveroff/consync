@@ -1,16 +1,69 @@
-# React + Vite
+# ConSync Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ConSync is a modern web-based Construction Lifecycle Management System (CLMS) built with Vite, React, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Development Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## React Compiler
+3. Copy the environment file:
+   ```bash
+   cp .env.development .env
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Expanding the ESLint configuration
+## Mock Data Mode
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The application includes a mock data mode for development and demonstration purposes. This allows you to work on the frontend without requiring a backend connection.
+
+### Enabling Mock Mode
+
+1. Set `VITE_USE_MOCK=true` in your `.env` file
+2. Mock data is located in `src/data/mockData.js`
+3. Mock configuration settings are in `src/config/mock.js`
+
+### Available Mock Features
+
+- Global summary statistics
+- Project listings and details
+- Activity trends and timelines
+- Cost tracking and analysis
+- Task management data
+- Resource allocation metrics
+
+### Production Mode
+
+For production deployment:
+
+1. Use `.env.production`
+2. Ensure `VITE_USE_MOCK=false`
+3. Configure `VITE_API_URL` to point to your production API
+
+## Project Structure
+
+- `/src` - Application source code
+  - `/api` - API client and interceptors
+  - `/components` - Reusable React components
+  - `/context` - React Context providers
+  - `/data` - Mock data for development
+  - `/pages` - Page components
+  - `/theme` - Theme configuration
+  - `/utils` - Utility functions
+
+## Features
+
+- Modern, responsive UI with Tailwind CSS
+- Role-based access control
+- Real-time project tracking
+- Task management
+- Resource allocation
+- Cost tracking
+- Analytics and reporting

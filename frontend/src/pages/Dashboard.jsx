@@ -4,6 +4,14 @@ import api from "../api/apiClient";
 import DashboardCard from "../components/DashboardCard";
 import TrendChart from "../components/TrendChart";
 import ActivityList from "../components/ActivityList";
+import { USE_MOCK, simulateDelay, simulateError } from "../config/mock";
+import { 
+  mockGlobalSummary,
+  mockActivityTrend,
+  mockCostTrend,
+  mockActiveProjects,
+  mockRecentTasks
+} from "../data/mockData";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -23,71 +31,32 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
 
-        // Fetch all data in parallel
-        const [summaryRes, activityTrendsRes, activitiesRes] = await Promise.all([
-          api.get("/api/analytics/summary/global"),
-          api.get("/api/analytics/trends/activity"),
-          api.get("/api/activities?limit=5")
-        ]);
+        if (USE_MOCK) {
+          await simulateDelay();
+          simulateError();
 
-        setDashboardData({
-          summary: summaryRes.data.data,
-          activityTrends: activityTrendsRes.data.data,
-          costTrends: [], // Will be populated when a project is selected
-          recentActivities: activitiesRes.data.data
-        });
-      } catch (err) {
-        console.error("Failed to fetch dashboard data:", err);
-        
-        // Fallback to mock data for development
-        const mockData = {
-          summary: {
-            totalProjects: 12,
-            totalTasks: 156,
-            completedTasks: 89,
-            avgProgress: 67.5,
-            totalExpenses: 2450000
-          },
-          activityTrends: [
-            { _id: '2025-01-15', count: 5 },
-            { _id: '2025-01-16', count: 8 },
-            { _id: '2025-01-17', count: 12 },
-            { _id: '2025-01-18', count: 6 },
-            { _id: '2025-01-19', count: 15 },
-            { _id: '2025-01-20', count: 9 },
-            { _id: '2025-01-21', count: 11 }
-          ],
-          costTrends: [],
-          recentActivities: [
-            {
-              _id: '1',
-              action: 'Created',
-              entityType: 'Project',
-              message: 'New project "Lagos Office Complex" created',
-              user: { name: 'John Doe' },
-              project: { title: 'Lagos Office Complex' },
-              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-            },
-            {
-              _id: '2',
-              action: 'Updated',
-              entityType: 'Task',
-              message: 'Task "Foundation Work" marked as completed',
-              user: { name: 'Jane Smith' },
-              project: { title: 'Lagos Office Complex' },
-              createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-            },
-            {
-              _id: '3',
-              action: 'Created',
-              entityType: 'Finance',
-              message: 'New expense entry added',
-              user: { name: 'Mike Johnson' },
-              project: { title: 'Abuja Mall Project' },
-              createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
-            }
-          ]
-        };
+          setDashboardData({
+            summary: mockGlobalSummary,
+            activityTrends: mockActivityTrend,
+            costTrends: mockCostTrend,
+            recentActivities: mockRecentTasks,
+            activeProjects: mockActiveProjects
+          });
+        } else {
+          // Fetch all data in parallel
+          const [summaryRes, activityTrendsRes, activitiesRes] = await Promise.all([
+            api.get("/api/analytics/summary/global"),
+            api.get("/api/analytics/trends/activity"),
+            api.get("/api/activities?limit=5")
+          ]);
+
+          setDashboardData({
+            summary: summaryRes.data.data,
+            activityTrends: activityTrendsRes.data.data,
+            costTrends: [], // Will be populated when a project is selected
+            recentActivities: activitiesRes.data.data
+          });
+        }
         
         setDashboardData(mockData);
         console.log("Using mock data for development");
