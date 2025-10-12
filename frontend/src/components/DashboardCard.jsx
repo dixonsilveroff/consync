@@ -44,7 +44,7 @@ export default function DashboardCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 relative overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm p-6 relative overflow-hidden transition-all duration-300 ease-in-out hover:shadow-md hover:translate-y-[-2px] group">
       {/* Gradient accent border */}
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradientClass}`}></div>
       
@@ -79,8 +79,8 @@ export default function DashboardCard({
 
           {/* Trend indicator */}
           {trend && (
-            <div className="flex items-center text-sm">
-              <span className={trend > 0 ? "text-green-600" : "text-red-600"}>
+            <div className="flex items-center text-sm transition-transform duration-300 group-hover:translate-x-1">
+              <span className={`${trend > 0 ? "text-green-600" : "text-red-600"} font-medium`}>
                 {trend > 0 ? "↗" : "↘"} {Math.abs(trend)}%
               </span>
               <span className="text-gray-500 ml-1">vs last month</span>
@@ -90,7 +90,7 @@ export default function DashboardCard({
       </div>
 
       {/* Background decoration */}
-      <div className={`absolute -right-4 -top-4 w-16 h-16 ${bgClass} rounded-full opacity-20`}></div>
+      <div className={`absolute -right-4 -top-4 w-16 h-16 ${bgClass} rounded-full opacity-20 transition-all duration-300 group-hover:scale-110 group-hover:opacity-30`}></div>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import api from "../api/apiClient";
 import DashboardCard from "../components/DashboardCard";
 import TrendChart from "../components/TrendChart";
 import ActivityList from "../components/ActivityList";
+import DashboardSkeleton from "../components/DashboardSkeleton";
+import MockModeBanner from "../components/MockModeBanner";
 import { USE_MOCK, simulateDelay, simulateError } from "../config/mock";
 import { 
   mockGlobalSummary,
@@ -58,7 +60,6 @@ export default function Dashboard() {
           });
         }
         
-        setDashboardData(mockData);
         console.log("Using mock data for development");
       } finally {
         setLoading(false);
@@ -68,7 +69,7 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  // Handle project selection for cost trends
+  // Export the handleProjectSelect function to be used by the project selector component
   const handleProjectSelect = async (projectId) => {
     if (!projectId) return;
     
@@ -83,14 +84,11 @@ export default function Dashboard() {
     }
   };
 
+  // Make the function available for child components
+  const contextValue = { handleProjectSelect };
+
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {
@@ -108,8 +106,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {/* Mock Mode Banner */}
+      {USE_MOCK && <MockModeBanner />}
+
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 transition-opacity duration-300 ease-in-out">
         <h1 className="text-3xl font-semibold text-gray-800 mb-2">
           ConSync Project Dashboard
         </h1>
@@ -125,72 +126,84 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <DashboardCard
-          title="Total Projects"
-          value={dashboardData.summary?.totalProjects || 0}
-          icon="🏗️"
-          color="blue"
-        />
-        <DashboardCard
-          title="Total Tasks"
-          value={dashboardData.summary?.totalTasks || 0}
-          icon="📋"
-          color="green"
-        />
-        <DashboardCard
-          title="Avg. Progress"
-          value={`${dashboardData.summary?.avgProgress || 0}%`}
-          icon="📊"
-          color="purple"
-          isProgress={true}
-          progressValue={parseFloat(dashboardData.summary?.avgProgress || 0)}
-        />
-        <DashboardCard
-          title="Total Expenses"
-          value={`₦${(dashboardData.summary?.totalExpenses || 0).toLocaleString()}`}
-          icon="💰"
-          color="red"
-          isExpense={true}
-        />
+        {[
+          {
+            title: "Total Projects",
+            value: dashboardData.summary?.totalProjects || 0,
+            icon: "🏗️",
+            color: "blue"
+          },
+          {
+            title: "Total Tasks",
+            value: dashboardData.summary?.totalTasks || 0,
+            icon: "📋",
+            color: "green"
+          },
+          {
+            title: "Avg. Progress",
+            value: `${dashboardData.summary?.avgProgress || 0}%`,
+            icon: "📊",
+            color: "purple",
+            isProgress: true,
+            progressValue: parseFloat(dashboardData.summary?.avgProgress || 0)
+          },
+          {
+            title: "Total Expenses",
+            value: `₦${(dashboardData.summary?.totalExpenses || 0).toLocaleString()}`,
+            icon: "💰",
+            color: "red",
+            isExpense: true
+          }
+        ].map((card, index) => (
+          <div key={card.title} 
+               className="transition-all duration-300 ease-in-out"
+               style={{ animationDelay: `${index * 100}ms` }}>
+            <DashboardCard {...card} />
+          </div>
+        ))}
       </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 transition-all duration-300 ease-in-out hover:shadow-md">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Recent Activity Volume
           </h3>
-          <TrendChart
-            data={dashboardData.activityTrends}
-            type="line"
-            xKey="_id"
-            yKey="count"
-            color="#2563EB"
-            height={300}
-          />
+          <div className="transition-opacity duration-500 ease-in-out">
+            <TrendChart
+              data={dashboardData.activityTrends}
+              type="line"
+              xKey="_id"
+              yKey="count"
+              color="#2563EB"
+              height={300}
+            />
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 transition-all duration-300 ease-in-out hover:shadow-md">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Project Cost Flow
           </h3>
-          {dashboardData.costTrends.length > 0 ? (
-            <TrendChart
-              data={dashboardData.costTrends}
-              type="area"
-              xKey="_id"
-              yKey="total"
-              color="#16A34A"
-              height={300}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-[300px] text-gray-500">
-              <div className="text-center">
-                <div className="text-4xl mb-2">📊</div>
-                <div>Select a project to view cost trends</div>
+          <div className="transition-opacity duration-500 ease-in-out">
+            {dashboardData.costTrends.length > 0 ? (
+              <TrendChart
+                data={dashboardData.costTrends}
+                type="area"
+                xKey="_id"
+                yKey="total"
+                color="#16A34A"
+                height={300}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-[300px] text-gray-500">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📊</div>
+                  <div>Select a project to view cost trends</div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
