@@ -1,5 +1,6 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import api from '../api/apiClient';
 import TaskList from '../components/TaskList';
 import AddTaskForm from '../components/AddTaskForm';
@@ -58,6 +59,14 @@ export default function ProjectDetails() {
 
   return (
     <div className="p-6 space-y-6">
+      <Link
+        to="/projects"
+        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#1E4E8C] rounded-lg hover:bg-[#183d70] transition-colors duration-300"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Projects
+      </Link>
+
       <div className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
         <h2 className="text-2xl font-semibold">{project.title}</h2>
         <p className="text-gray-600 mt-1">{project.description}</p>

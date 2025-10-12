@@ -5,7 +5,7 @@ import { NotificationBell } from '../NotificationBell';
 
 const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const location = useLocation();
 
   const isCurrentPath = (path) => {
@@ -32,7 +32,15 @@ const NavigationBar = () => {
     return authNavItems.filter(item => item.roles.includes(user.role || 'client'));
   };
 
-  const filteredNavItems = getNavigationItems();
+  // On public routes or when loaded, show navigation items
+  // On protected routes while loading, show only public items
+  const isProtectedRoute = !['/', '/login', '/register'].includes(location.pathname);
+  const showAuthItems = !isProtectedRoute || !loading;
+  const filteredNavItems = showAuthItems ? getNavigationItems() : [
+    { name: 'Home', path: '/', roles: [] },
+    { name: 'Login', path: '/login', roles: [] },
+    { name: 'Register', path: '/register', roles: [] }
+  ];
 
   const NavLink = ({ item }) => (
     <Link
@@ -73,7 +81,7 @@ const NavigationBar = () => {
 
           {/* User Menu and Mobile Button */}
           <div className="flex items-center">
-            {user && (
+            {showAuthItems && user && (
               <div className="hidden sm:flex items-center space-x-4">
                 <NotificationBell />
                 <span className="text-sm text-gray-700">
@@ -128,7 +136,7 @@ const NavigationBar = () => {
                 {item.name}
               </Link>
             ))}
-            {user && (
+            {showAuthItems && user && (
               <button
                 onClick={() => {
                   logout();

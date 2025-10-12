@@ -27,10 +27,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleSetToken = (token) => {
+  const handleSetToken = useCallback((token) => {
     setAccessToken(token || null);
     persistToken(token || null);
-  };
+  }, []);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -49,45 +49,49 @@ export const AuthProvider = ({ children }) => {
     let timeoutId;
 
     const init = async () => {
+      if (!mounted) return;
       setLoading(true);
+
       try {
-        // Set a timeout to prevent infinite loading
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => {
-            reject(new Error('Authentication timeout'));
-          }, 5000); // 5 second timeout
-        });
-
-        const authProcess = async () => {
-          const stored = localStorage.getItem("accessToken");
-          if (stored) {
-            handleSetToken(stored);
+        // First check localStorage
+        const stored = localStorage.getItem("accessToken");
+        if (stored) {
+          // Validate stored token first
+          handleSetToken(stored);
+          try {
             await fetchProfile();
-            return;
+            return; // Success with stored token
+          } catch (e) {
+            // Stored token failed, continue to refresh
+            console.log("Stored token invalid, trying refresh");
           }
+        }
 
-          // try refresh (server-side refresh cookie)
+        // Try refresh token
+        try {
           const r = await api.post("/api/auth/refresh");
           const newToken = r.data.accessToken || r.data.token;
           if (newToken) {
             handleSetToken(newToken);
             await fetchProfile();
-          } else {
-            throw new Error('No token received');
+            return; // Success with refreshed token
           }
-        };
+        } catch (e) {
+          console.log("Refresh token failed:", e.message);
+        }
 
-        // Race between timeout and auth process
-        await Promise.race([authProcess(), timeoutPromise]);
+        // If we get here, both stored token and refresh failed
+        handleSetToken(null);
+        setUser(null);
+
       } catch (e) {
-        // Clear any existing token on error
+        // Final error handler
         handleSetToken(null);
         setUser(null);
         console.error('Auth initialization failed:', e.message);
       } finally {
         if (mounted) {
           setLoading(false);
-          if (timeoutId) clearTimeout(timeoutId);
         }
       }
     };
@@ -97,21 +101,37 @@ export const AuthProvider = ({ children }) => {
       mounted = false;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, handleSetToken]);
 
   // login
   const login = async (email, password) => {
+    setLoading(true);
     try {
+      // Clear any existing tokens first
+      handleSetToken(null);
+      setUser(null);
+
+      // Attempt login
       const { data } = await api.post("/api/auth/login", { email, password });
-      const token = data.accessToken || data.token || data.accessToken;
-      if (token) handleSetToken(token);
-      if (data.user) setUser(data.user);
-      else await fetchProfile();
+      
+      // Validate response
+      const token = data.accessToken || data.token;
+      if (!token) throw new Error('No token received from login');
+      
+      // Set token first
+      handleSetToken(token);
+
+      // Get user profile (even if user data was included in login response)
+      await fetchProfile();
+      
       return data;
     } catch (err) {
-      // bubble up error with some helpful message
+      handleSetToken(null);
+      setUser(null);
       const msg = err.response?.data?.message || err.message || "Login failed";
       throw new Error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
