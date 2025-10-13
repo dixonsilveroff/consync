@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import api, { setAccessToken } from '../api/apiClient';
+import { isTokenExpiringSoon } from '../utils/authHelpers';
 
 export default function AddProjectModal({ close, refresh, project = null }) {
+  const { user, fetchProfile } = useAuth();
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
@@ -9,25 +12,56 @@ export default function AddProjectModal({ close, refresh, project = null }) {
     status: project?.status || 'planning'
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
+      // Refresh user profile first to ensure we have latest permissions
+      await fetchProfile();
+
+      // Validate user role after fetching fresh profile
+      if (!user?.role || user.role !== 'admin') {
+        setError('Insufficient permissions. Only administrators can manage projects.');
+        setLoading(false);
+        return;
+      }
+
+      // Try to refresh token before making the request
+      if (isTokenExpiringSoon()) {
+        try {
+          const { data } = await api.post('/api/auth/refresh');
+          if (data.accessToken || data.token) {
+            setAccessToken(data.accessToken || data.token);
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          // Continue with the request anyway, the interceptor will handle if needed
+        }
+      }
+
+      // Proceed with the project save
       if (project) {
-        await axios.patch(
-          `/api/projects/${project._id}`,
-          formData,
-          { withCredentials: true }
-        );
+        await api.patch(`/api/projects/${project._id}`, formData);
       } else {
-        await axios.post('/api/projects', formData, { withCredentials: true });
+        await api.post('/api/projects', formData);
       }
       refresh();
       close();
-    } catch (error) {
-      console.error('Failed to save project:', error);
+    } catch (err) {
+      console.error('Failed to save project:', err);
+      let errorMessage = 'Failed to save project. Please try again.';
+      
+      if (err.response?.status === 403) {
+        errorMessage = 'You do not have permission to perform this action. Please contact your administrator.';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -39,6 +73,12 @@ export default function AddProjectModal({ close, refresh, project = null }) {
         <h2 className="text-xl font-semibold mb-4">
           {project ? 'Edit Project' : 'New Project'}
         </h2>
+        
+        {error && (
+          <div className="mb-4 p-3 rounded bg-red-50 text-red-600 text-sm">
+            {error}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

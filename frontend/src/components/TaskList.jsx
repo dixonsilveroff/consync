@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { CheckCircle, Circle } from 'lucide-react';
 import api from '../api/apiClient';
 
 export default function TaskList({ projectId, onUpdate }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const res = await api.get(`/api/tasks/project/${projectId}`);
       setTasks(res.data.data || []);
@@ -14,11 +15,11 @@ export default function TaskList({ projectId, onUpdate }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
   useEffect(() => {
     fetchTasks();
-  }, [projectId, onUpdate]);
+  }, [projectId, onUpdate, fetchTasks]);
 
   const toggleTaskStatus = async (taskId, completed) => {
     try {

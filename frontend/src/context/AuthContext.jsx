@@ -50,24 +50,14 @@ export const AuthProvider = ({ children }) => {
 
     const init = async () => {
       if (!mounted) return;
-      setLoading(true);
-
+      
       try {
-        // First check localStorage
-        const stored = localStorage.getItem("accessToken");
-        if (stored) {
-          // Validate stored token first
-          handleSetToken(stored);
-          try {
-            await fetchProfile();
-            return; // Success with stored token
-          } catch (e) {
-            // Stored token failed, continue to refresh
-            console.log("Stored token invalid, trying refresh");
-          }
-        }
+        setLoading(true);
+        // Always clear the state first to prevent stale data
+        handleSetToken(null);
+        setUser(null);
 
-        // Try refresh token
+        // First try refresh token (server-side cookie)
         try {
           const r = await api.post("/api/auth/refresh");
           const newToken = r.data.accessToken || r.data.token;
@@ -77,18 +67,28 @@ export const AuthProvider = ({ children }) => {
             return; // Success with refreshed token
           }
         } catch (e) {
-          console.log("Refresh token failed:", e.message);
+          console.log("Refresh token failed, checking localStorage");
         }
 
-        // If we get here, both stored token and refresh failed
-        handleSetToken(null);
-        setUser(null);
+        // Then try localStorage (backup)
+        const stored = localStorage.getItem("accessToken");
+        if (stored) {
+          handleSetToken(stored);
+          try {
+            await fetchProfile();
+            return; // Success with stored token
+          } catch (e) {
+            console.log("Stored token invalid");
+            handleSetToken(null); // Clear invalid token
+          }
+        }
 
+        // If we get here, no valid token found
+        setUser(null);
       } catch (e) {
-        // Final error handler
+        console.error('Auth initialization failed:', e.message);
         handleSetToken(null);
         setUser(null);
-        console.error('Auth initialization failed:', e.message);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -107,27 +107,41 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // Clear any existing tokens first
+      // Always start with a clean state
       handleSetToken(null);
       setUser(null);
+      localStorage.clear(); // Clear any stored auth data
 
       // Attempt login
-      const { data } = await api.post("/api/auth/login", { email, password });
+      const { data } = await api.post("/api/auth/login", { 
+        email, 
+        password,
+        // Include client timestamp to help prevent replay attacks
+        timestamp: new Date().toISOString() 
+      });
       
       // Validate response
+      if (!data) throw new Error('Empty response from server');
+      
       const token = data.accessToken || data.token;
       if (!token) throw new Error('No token received from login');
       
       // Set token first
       handleSetToken(token);
 
-      // Get user profile (even if user data was included in login response)
-      await fetchProfile();
+      // Validate token by fetching profile
+      try {
+        await fetchProfile();
+      } catch (profileErr) {
+        handleSetToken(null);
+        throw new Error('Failed to validate login session');
+      }
       
       return data;
     } catch (err) {
       handleSetToken(null);
       setUser(null);
+      localStorage.clear(); // Clean up on error
       const msg = err.response?.data?.message || err.message || "Login failed";
       throw new Error(msg);
     } finally {
@@ -151,13 +165,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    setLoading(true);
     try {
+      // Always try to notify the server
       await api.post("/api/auth/logout");
     } catch (e) {
-      // ignore errors on logout
+      console.log('Logout request failed:', e.message);
+      // Continue with local cleanup regardless of server response
+    } finally {
+      // Clean up all auth state
+      handleSetToken(null);
+      setUser(null);
+      localStorage.clear();
+      // Clear any pending requests
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'; // Force a clean reload on the login page
+      }
+      setLoading(false);
     }
-    handleSetToken(null);
-    setUser(null);
   };
 
   const updateProfile = async (profileData) => {
@@ -184,7 +209,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register, updateProfile, changePassword }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      login, 
+      logout, 
+      register, 
+      updateProfile, 
+      changePassword,
+      fetchProfile  // Add fetchProfile to the context value
+    }}>
       {children}
     </AuthContext.Provider>
   );

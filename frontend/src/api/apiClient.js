@@ -2,45 +2,124 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
-  withCredentials: true, // important: sends refresh cookie to /auth/refresh
+  withCredentials: true // important: sends refresh cookie to /auth/refresh
 });
 
 let accessToken = null;
-export function setAccessToken(token) { accessToken = token; }
+export function setAccessToken(token) { 
+  accessToken = token;
+  if (token) {
+    localStorage.setItem('lastTokenRefresh', Date.now().toString());
+  } else {
+    localStorage.removeItem('lastTokenRefresh');
+  }
+}
 
-api.interceptors.request.use(cfg => {
-  if (accessToken) cfg.headers.Authorization = `Bearer ${accessToken}`;
-  return cfg;
-});
+// Check token freshness
+function isTokenExpiringSoon() {
+  const lastRefresh = localStorage.getItem('lastTokenRefresh');
+  if (!lastRefresh) return true;
+  
+  // Consider token as expiring if it's older than 14 minutes (tokens usually expire at 15min)
+  const REFRESH_THRESHOLD = 14 * 60 * 1000; // 14 minutes in milliseconds
+  return Date.now() - parseInt(lastRefresh) > REFRESH_THRESHOLD;
+}
 
 let isRefreshing = false;
-let queue = [];
-api.interceptors.response.use(r => r, async err => {
-  const original = err.config;
-  if (err.response?.status === 401 && !original._retry) {
-    if (isRefreshing) {
-      return new Promise((res, rej) => queue.push({ res, rej }))
-        .then(token => {
-          original.headers.Authorization = `Bearer ${token}`;
-          return api(original);
-        });
+const refreshSubscribers = [];
+
+const onTokenRefreshed = (token) => {
+  refreshSubscribers.forEach(cb => cb(token));
+  refreshSubscribers.length = 0;
+};
+
+// Add token to all requests
+api.interceptors.request.use(
+  async (config) => {
+    // Skip token refresh checks on login-related endpoints
+    if (config.url?.includes('/login') || config.url?.includes('/register')) {
+      return config;
     }
-    original._retry = true;
+
+    // Check if token needs refresh before making a request
+    if (accessToken && isTokenExpiringSoon() && config.url !== '/api/auth/refresh') {
+      try {
+        const { data } = await api.post('/api/auth/refresh');
+        const newToken = data.accessToken || data.token;
+        if (newToken) {
+          setAccessToken(newToken);
+        }
+      } catch (error) {
+        console.log('Preemptive token refresh failed:', error);
+      }
+    }
+
+    if (accessToken && config.url !== '/api/auth/refresh') {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Handle response errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is not 401 or request was already retried, reject
+    if (!error.response || error.response.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    // Don't retry refresh token requests and avoid redirect loops on login page
+    if (originalRequest.url === '/api/auth/refresh') {
+      setAccessToken(null);
+      // Only redirect if not already on login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    if (isRefreshing) {
+      return new Promise((resolve) => {
+        refreshSubscribers.push((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          resolve(api(originalRequest));
+        });
+      });
+    }
+
     isRefreshing = true;
+
     try {
-      const resp = await api.post("/api/auth/refresh");
-      const newToken = resp.data.accessToken;
+      const { data } = await api.post('/api/auth/refresh');
+      const newToken = data.accessToken || data.token;
+      
+      if (!newToken) {
+        throw new Error('No token received');
+      }
+
       setAccessToken(newToken);
-      queue.forEach(q => q.res(newToken));
-      queue = [];
-      return api(original);
-    } catch (e) {
-      queue.forEach(q => q.rej(e));
-      queue = [];
-      throw e;
-    } finally { isRefreshing = false; }
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      onTokenRefreshed(newToken);
+
+      return api(originalRequest);
+    } catch (refreshError) {
+      setAccessToken(null);
+      // Only redirect if not already on login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
-  throw err;
-});
+);
 
 export default api;

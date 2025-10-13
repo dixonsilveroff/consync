@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Edit2, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatCurrency';
+import api from '../api/apiClient';
 
 export default function ProjectCard({ project, refresh }) {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [error, setError] = useState('');
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/api/projects/${project._id}`, { withCredentials: true });
+      await api.delete(`/api/projects/${project._id}`);
       refresh();
     } catch (error) {
       console.error('Failed to delete project:', error);
+      setError(error.response?.data?.message || 'Failed to delete project');
     }
   };
 

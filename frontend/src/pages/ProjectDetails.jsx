@@ -1,7 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import api from '../api/apiClient';
+import { useAuth } from '../context/AuthContext';
 import TaskList from '../components/TaskList';
 import AddTaskForm from '../components/AddTaskForm';
 import ProgressBar from '../components/ProgressBar';
@@ -9,12 +10,16 @@ import { formatCurrency } from '../utils/formatCurrency';
 
 export default function ProjectDetails() {
   const { id } = useParams();
+  const { user } = useAuth();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
+  
+  const canManageTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
 
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     try {
       const res = await api.get(`/api/projects/${id}`);
       setProject(res.data.data);
@@ -25,11 +30,11 @@ export default function ProjectDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchProject();
-  }, [id, refreshTrigger]);
+  }, [id, refreshTrigger, fetchProject]);
 
   if (loading) {
     return (
@@ -88,11 +93,34 @@ export default function ProjectDetails() {
       <div className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold">Tasks</h3>
-          <span className="text-sm text-gray-500">
-            {project.progress}% Complete
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">
+              {project.progress}% Complete
+            </span>
+            {canManageTasks && (
+              <button
+                onClick={() => setShowAddTask(!showAddTask)}
+                className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                {showAddTask ? 'Cancel' : 'Add Task'}
+              </button>
+            )}
+          </div>
         </div>
         
+        {showAddTask && (
+          <div className="mb-4">
+            <AddTaskForm 
+              projectId={id} 
+              onAdd={() => {
+                setShowAddTask(false);
+                setRefreshTrigger(prev => !prev);
+              }} 
+            />
+          </div>
+        )}
+
         <TaskList 
           projectId={id} 
           onUpdate={() => setRefreshTrigger(prev => !prev)} 

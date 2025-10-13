@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { formatCurrency } from '../utils/formatCurrency';
+import api from '../api/apiClient';
 
 export default function CostTracker({ projectId }) {
   const [costs, setCosts] = useState([]);
@@ -10,13 +10,16 @@ export default function CostTracker({ projectId }) {
     type: 'estimate' // or 'expense'
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchCosts = async () => {
     try {
-      const res = await axios.get(`/api/finance/project/${projectId}`, { withCredentials: true });
+      const res = await api.get(`/api/finance/project/${projectId}`);
       setCosts(res.data.data || []);
+      setError('');
     } catch (error) {
       console.error('Failed to fetch costs:', error);
+      setError(error.response?.data?.message || 'Failed to fetch costs');
     } finally {
       setLoading(false);
     }
@@ -28,12 +31,13 @@ export default function CostTracker({ projectId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      await axios.post('/api/finance', {
+      await api.post('/api/finance', {
         ...newCost,
         projectId,
         amount: parseFloat(newCost.amount)
-      }, { withCredentials: true });
+      });
       
       setNewCost({
         description: '',

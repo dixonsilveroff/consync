@@ -10,17 +10,27 @@ export default function AddTaskForm({ projectId, onAdd }) {
     deadline: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Check if user has permission to add tasks
+  const canAddTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!canAddTasks) {
+      setError('You do not have permission to add tasks.');
+      return;
+    }
+
     setLoading(true);
+    setError('');
 
     try {
       await api.post('/api/tasks', {
         ...formData,
         project: projectId,
         createdBy: user.id,
-        status: 'todo'
+        status: 'pending'
       });
       
       // Reset form
@@ -32,8 +42,10 @@ export default function AddTaskForm({ projectId, onAdd }) {
       
       // Notify parent component to refresh task list
       onAdd();
-    } catch (error) {
-      console.error('Failed to create task:', error);
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to create task. Please try again.';
+      setError(errorMessage);
+      console.error('Failed to create task:', err);
     } finally {
       setLoading(false);
     }
@@ -79,13 +91,26 @@ export default function AddTaskForm({ projectId, onAdd }) {
         />
       </div>
 
+      {error && (
+        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
       <button
         type="submit"
-        disabled={loading}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        disabled={loading || !canAddTasks}
+        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600"
+        title={!canAddTasks ? 'You do not have permission to add tasks' : undefined}
       >
         {loading ? 'Adding Task...' : 'Add Task'}
       </button>
+
+      {!canAddTasks && (
+        <p className="text-sm text-gray-500 text-center mt-2">
+          Only administrators, engineers, and contractors can add tasks.
+        </p>
+      )}
     </form>
   );
 }
