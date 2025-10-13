@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { NotificationBell } from '../NotificationBell';
+import logoBlack from '../../assets/images/logo-white.png';
 
 const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -64,9 +65,9 @@ const NavigationBar = () => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center space-x-2">
                 <img
-                  className="h-12 w-auto"
-                  src="./src/assets/images/logo-white.png"
-                  alt="ConSync"
+                  className="h-10 w-auto"
+                  src={logoBlack}
+                  alt="ConSync Logo"
                 />
               </Link>
             </div>
