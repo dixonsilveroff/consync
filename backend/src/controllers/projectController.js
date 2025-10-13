@@ -243,10 +243,11 @@ export const deleteProject = async (req, res, next) => {
 
     if (!req.user || req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Forbidden' });
 
-    const project = await Project.findById(id);
-    if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
-
-    await project.remove();
+    const result = await Project.deleteOne({ _id: id });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Project not found' });
+    }
 
     return res.status(204).json({ success: true, message: 'Project deleted' });
   } catch (err) {
