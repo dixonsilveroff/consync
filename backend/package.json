@@ -26,6 +26,7 @@
   },
   "scripts": {
     "dev": "nodemon --experimental-specifier-resolution=node src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "fix-user-roles": "node src/utils/fixUserRoles.js"
   }
 }

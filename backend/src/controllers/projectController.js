@@ -93,17 +93,25 @@ export const getProjects = async (req, res, next) => {
     const role = req.user.role;
     const userId = req.user._id || req.user.id;
 
+    // If role is still undefined, treat as restrictive (contractor-like)
+    if (!role) {
+      console.warn('User role is undefined, applying restrictive filter for user:', userId);
+    }
+
     if (role === 'admin' || role === 'engineer') {
       // no extra constraints - can see all projects
+      console.log('Admin/Engineer access - no additional filters');
     } else if (role === 'client') {
       filter.client = userId; // MongoDB will handle the type conversion
+      console.log('Client access - filtering by client:', userId);
     } else {
-      // contractor/other: assigned, owner, or createdBy only
+      // contractor/other/undefined: assigned, owner, or createdBy only
       filter.$or = [
         { assignedUsers: new mongoose.Types.ObjectId(userId) },
         { owner: new mongoose.Types.ObjectId(userId) },
         { createdBy: new mongoose.Types.ObjectId(userId) },
       ];
+      console.log('Restrictive access - filtering by assignment/ownership');
     }
 
     const total = await Project.countDocuments(filter);
