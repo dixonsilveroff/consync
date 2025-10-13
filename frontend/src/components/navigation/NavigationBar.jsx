@@ -65,7 +65,7 @@ const NavigationBar = () => {
               <Link to="/" className="flex items-center space-x-2">
                 <img
                   className="h-12 w-auto"
-                  src="/src/assets/images/logo-white.png"
+                  src="./src/assets/images/logo-white.png"
                   alt="ConSync"
                 />
               </Link>

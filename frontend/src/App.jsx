@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NavigationBar from "./components/navigation/NavigationBar";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -13,23 +14,16 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetails from "./pages/ProjectDetails";
 
 const AppContent = () => {
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavigationBar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mt-6">
+      {!isLandingPage && <NavigationBar />}
+      <main className={!isLandingPage ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" : ""}>
+        <div className={!isLandingPage ? "mt-6" : ""}>
           <Routes>
-            <Route path="/" element={
-              <div className="text-center py-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Welcome to ConSync
-                </h1>
-                <p className="text-xl text-gray-600">
-                  Construction Lifecycle Management System
-                </p>
-              </div>
-            } />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
