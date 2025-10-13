@@ -6,7 +6,7 @@ export default function AddTaskForm({ projectId, onAdd }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
-    assignedTo: '',
+    description: '',
     deadline: ''
   });
   const [loading, setLoading] = useState(false);
@@ -26,17 +26,19 @@ export default function AddTaskForm({ projectId, onAdd }) {
     setError('');
 
     try {
-      await api.post('/api/tasks', {
+      const taskData = {
         ...formData,
         project: projectId,
         createdBy: user.id,
-        status: 'pending'
-      });
+        status: 'todo' // Using the default status from the schema
+      };
+      
+      await api.post('/api/tasks', taskData);
       
       // Reset form
       setFormData({
         title: '',
-        assignedTo: '',
+        description: '',
         deadline: ''
       });
       
@@ -68,14 +70,13 @@ export default function AddTaskForm({ projectId, onAdd }) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Assigned To
+          Description
         </label>
-        <input
-          type="text"
-          value={formData.assignedTo}
-          onChange={(e) => setFormData(prev => ({ ...prev, assignedTo: e.target.value }))}
+        <textarea
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Email or username"
+          rows="3"
         />
       </div>
 

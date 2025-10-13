@@ -19,9 +19,10 @@ export default function ProjectDetails() {
   
   const canManageTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
 
-  const fetchProject = useCallback(async () => {
+    const fetchProject = useCallback(async () => {
     try {
       const res = await api.get(`/api/projects/${id}`);
+      console.log('Project details:', res.data.data); // Debug log
       setProject(res.data.data);
       setError(null);
     } catch (err) {
@@ -79,12 +80,12 @@ export default function ProjectDetails() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <p className="text-sm text-gray-500 mb-1">Project Progress</p>
-            <ProgressBar value={project.progress || 0} />
+            <ProgressBar value={project.progressPercent || 0} />
           </div>
           <div>
             <p className="text-sm text-gray-500">Budget</p>
             <p className="text-lg font-semibold">
-              {formatCurrency(project.budget)}
+              {formatCurrency(project.budget?.amount || 0)}
             </p>
           </div>
         </div>
@@ -95,7 +96,7 @@ export default function ProjectDetails() {
           <h3 className="text-lg font-semibold">Tasks</h3>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">
-              {project.progress}% Complete
+              {project.progressPercent || 0}% Complete
             </span>
             {canManageTasks && (
               <button
@@ -124,11 +125,6 @@ export default function ProjectDetails() {
         <TaskList 
           projectId={id} 
           onUpdate={() => setRefreshTrigger(prev => !prev)} 
-        />
-        
-        <AddTaskForm 
-          projectId={id} 
-          onAdd={() => setRefreshTrigger(prev => !prev)} 
         />
       </div>
     </div>

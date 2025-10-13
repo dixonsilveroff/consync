@@ -3,6 +3,7 @@ import Task from '../models/taskModel.js';
 import Project from '../models/projectModel.js';
 import Notification from '../models/notificationModel.js';
 import logActivity from '../middleware/activityLogger.js';
+import calculateProjectProgress from '../utils/progressCalculator.js';
 
 // Test route
 export const testRoute = (req, res) => {
@@ -39,10 +40,8 @@ export const createTask = async (req, res, next) => {
             });
         }
 
-        // Ensure createdBy is set
-        if (!createdBy && req.user) {
-            createdBy = req.user.id;
-        }
+        // Set createdBy from the request user if not provided
+        const taskCreator = createdBy || (req.user ? req.user.id : null);
 
         // Validate dependencies if provided
         if (dependencies.length > 0) {
@@ -79,7 +78,7 @@ export const createTask = async (req, res, next) => {
         // Create task
         const task = await Task.create({
             ...req.body,
-            createdBy: createdBy || req.user._id
+            createdBy: taskCreator || req.user._id
         });
 
         // Return populated task
@@ -87,6 +86,9 @@ export const createTask = async (req, res, next) => {
             { path: 'project', select: 'title status' },
             { path: 'assignedTo', select: 'name email' }
         ]);
+
+        // Recalculate project progress
+        await calculateProjectProgress(task.project);
 
         // Log task creation
         await logActivity(
