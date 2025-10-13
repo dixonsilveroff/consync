@@ -5,14 +5,27 @@
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Load environment variables
-dotenv.config();
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables from the backend root directory
+dotenv.config({ path: join(__dirname, '../../.env') });
 
 async function fixUserRoles() {
   try {
     // Connect to MongoDB
-    const dbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/consync';
+    const dbUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/consync';
+    
+    if (!process.env.MONGO_URI && !process.env.MONGODB_URI) {
+      console.error('WARNING: No MONGO_URI or MONGODB_URI found in environment variables');
+      console.error('Using fallback: mongodb://localhost:27017/consync');
+    }
+    
+    console.log('Connecting to MongoDB...');
     await mongoose.connect(dbUri);
     console.log('Connected to MongoDB');
 
