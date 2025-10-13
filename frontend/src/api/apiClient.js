@@ -42,9 +42,6 @@ api.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Request to:', config.url, 'with token:', token);
-    } else {
-      console.warn('No token available for request to:', config.url);
     }
 
     // Skip token refresh checks on auth-related endpoints
@@ -87,8 +84,10 @@ api.interceptors.response.use(
     // Don't retry refresh token requests and avoid redirect loops on login page
     if (originalRequest.url === '/api/auth/refresh') {
       setAccessToken(null);
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
+      // Only redirect if not on public pages (landing, login, register)
+      const publicPaths = ['/', '/login', '/register'];
+      const isPublicPage = publicPaths.some(path => window.location.pathname === path);
+      if (!isPublicPage) {
         window.location.href = '/login';
       }
       return Promise.reject(error);
@@ -122,8 +121,10 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       setAccessToken(null);
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
+      // Only redirect if not on public pages (landing, login, register)
+      const publicPaths = ['/', '/login', '/register'];
+      const isPublicPage = publicPaths.some(path => window.location.pathname === path);
+      if (!isPublicPage) {
         window.location.href = '/login';
       }
       return Promise.reject(refreshError);
