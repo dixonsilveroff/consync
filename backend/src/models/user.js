@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: { type: String, 
     enum: ["admin", "engineer", "client", "contractor"],
-    default: "client" },
+    default: "engineer" },
   phone: { type: String },
   refreshTokenHash: { type: String, default: null },
 });

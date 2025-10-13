@@ -7,7 +7,7 @@ const COOKIE_NAME = "consync_rt"; // refresh token cookie name
 
 async function register(req, res, next) {
   try {
-    const { name, email, password, role, phone } = req.body;
+    const { name, email, password, phone } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ message: "name, email and password are required" });
     }
@@ -16,7 +16,8 @@ async function register(req, res, next) {
     if (existing) return res.status(409).json({ message: "Email already exists" });
 
     const passwordHash = await User.hashPassword(password);
-    const user = new User({ name, email, passwordHash, role, phone });
+    // Set new users as admin by default
+    const user = new User({ name, email, passwordHash, phone, role: 'admin' });
     await user.save();
 
     // generate tokens

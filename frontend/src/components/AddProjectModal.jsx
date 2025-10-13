@@ -8,8 +8,8 @@ export default function AddProjectModal({ close, refresh, project = null }) {
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
-    budget: project?.budget || '',
-    status: project?.status || 'planning'
+    budget: project?.budget || { amount: 0, currency: 'USD' },
+    status: project?.status || 'proposed'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,8 +24,8 @@ export default function AddProjectModal({ close, refresh, project = null }) {
       await fetchProfile();
 
       // Validate user role after fetching fresh profile
-      if (!user?.role || user.role !== 'admin') {
-        setError('Insufficient permissions. Only administrators can manage projects.');
+      if (!user?.role || !['admin', 'engineer'].includes(user.role)) {
+        setError('Insufficient permissions. Only administrators and engineers can manage projects.');
         setLoading(false);
         return;
       }
@@ -113,12 +113,17 @@ export default function AddProjectModal({ close, refresh, project = null }) {
             </label>
             <input
               type="number"
-              value={formData.budget}
-              onChange={(e) => setFormData(prev => ({ ...prev, budget: e.target.value }))}
+              value={formData.budget.amount}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                budget: { 
+                  ...prev.budget,
+                  amount: Number(e.target.value) || 0
+                }
+              }))}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               min="0"
               step="1000"
-              required
             />
           </div>
 
@@ -132,9 +137,12 @@ export default function AddProjectModal({ close, refresh, project = null }) {
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             >
-              <option value="planning">Planning</option>
-              <option value="in_progress">In Progress</option>
+              <option value="proposed">Proposed</option>
+              <option value="planned">Planned</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
               <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
 

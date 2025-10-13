@@ -75,6 +75,8 @@ export const createProject = async (req, res, next) => {
  */
 export const getProjects = async (req, res, next) => {
   try {
+    console.log('GET /projects - User:', req.user ? { id: req.user.id, role: req.user.role } : 'No user');
+    
     if (!req.user) return res.status(401).json({ success: false, message: 'Not authenticated' });
 
     const { page = 1, limit = 20, status, search, sort = '-createdAt' } = req.query;
@@ -91,12 +93,12 @@ export const getProjects = async (req, res, next) => {
     const role = req.user.role;
     const userId = req.user._id || req.user.id;
 
-    if (role === 'admin') {
-      // no extra constraints
+    if (role === 'admin' || role === 'engineer') {
+      // no extra constraints - can see all projects
     } else if (role === 'client') {
       filter.client = userId; // MongoDB will handle the type conversion
     } else {
-      // engineer/contractor/other: assigned, owner, or createdBy
+      // contractor/other: assigned, owner, or createdBy only
       filter.$or = [
         { assignedUsers: new mongoose.Types.ObjectId(userId) },
         { owner: new mongoose.Types.ObjectId(userId) },
@@ -108,6 +110,8 @@ export const getProjects = async (req, res, next) => {
     const pages = Math.ceil(total / lim) || 1;
     const skip = (pg - 1) * lim;
 
+    console.log('Project query filter:', JSON.stringify(filter));
+    
     const query = Project.find(filter)
       .populate('assignedUsers', 'name email')
       .populate('owner', 'name email')
@@ -117,6 +121,7 @@ export const getProjects = async (req, res, next) => {
       .limit(lim);
 
     const projects = await query.exec();
+    console.log('Found projects:', projects ? projects.length : 0);
 
     return res.json({ success: true, data: projects, meta: { total, page: pg, limit: lim, pages } });
   } catch (err) {

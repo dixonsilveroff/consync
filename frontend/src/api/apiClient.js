@@ -5,12 +5,14 @@ const api = axios.create({
   withCredentials: true // important: sends refresh cookie to /auth/refresh
 });
 
-let accessToken = null;
+let accessToken = localStorage.getItem('accessToken');
 export function setAccessToken(token) { 
   accessToken = token;
   if (token) {
+    localStorage.setItem('accessToken', token);
     localStorage.setItem('lastTokenRefresh', Date.now().toString());
   } else {
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('lastTokenRefresh');
   }
 }
@@ -36,13 +38,22 @@ const onTokenRefreshed = (token) => {
 // Add token to all requests
 api.interceptors.request.use(
   async (config) => {
-    // Skip token refresh checks on login-related endpoints
-    if (config.url?.includes('/login') || config.url?.includes('/register')) {
+    // Add token to request if available
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log('Request to:', config.url, 'with token:', token);
+    } else {
+      console.warn('No token available for request to:', config.url);
+    }
+
+    // Skip token refresh checks on auth-related endpoints
+    if (config.url?.includes('/login') || config.url?.includes('/register') || config.url?.includes('/refresh')) {
       return config;
     }
 
     // Check if token needs refresh before making a request
-    if (accessToken && isTokenExpiringSoon() && config.url !== '/api/auth/refresh') {
+    if (token && isTokenExpiringSoon() && !config.url?.includes('/auth')) {
       try {
         const { data } = await api.post('/api/auth/refresh');
         const newToken = data.accessToken || data.token;

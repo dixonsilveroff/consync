@@ -18,6 +18,7 @@ export default function ProjectsPage() {
     setError(null);
     try {
       const res = await api.get('/api/projects');
+      console.log('Projects response:', res.data);
       setProjects(res.data.data || []);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -38,7 +39,7 @@ export default function ProjectsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold text-gray-800">Projects</h1>
-        {!authLoading && user?.role === 'admin' && (
+        {!authLoading && (user?.role === 'admin' || user?.role === 'engineer') && (
           <button
             onClick={() => setOpenModal(true)}
             className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
