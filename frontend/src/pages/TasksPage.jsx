@@ -65,30 +65,56 @@ export default function TasksPage() {
   // Calculate stats
   const stats = {
     total: filteredTasks.length,
-    completed: filteredTasks.filter(t => t.status === 'completed').length,
-    inProgress: filteredTasks.filter(t => t.status === 'in-progress').length,
+    completed: filteredTasks.filter(t => t.status === 'done' || t.status === 'completed').length,
+    inProgress: filteredTasks.filter(t => t.status === 'in_progress' || t.status === 'in-progress' || t.status === 'review').length,
     overdue: filteredTasks.filter(t => {
-      if (t.status === 'completed') return false;
+      if (t.status === 'done' || t.status === 'completed') return false;
       return t.dueDate && new Date(t.dueDate) < new Date();
     }).length
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-700';
-      case 'in-progress': return 'bg-blue-100 text-blue-700';
-      case 'pending': return 'bg-yellow-100 text-yellow-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'done':
+      case 'completed':
+        return 'bg-green-100 text-green-700';
+      case 'in_progress':
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-700';
+      case 'review':
+        return 'bg-purple-100 text-purple-700';
+      case 'todo':
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'blocked':
+        return 'bg-red-100 text-red-700';
+      default: 
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
+      case 'critical': return 'text-red-700 font-bold';
       case 'high': return 'text-red-600';
       case 'medium': return 'text-orange-600';
       case 'low': return 'text-green-600';
       default: return 'text-gray-600';
     }
+  };
+
+  const formatStatus = (status) => {
+    const statusMap = {
+      'todo': 'To Do',
+      'in_progress': 'In Progress',
+      'review': 'In Review',
+      'done': 'Done',
+      'blocked': 'Blocked',
+      'pending': 'Pending',
+      'in-progress': 'In Progress',
+      'completed': 'Completed'
+    };
+    return statusMap[status] || status;
   };
 
   const handleTaskClick = (task) => {
@@ -226,9 +252,11 @@ export default function TasksPage() {
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
+              <option value="todo">To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="review">In Review</option>
+              <option value="done">Done</option>
+              <option value="blocked">Blocked</option>
             </select>
 
             {/* Priority Filter */}
@@ -238,6 +266,7 @@ export default function TasksPage() {
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Priority</option>
+              <option value="critical">Critical</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>
               <option value="low">Low</option>
@@ -317,7 +346,7 @@ export default function TasksPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
-                          {task.status}
+                          {formatStatus(task.status)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
