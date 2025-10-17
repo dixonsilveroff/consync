@@ -12,6 +12,7 @@ import ClientPage from "./pages/ClientPage";
 import Unauthorized from "./pages/Unauthorized";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetails from "./pages/ProjectDetails";
+import TasksPage from "./pages/TasksPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -61,6 +62,12 @@ const AppContent = () => {
             <Route path="/projects/:id" element={
               <ProtectedRoute>
                 <ProjectDetails />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/tasks" element={
+              <ProtectedRoute>
+                <TasksPage />
               </ProtectedRoute>
             } />
           </Routes>

@@ -1,15 +1,33 @@
 import { useNotifications } from '../context/useNotifications';
 import { formatDate } from '../utils/formatDate';
 import { X } from 'lucide-react';
+import api from '../api/apiClient';
+import { useState } from 'react';
 
-export function NotificationItem({ notification = {} }) {
-  const { markAsRead, clearNotification } = useNotifications() || {};
+export function NotificationItem({ notification = {}, onDelete }) {
+  const { markAsRead } = useNotifications() || {};
+  const [deleting, setDeleting] = useState(false);
 
   const typeColors = {
     info: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
     warning: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200',
     success: 'bg-green-100 text-green-700 hover:bg-green-200',
     error: 'bg-red-100 text-red-700 hover:bg-red-200',
+  };
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    setDeleting(true);
+    try {
+      await api.delete(`/api/notifications/${notification._id}`);
+      if (onDelete) {
+        await onDelete();
+      }
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (!notification._id) return null;
@@ -26,9 +44,10 @@ export function NotificationItem({ notification = {} }) {
             {notification.title}
           </p>
           <button
-            onClick={() => clearNotification(notification._id)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-200 rounded-full"
-            aria-label="Clear notification"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-200 rounded-full disabled:opacity-50"
+            aria-label="Delete notification"
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
