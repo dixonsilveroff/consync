@@ -14,6 +14,15 @@ import calculateProjectProgress from '../utils/progressCalculator.js';
  */
 const logActivity = async (action, entityType, entityId, userId, message, projectId = null, metadata = {}) => {
   try {
+    // Debug logging
+    console.log('=== Activity Logger ===');
+    console.log('Action:', action);
+    console.log('Entity Type:', entityType);
+    console.log('Entity ID:', entityId);
+    console.log('User ID:', userId);
+    console.log('Project ID:', projectId);
+    console.log('Message:', message);
+    
     // Create the activity document
     const activity = await Activity.create({
       action,
@@ -33,6 +42,15 @@ const logActivity = async (action, entityType, entityId, userId, message, projec
     return activity;
   } catch (error) {
     console.error('Error logging activity:', error);
+    console.error('Activity data that failed:', {
+      action,
+      entityType,
+      entityId,
+      userId,
+      projectId,
+      message,
+      metadata
+    });
     throw error;
   }
 };

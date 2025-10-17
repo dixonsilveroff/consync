@@ -26,7 +26,7 @@ router
 router
     .route('/:id')
     .get(protect, getTaskById)
-    .put(protect, authorizeRoles('admin', 'engineer'), updateTask)
+    .put(protect, updateTask) // Let controller handle authorization
     .delete(protect, authorizeRoles('admin'), deleteTask);
 
 router.patch('/bulk-status', protect, authorizeRoles('admin', 'engineer'), bulkUpdateStatus);

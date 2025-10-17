@@ -249,6 +249,24 @@ export const updateTask = async (req, res, next) => {
         const { id } = req.params;
         const updates = req.body;
 
+        // Debug logging
+        console.log('=== Task Update Request ===');
+        console.log('Task ID:', id);
+        console.log('Updates:', updates);
+        console.log('User from token:', req.user);
+        console.log('User ID (_id):', req.user?._id);
+        console.log('User ID (id):', req.user?.id);
+        console.log('User role:', req.user?.role);
+
+        // Ensure user is authenticated
+        if (!req.user || !req.user._id) {
+            console.error('Authentication failed - req.user:', req.user);
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
         // Validate ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
@@ -269,11 +287,17 @@ export const updateTask = async (req, res, next) => {
         // Store old status for comparison
         const oldStatus = task.status;
 
-        // Check authorization
+        // Check authorization - Admins can update any task
+        // Others can only update tasks they created, are assigned to, or if they're an engineer/contractor on the project
         if (req.user.role !== 'admin') {
-            const isAuthorized = 
-                task.createdBy.toString() === req.user._id.toString() ||
-                task.assignedTo?.toString() === req.user._id.toString();
+            const isCreator = task.createdBy.toString() === req.user._id.toString();
+            const isAssignee = task.assignedTo?.toString() === req.user._id.toString();
+            
+            // Engineers and contractors can update tasks in projects they're part of
+            const isProjectMember = ['engineer', 'contractor'].includes(req.user.role) && 
+                                   req.user.projects?.includes(task.project.toString());
+            
+            const isAuthorized = isCreator || isAssignee || isProjectMember;
 
             if (!isAuthorized) {
                 return res.status(403).json({
@@ -314,37 +338,81 @@ export const updateTask = async (req, res, next) => {
             { path: 'createdBy', select: 'name email' }
         ]);
 
-        // Log status change if it occurred
+        // Log status change if it occurred (non-blocking)
         if (oldStatus !== updatedTask.status) {
-            await logActivity(
-                'TASK_STATUS_UPDATED',
-                'Task',
-                updatedTask._id,
-                req.user._id,
-                `Task "${updatedTask.title}" status changed from ${oldStatus} to ${updatedTask.status}`,
-                updatedTask.project,
-                { oldStatus, newStatus: updatedTask.status }
-            );
+            try {
+                const userId = req.user._id || req.user.id;
+                const projectId = updatedTask.project?._id || updatedTask.project;
+                
+                console.log('About to log activity with:');
+                console.log('  User ID:', userId);
+                console.log('  Project ID:', projectId);
+                console.log('  req.user:', JSON.stringify(req.user));
+                
+                if (!userId) {
+                    console.error('CRITICAL: User ID is undefined! Cannot log activity.');
+                    console.error('req.user object:', req.user);
+                    throw new Error('User ID is required for activity logging');
+                }
+                
+                await logActivity(
+                    'TASK_STATUS_UPDATED',
+                    'Task',
+                    updatedTask._id,
+                    userId,
+                    `Task "${updatedTask.title}" status changed from ${oldStatus} to ${updatedTask.status}`,
+                    projectId,
+                    { oldStatus, newStatus: updatedTask.status }
+                );
+                
+                console.log('Activity logged successfully');
+            } catch (logError) {
+                console.error('Failed to log task status update activity:', logError.message);
+                console.error('Caught error, continuing with response...');
+                // Continue execution - don't fail the request if logging fails
+                // DO NOT rethrow the error!
+            }
         }
 
-        // Log general update if other fields changed
+        // Log general update if other fields changed (non-blocking)
         if (Object.keys(updates).length > (updates.status ? 1 : 0)) {
-            await logActivity(
-                'TASK_UPDATED',
-                'Task',
-                updatedTask._id,
-                req.user._id,
-                `Task "${updatedTask.title}" updated`,
-                updatedTask.project,
-                { updatedFields: Object.keys(updates).filter(k => k !== 'status') }
-            );
+            try {
+                const userId = req.user._id || req.user.id;
+                const projectId = updatedTask.project?._id || updatedTask.project;
+                
+                if (!userId) {
+                    console.error('CRITICAL: User ID is undefined for general update! Cannot log activity.');
+                    // Don't throw - just skip logging
+                } else {
+                    await logActivity(
+                        'TASK_UPDATED',
+                        'Task',
+                        updatedTask._id,
+                        userId,
+                        `Task "${updatedTask.title}" updated`,
+                        projectId,
+                        { updatedFields: Object.keys(updates).filter(k => k !== 'status') }
+                    );
+                }
+            } catch (logError) {
+                console.error('Failed to log task update activity:', logError.message);
+                console.error('Caught error, continuing with response...');
+                // Continue execution - don't fail the request if logging fails
+                // DO NOT rethrow the error!
+            }
         }
+
+        console.log('=== Task Update Success ===');
+        console.log('Sending success response for task:', updatedTask._id);
 
         res.status(200).json({
             success: true,
             data: updatedTask
         });
     } catch (error) {
+        console.error('=== Task Update Error ===');
+        console.error('Error:', error.message);
+        console.error('Stack:', error.stack);
         next(error);
     }
 };

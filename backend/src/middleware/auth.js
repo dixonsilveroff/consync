@@ -16,6 +16,8 @@ export default async function authMiddleware(req, res, next) {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    console.log('Auth middleware - decoded token:', decoded);
+
     // If role is missing from token, fetch from database
     if (!decoded.role) {
       console.warn('Role missing from token, fetching from database for user:', decoded.id);
@@ -30,6 +32,15 @@ export default async function authMiddleware(req, res, next) {
 
     // Attach user payload to request
     req.user = decoded;
+    
+    // Normalize user ID - add _id property for compatibility with existing code
+    // JWT contains 'id', but most code expects '_id'
+    if (decoded.id && !decoded._id) {
+      req.user._id = decoded.id;
+      console.log('Auth middleware - normalized user ID from', decoded.id, 'to', req.user._id);
+    }
+
+    console.log('Auth middleware - final req.user:', req.user);
 
     next(); // Proceed to route handler
   } catch (err) {

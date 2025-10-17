@@ -14,12 +14,11 @@ export default function ProjectDetails() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   
   const canManageTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
 
-    const fetchProject = useCallback(async () => {
+  const fetchProject = useCallback(async () => {
     try {
       const res = await api.get(`/api/projects/${id}`);
       console.log('Project details:', res.data.data); // Debug log
@@ -35,7 +34,7 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     fetchProject();
-  }, [id, refreshTrigger, fetchProject]);
+  }, [fetchProject]);
 
   if (loading) {
     return (
@@ -116,7 +115,7 @@ export default function ProjectDetails() {
               projectId={id} 
               onAdd={() => {
                 setShowAddTask(false);
-                setRefreshTrigger(prev => !prev);
+                fetchProject(); // Refresh project data after adding task
               }} 
             />
           </div>
@@ -124,7 +123,7 @@ export default function ProjectDetails() {
 
         <TaskList 
           projectId={id} 
-          onUpdate={() => setRefreshTrigger(prev => !prev)} 
+          onUpdate={fetchProject} // Pass fetchProject directly
         />
       </div>
     </div>
