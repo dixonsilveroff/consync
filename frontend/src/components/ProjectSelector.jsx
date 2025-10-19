@@ -8,8 +8,11 @@ export default function ProjectSelector({ onProjectSelect, selectedProjectId = n
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await api.get('/api/projects?status=active&limit=100');
+        // Fetch all projects the user has access to (no status filter)
+        // Backend will apply role-based filtering automatically
+        const res = await api.get('/api/projects?limit=100&sort=title');
         const projectsData = res.data?.data || [];
+        console.log('ProjectSelector: Fetched projects:', projectsData.length);
         setProjects(Array.isArray(projectsData) ? projectsData : []);
       } catch (error) {
         console.error('Failed to fetch projects:', error);
@@ -47,9 +50,12 @@ export default function ProjectSelector({ onProjectSelect, selectedProjectId = n
       <option value="">All Projects (Aggregated)</option>
       {projects.map((project) => (
         <option key={project._id} value={project._id}>
-          {project.title}
+          {project.title} ({project.status || 'unknown'})
         </option>
       ))}
+      {projects.length === 0 && (
+        <option disabled>No projects available</option>
+      )}
     </select>
   );
 }
