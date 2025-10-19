@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { NotificationBell } from '../NotificationBell';
 import logoBlack from '../../assets/images/logo-white.png';
@@ -8,6 +8,12 @@ const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   const isCurrentPath = (path) => {
     return location.pathname === path;
@@ -89,7 +95,7 @@ const NavigationBar = () => {
                   {user.name || user.email}
                 </span>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
                 >
                   Logout
@@ -140,7 +146,7 @@ const NavigationBar = () => {
             {showAuthItems && user && (
               <button
                 onClick={() => {
-                  logout();
+                  handleLogout();
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"

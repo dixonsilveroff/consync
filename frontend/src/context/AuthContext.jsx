@@ -177,11 +177,10 @@ export const AuthProvider = ({ children }) => {
       handleSetToken(null);
       setUser(null);
       localStorage.clear();
-      // Clear any pending requests
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'; // Force a clean reload on the login page
-      }
       setLoading(false);
+      
+      // Don't force page reload - let React Router handle navigation
+      // Components calling logout should navigate to /login themselves
     }
   };
 
