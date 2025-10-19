@@ -16,6 +16,7 @@ export default function ProjectDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [taskRefreshTrigger, setTaskRefreshTrigger] = useState(0);
   
   const canManageTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
 
@@ -116,6 +117,7 @@ export default function ProjectDetails() {
               projectId={id} 
               onAdd={() => {
                 setShowAddTask(false);
+                setTaskRefreshTrigger(prev => prev + 1); // Trigger TaskList refresh
                 fetchProject(); // Refresh project data after adding task
               }} 
             />
@@ -125,6 +127,7 @@ export default function ProjectDetails() {
         <TaskList 
           projectId={id} 
           onUpdate={fetchProject} // Pass fetchProject directly
+          refreshTrigger={taskRefreshTrigger} // Pass trigger to force refresh
         />
       </div>
 

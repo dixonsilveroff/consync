@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit2, Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatCurrency';
 import api from '../api/apiClient';
+import AddProjectModal from './AddProjectModal';
 
 export default function ProjectCard({ project, refresh }) {
   const navigate = useNavigate();

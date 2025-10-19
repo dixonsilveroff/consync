@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
 import api from '../api/apiClient';
 
-export default function TaskList({ projectId, onUpdate }) {
+export default function TaskList({ projectId, onUpdate, refreshTrigger }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingTaskId, setUpdatingTaskId] = useState(null);
@@ -26,7 +26,7 @@ export default function TaskList({ projectId, onUpdate }) {
 
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+  }, [fetchTasks, refreshTrigger]); // Re-fetch when refreshTrigger changes
 
   const toggleTaskStatus = async (taskId, currentStatus) => {
     setUpdatingTaskId(taskId);

@@ -66,7 +66,7 @@ export default function AddProjectModal({ close, refresh, project = null }) {
       };
 
       if (project) {
-        await api.patch(`/api/projects/${project._id}`, payload);
+        await api.put(`/api/projects/${project._id}`, payload);
       } else {
         await api.post('/api/projects', payload);
       }
