@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api, { setAccessToken } from '../api/apiClient';
@@ -5,10 +6,22 @@ import { isTokenExpiringSoon } from '../utils/authHelpers';
 
 export default function AddProjectModal({ close, refresh, project = null }) {
   const { user, fetchProfile } = useAuth();
+  
+  // Ensure budget has correct structure
+  const initializeBudget = () => {
+    if (project?.budget) {
+      return {
+        amount: project.budget.amount || 0,
+        currency: project.budget.currency || 'USD'
+      };
+    }
+    return { amount: 0, currency: 'USD' };
+  };
+
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
-    budget: project?.budget || { amount: 0, currency: 'USD' },
+    budget: initializeBudget(),
     status: project?.status || 'proposed'
   });
   const [loading, setLoading] = useState(false);
@@ -44,10 +57,18 @@ export default function AddProjectModal({ close, refresh, project = null }) {
       }
 
       // Proceed with the project save
+      const payload = {
+        ...formData,
+        budget: {
+          amount: Number(formData.budget.amount) || 0,
+          currency: formData.budget.currency || 'USD'
+        }
+      };
+
       if (project) {
-        await api.patch(`/api/projects/${project._id}`, formData);
+        await api.patch(`/api/projects/${project._id}`, payload);
       } else {
-        await api.post('/api/projects', formData);
+        await api.post('/api/projects', payload);
       }
       refresh();
       close();

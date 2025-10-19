@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import TaskList from '../components/TaskList';
 import AddTaskForm from '../components/AddTaskForm';
 import ProgressBar from '../components/ProgressBar';
+import CostTracker from '../components/CostTracker';
 import { formatCurrency } from '../utils/formatCurrency';
 
 export default function ProjectDetails() {
@@ -125,6 +126,12 @@ export default function ProjectDetails() {
           projectId={id} 
           onUpdate={fetchProject} // Pass fetchProject directly
         />
+      </div>
+
+      {/* Cost Tracker Section */}
+      <div className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+        <h3 className="text-lg font-semibold mb-4">Cost Tracking</h3>
+        <CostTracker projectId={id} />
       </div>
     </div>
   );
