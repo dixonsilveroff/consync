@@ -12,34 +12,57 @@ const AuthForm = ({
   isLoading
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <img src={ConSyncLogo} alt="ConSync Logo" className="h-10 sm:h-12 w-auto" />
-        </div>
-        <h2 className="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
-          {isLogin ? 'Sign in to ConSync' : 'Create your account'}
-        </h2>
-        <p className="mt-2 text-center text-xs sm:text-sm text-gray-600">
-          {isLogin ? (
-            <>
-              New to ConSync?{' '}
-              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                Create an account
-              </Link>
-            </>
-          ) : (
-            <>
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                Sign in
-              </Link>
-            </>
-          )}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Navigation Bar for Auth Pages */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center">
+              <img
+                className="h-8 sm:h-10 w-auto"
+                src={ConSyncLogo}
+                alt="ConSync Logo"
+              />
+            </Link>
 
-      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            {/* Auth Navigation Links */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Link
+                to="/"
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
+              >
+                Home
+              </Link>
+              {isLogin ? (
+                <Link
+                  to="/register"
+                  className="px-3 sm:px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-150"
+                >
+                  Sign Up
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-3 sm:px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-150"
+                >
+                  Sign In
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Auth Form Content */}
+      <div className="flex-1 flex flex-col py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
+            {isLogin ? 'Sign in to ConSync' : 'Create your account'}
+          </h2>
+        </div>
+
+        <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-6 sm:py-8 px-4 shadow-xl rounded-lg sm:px-10">
           <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
             {!isLogin && (
@@ -145,6 +168,7 @@ const AuthForm = ({
             </button>
           </form>
         </div>
+      </div>
       </div>
     </div>
   );
