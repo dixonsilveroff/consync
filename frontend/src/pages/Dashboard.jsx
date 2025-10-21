@@ -143,47 +143,47 @@ export default function Dashboard() {
       {/* Mock Mode Banner */}
       {USE_MOCK && <MockModeBanner />}
 
-      {/* Header with Refresh */}
-      <div className="mb-8 transition-opacity duration-300 ease-in-out">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-800 mb-2">
-              ConSync Project Dashboard
-            </h1>
-            <p className="text-sm text-gray-500">
-              Monitor progress, cost, and activity across all projects.
+      {/* Header */}
+      <div className="mb-4 sm:mb-6 transition-opacity duration-300 ease-in-out">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
+            ConSync Project Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500">
+            Monitor progress, cost, and activity across all projects.
+          </p>
+          {user && (
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+              Welcome back, <span className="font-medium">{user.name}</span> ({user.role})
             </p>
-            {user && (
-              <p className="text-sm text-gray-600 mt-1">
-                Welcome back, <span className="font-medium">{user.name}</span> ({user.role})
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            {lastUpdated && (
-              <span className="text-xs text-gray-500">
-                Updated {lastUpdated.toLocaleTimeString()}
-              </span>
-            )}
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium">Refresh</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
+      {/* Refresh Section - Below Header */}
+      <div className="mb-6 sm:mb-8 flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
+        {lastUpdated && (
+          <span className="text-xs text-gray-500">
+            Updated {lastUpdated.toLocaleTimeString()}
+          </span>
+        )}
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+          <span className="text-xs sm:text-sm font-medium">Refresh</span>
+        </button>
+      </div>
+
       {/* Quick Actions */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <QuickActions onNewProject={() => setShowAddProjectModal(true)} />
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {[
           {
             title: "Total Projects",
@@ -222,9 +222,9 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-sm p-6 transition-all duration-300 ease-in-out hover:shadow-md">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 transition-all duration-300 ease-in-out hover:shadow-md">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
             Recent Activity Volume
           </h3>
           <div className="transition-opacity duration-500 ease-in-out">
@@ -239,15 +239,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 transition-all duration-300 ease-in-out hover:shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 transition-all duration-300 ease-in-out hover:shadow-md">
+          <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex-shrink-0">
               Project Cost Trends
             </h3>
-            <ProjectSelector 
-              onProjectSelect={handleProjectSelect}
-              selectedProjectId={selectedProjectId}
-            />
+            <div className="w-full sm:w-auto sm:min-w-[200px] sm:max-w-[300px]">
+              <ProjectSelector 
+                onProjectSelect={handleProjectSelect}
+                selectedProjectId={selectedProjectId}
+              />
+            </div>
           </div>
           <div className="transition-opacity duration-500 ease-in-out">
             {dashboardData.costTrends.length > 0 ? (
@@ -272,18 +274,18 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Section: Active Projects & Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {/* Active Projects */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
             Active Projects
           </h3>
           <ActiveProjectsWidget projects={dashboardData.activeProjects} />
         </div>
 
         {/* Recent Activities */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
             Recent System Activities
           </h3>
           <ActivityList activities={dashboardData.recentActivities} />

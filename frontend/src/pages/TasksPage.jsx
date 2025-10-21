@@ -140,14 +140,14 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-3 sm:p-6 md:p-8">
       {/* Error Message */}
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
+        <div className="mb-4 sm:mb-6 bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-3 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <span className="text-sm">{error}</span>
           <button
             onClick={fetchData}
-            className="text-sm underline hover:no-underline"
+            className="text-sm underline hover:no-underline whitespace-nowrap"
           >
             Retry
           </button>
@@ -155,75 +155,75 @@ export default function TasksPage() {
       )}
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">All Tasks</h1>
-        <p className="text-gray-600 mt-1">View and manage all tasks across your projects</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">All Tasks</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">View and manage all tasks across your projects</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-              <p className="text-3xl font-bold text-gray-800 mt-1">{stats.total}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Total Tasks</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mt-1">{stats.total}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <ClockIcon className="h-6 w-6 text-blue-600" />
+            <div className="p-2 sm:p-3 bg-blue-100 rounded-lg">
+              <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">In Progress</p>
-              <p className="text-3xl font-bold text-blue-600 mt-1">{stats.inProgress}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">In Progress</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mt-1">{stats.inProgress}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <ClockIcon className="h-6 w-6 text-blue-600" />
+            <div className="p-2 sm:p-3 bg-blue-100 rounded-lg">
+              <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">{stats.completed}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Completed</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 mt-1">{stats.completed}</p>
             </div>
-            <div className="p-3 bg-green-100 rounded-lg">
-              <CheckCircleIcon className="h-6 w-6 text-green-600" />
+            <div className="p-2 sm:p-3 bg-green-100 rounded-lg">
+              <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-600" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Overdue</p>
-              <p className="text-3xl font-bold text-red-600 mt-1">{stats.overdue}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-600">Overdue</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 mt-1">{stats.overdue}</p>
             </div>
-            <div className="p-3 bg-red-100 rounded-lg">
-              <ExclamationCircleIcon className="h-6 w-6 text-red-600" />
+            <div className="p-2 sm:p-3 bg-red-100 rounded-lg">
+              <ExclamationCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-red-600" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200 mb-4 sm:mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {/* Search */}
-          <div className="md:col-span-2">
+          <div className="sm:col-span-2">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search tasks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function TasksPage() {
             <select
               value={filters.project}
               onChange={(e) => setFilters(prev => ({ ...prev, project: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Projects</option>
               {projects.map(project => (

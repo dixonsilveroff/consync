@@ -29,8 +29,8 @@ const AppContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {!isLandingPage && <NavigationBar />}
-      <main className={!isLandingPage ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" : ""}>
-        <div className={!isLandingPage ? "mt-6" : ""}>
+      <main className={!isLandingPage ? "max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6" : ""}>
+        <div className={!isLandingPage ? "mt-4 sm:mt-6" : ""}>
           <Suspense fallback={<LoadingScreen />}>
             <Routes>
             <Route path="/" element={<LandingPage />} />

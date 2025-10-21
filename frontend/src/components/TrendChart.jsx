@@ -17,9 +17,10 @@ export default function TrendChart({
     );
   }
 
-  // Chart dimensions
+  // Chart dimensions - responsive width
   const margin = { top: 20, right: 20, bottom: 40, left: 40 };
-  const chartWidth = 400;
+  // Use viewport-based width, capped at sensible max
+  const chartWidth = Math.min(600, typeof window !== 'undefined' ? window.innerWidth - 100 : 600);
   const chartHeight = height - margin.top - margin.bottom;
 
   // Calculate data bounds
@@ -71,12 +72,13 @@ export default function TrendChart({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-auto">
       <svg 
         width="100%" 
         height={height} 
         viewBox={`0 0 ${chartWidth + margin.left + margin.right} ${height}`}
-        className="overflow-visible"
+        preserveAspectRatio="xMidYMid meet"
+        className="min-w-[300px]"
       >
         {/* Grid lines */}
         <defs>

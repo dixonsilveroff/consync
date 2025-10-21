@@ -45,9 +45,9 @@ export default function ProjectSelector({ onProjectSelect, selectedProjectId = n
     <select
       value={selectedProjectId || ''}
       onChange={handleChange}
-      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+      className="px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white max-w-full"
     >
-      <option value="">All Projects (Aggregated)</option>
+      <option value="">All Projects</option>
       {projects.map((project) => (
         <option key={project._id} value={project._id}>
           {project.title} ({project.status || 'unknown'})

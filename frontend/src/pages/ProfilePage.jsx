@@ -30,22 +30,22 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Profile Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-start gap-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
             {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+            <div className="flex-shrink-0 mx-auto sm:mx-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold">
                 {user.name?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
 
             {/* User Info */}
-            <div className="flex-grow">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+            <div className="flex-grow text-center sm:text-left w-full">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{user.name}</h1>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium border ${roleColors[user.role] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                   {user.role?.charAt(0).toUpperCase() + user.role?.slice(1)}
                 </span>
@@ -70,34 +70,35 @@ const ProfilePage = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
           <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+            <nav className="flex -mb-px overflow-x-auto">
               <button
                 onClick={() => setActiveSection('personal')}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeSection === 'personal'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <User className="w-4 h-4" />
-                Personal Information
+                <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Personal Information</span>
+                <span className="sm:hidden">Personal</span>
               </button>
               <button
                 onClick={() => setActiveSection('security')}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeSection === 'security'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Lock className="w-4 h-4" />
+                <Lock className="w-3 h-3 sm:w-4 sm:h-4" />
                 Security
               </button>
               <button
                 onClick={() => setActiveSection('activity')}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeSection === 'activity'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

@@ -42,17 +42,17 @@ export default function QuickActions({ onNewProject }) {
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
       {actions.map((action) => {
         const Icon = action.icon;
         return (
           <button
             key={action.label}
             onClick={action.onClick}
-            className={`flex flex-col items-center justify-center p-4 rounded-lg transition-all duration-200 ${getColorClasses(action.color)}`}
+            className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg transition-all duration-200 ${getColorClasses(action.color)} hover:scale-105 active:scale-95`}
           >
-            <Icon className="w-6 h-6 mb-2" />
-            <span className="text-sm font-medium">{action.label}</span>
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
+            <span className="text-xs sm:text-sm font-medium text-center">{action.label}</span>
           </button>
         );
       })}

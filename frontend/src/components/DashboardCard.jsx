@@ -44,24 +44,24 @@ export default function DashboardCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6 relative overflow-hidden transition-all duration-300 ease-in-out hover:shadow-md hover:translate-y-[-2px] group">
+    <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 relative overflow-hidden transition-all duration-300 ease-in-out hover:shadow-md hover:translate-y-[-2px] group">
       {/* Gradient accent border */}
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradientClass}`}></div>
       
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center mb-2">
-            <span className="text-2xl mr-3">{icon}</span>
-            <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+            <span className="text-xl sm:text-2xl mr-2 sm:mr-3">{icon}</span>
+            <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}</h3>
           </div>
           
           <div className="mb-2">
             {isProgress ? (
-              <div className="flex items-center space-x-3">
-                <span className={`text-2xl font-bold ${getExpenseColor(value)}`}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <span className={`text-xl sm:text-2xl font-bold ${getExpenseColor(value)}`}>
                   {value}
                 </span>
-                <div className="flex-1">
+                <div className="w-full sm:flex-1">
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full bg-gradient-to-r ${gradientClass}`}
@@ -71,7 +71,7 @@ export default function DashboardCard({
                 </div>
               </div>
             ) : (
-              <span className={`text-2xl font-bold ${getExpenseColor(value)}`}>
+              <span className={`text-xl sm:text-2xl font-bold ${getExpenseColor(value)}`}>
                 {value}
               </span>
             )}
@@ -79,11 +79,11 @@ export default function DashboardCard({
 
           {/* Trend indicator */}
           {trend && (
-            <div className="flex items-center text-sm transition-transform duration-300 group-hover:translate-x-1">
+            <div className="flex items-center text-xs sm:text-sm transition-transform duration-300 group-hover:translate-x-1">
               <span className={`${trend > 0 ? "text-green-600" : "text-red-600"} font-medium`}>
                 {trend > 0 ? "↗" : "↘"} {Math.abs(trend)}%
               </span>
-              <span className="text-gray-500 ml-1">vs last month</span>
+              <span className="text-gray-500 ml-1 hidden sm:inline">vs last month</span>
             </div>
           )}
         </div>
