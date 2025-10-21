@@ -24,12 +24,18 @@ export async function updateProfile(req, res, next) {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
 
-    const { name, phone } = req.body;
+    const { name, phone, bio } = req.body;
 
     // Only allow updating non-sensitive fields here
     const updates = {};
     if (typeof name === "string") updates.name = name;
     if (typeof phone === "string") updates.phone = phone;
+    if (typeof bio === "string") {
+      if (bio.length > 500) {
+        return res.status(400).json({ message: "Bio must be 500 characters or less" });
+      }
+      updates.bio = bio;
+    }
 
     const user = await User.findByIdAndUpdate(userId, updates, { new: true }).select(
       "-passwordHash -refreshTokenHash"

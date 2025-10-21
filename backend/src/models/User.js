@@ -9,8 +9,9 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "engineer", "client", "contractor"],
     default: "engineer" },
   phone: { type: String },
+  bio: { type: String, maxlength: 500 },
   refreshTokenHash: { type: String, default: null },
-});
+}, { timestamps: true });
 
 // static helper to hash password
 userSchema.statics.hashPassword = async function (password) {

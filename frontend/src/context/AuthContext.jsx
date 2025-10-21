@@ -186,7 +186,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      const { data } = await api.put("/api/user/profile", profileData);
+      const { data } = await api.put("/api/users/profile", profileData);
       // controller may return updated user
       const updated = data.user || data;
       setUser(updated);
@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      const { data } = await api.post("/api/user/change-password", { currentPassword, newPassword });
+      const { data } = await api.post("/api/users/change-password", { currentPassword, newPassword });
       return data;
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Change password failed";

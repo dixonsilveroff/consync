@@ -94,6 +94,12 @@ const NavigationBar = () => {
                 <span className="text-sm text-gray-700">
                   {user.name || user.email}
                 </span>
+                <Link
+                  to="/profile"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150"
+                >
+                  Profile
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
@@ -144,15 +150,24 @@ const NavigationBar = () => {
               </Link>
             ))}
             {showAuthItems && user && (
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"
-              >
-                Logout
-              </button>
+              <>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"
+                >
+                  Logout
+                </button>
+              </>
             )}
           </div>
         </div>

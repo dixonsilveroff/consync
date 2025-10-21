@@ -14,6 +14,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetails from "./pages/ProjectDetails";
 import TasksPage from "./pages/TasksPage";
 import ResourcesPage from "./pages/ResourcesPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -75,6 +76,12 @@ const AppContent = () => {
             <Route path="/resources" element={
               <ProtectedRoute roles={["admin", "engineer"]}>
                 <ResourcesPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             } />
           </Routes>
