@@ -115,9 +115,7 @@ export const AuthProvider = ({ children }) => {
       // Attempt login
       const { data } = await api.post("/api/auth/login", { 
         email, 
-        password,
-        // Include client timestamp to help prevent replay attacks
-        timestamp: new Date().toISOString() 
+        password
       });
       
       // Validate response
