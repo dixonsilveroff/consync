@@ -25,12 +25,13 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AppContent = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
+  const isAuthPage = ['/login', '/register'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {!isLandingPage && <NavigationBar />}
-      <main className={!isLandingPage ? "max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6" : ""}>
-        <div className={!isLandingPage ? "mt-4 sm:mt-6" : ""}>
+      {!isLandingPage && !isAuthPage && <NavigationBar />}
+      <main className={!isLandingPage && !isAuthPage ? "max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6" : ""}>
+        <div className={!isLandingPage && !isAuthPage ? "mt-4 sm:mt-6" : ""}>
           <Suspense fallback={<LoadingScreen />}>
             <Routes>
             <Route path="/" element={<LandingPage />} />

@@ -12,15 +12,15 @@ const AuthForm = ({
   isLoading
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <img src={ConSyncLogo} alt="ConSync Logo" className="h-12 w-auto" />
+          <img src={ConSyncLogo} alt="ConSync Logo" className="h-10 sm:h-12 w-auto" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
           {isLogin ? 'Sign in to ConSync' : 'Create your account'}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-xs sm:text-sm text-gray-600">
           {isLogin ? (
             <>
               New to ConSync?{' '}
@@ -39,9 +39,9 @@ const AuthForm = ({
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-6 sm:py-8 px-4 shadow-xl rounded-lg sm:px-10">
+          <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
             {!isLogin && (
               <>
                 <InputField
