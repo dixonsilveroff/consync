@@ -1,20 +1,26 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NavigationBar from "./components/navigation/NavigationBar";
-import LandingPage from "./pages/LandingPage";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import AdminPage from "./pages/AdminPage";
-import EngineerPage from "./pages/EngineerPage";
-import ClientPage from "./pages/ClientPage";
-import Unauthorized from "./pages/Unauthorized";
-import ProjectsPage from "./pages/ProjectsPage";
-import ProjectDetails from "./pages/ProjectDetails";
-import TasksPage from "./pages/TasksPage";
-import ResourcesPage from "./pages/ResourcesPage";
-import ProfilePage from "./pages/ProfilePage";
+import LoadingScreen from "./components/LoadingScreen";
+
+// Lazy load pages for better performance
+const LandingPage = lazy(() => import("./pages/LandingPage"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const EngineerPage = lazy(() => import("./pages/EngineerPage"));
+const ClientPage = lazy(() => import("./pages/ClientPage"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
+const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
+const ProjectDetails = lazy(() => import("./pages/ProjectDetails"));
+const TasksPage = lazy(() => import("./pages/TasksPage"));
+const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 
 const AppContent = () => {
   const location = useLocation();
@@ -25,7 +31,8 @@ const AppContent = () => {
       {!isLandingPage && <NavigationBar />}
       <main className={!isLandingPage ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" : ""}>
         <div className={!isLandingPage ? "mt-6" : ""}>
-          <Routes>
+          <Suspense fallback={<LoadingScreen />}>
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -85,6 +92,7 @@ const AppContent = () => {
               </ProtectedRoute>
             } />
           </Routes>
+          </Suspense>
         </div>
       </main>
     </div>
@@ -93,10 +101,14 @@ const AppContent = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

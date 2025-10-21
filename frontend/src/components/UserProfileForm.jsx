@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { Save, Loader2 } from 'lucide-react';
 
 const UserProfileForm = () => {
   const { user, updateProfile } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -11,7 +13,6 @@ const UserProfileForm = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,8 +27,6 @@ const UserProfileForm = () => {
         [name]: null
       }));
     }
-    // Clear success message when user starts editing
-    if (success) setSuccess(false);
   };
 
   const validate = () => {
@@ -63,7 +62,6 @@ const UserProfileForm = () => {
     if (!validate()) return;
 
     setLoading(true);
-    setSuccess(false);
 
     try {
       await updateProfile({
@@ -71,12 +69,9 @@ const UserProfileForm = () => {
         phone: formData.phone.trim(),
         bio: formData.bio.trim(),
       });
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 5000);
+      toast.success('Profile updated successfully!');
     } catch (error) {
-      setErrors({
-        submit: error.message || 'Failed to update profile. Please try again.'
-      });
+      toast.error(error.message || 'Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -92,21 +87,6 @@ const UserProfileForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl">
-      {/* Success Message */}
-      {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <p className="text-green-800 font-medium">Profile updated successfully!</p>
-        </div>
-      )}
-
-      {/* Submit Error */}
-      {errors.submit && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800">{errors.submit}</p>
-        </div>
-      )}
-
       {/* Name Field */}
       <div className="mb-6">
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -242,7 +222,6 @@ const UserProfileForm = () => {
                 bio: user?.bio || '',
               });
               setErrors({});
-              setSuccess(false);
             }}
             className="px-6 py-2 text-gray-700 hover:text-gray-900 font-medium"
           >
