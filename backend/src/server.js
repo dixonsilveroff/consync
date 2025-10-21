@@ -54,9 +54,6 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Handle preflight requests
-app.options('*', cors());
-
 // health
 app.get("/", (req, res) => res.send("ConSync Backend Running ✅"));
 
