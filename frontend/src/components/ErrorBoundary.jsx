@@ -111,10 +111,10 @@ class ErrorBoundary extends Component {
                 <p className="text-sm text-gray-500 text-center">
                   If this problem persists, please contact support at{' '}
                   <a
-                    href="mailto:support@consync.com"
+                    href="mailto:dixonsilverofficial@gmail.com"
                     className="text-blue-600 hover:text-blue-700 underline"
                   >
-                    support@consync.com
+                    dixonsilverofficial@gmail.com
                   </a>
                 </p>
               </div>

@@ -1,3 +1,5 @@
+import { BarChart3 } from 'lucide-react';
+
 export default function TrendChart({ 
   data = [], 
   type = "line", 
@@ -10,7 +12,7 @@ export default function TrendChart({
     return (
       <div className="flex items-center justify-center h-full text-gray-500">
         <div className="text-center">
-          <div className="text-4xl mb-2">📊</div>
+          <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-400" />
           <div>No data available</div>
         </div>
       </div>

@@ -10,7 +10,7 @@ import ProjectSelector from "../components/ProjectSelector";
 import ActiveProjectsWidget from "../components/ActiveProjectsWidget";
 import QuickActions from "../components/QuickActions";
 import AddProjectModal from "../components/AddProjectModal";
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ListChecks, BarChart3, DollarSign, FolderKanban } from 'lucide-react';
 import { USE_MOCK, simulateDelay, simulateError } from "../config/mock";
 import { 
   mockGlobalSummary,
@@ -188,19 +188,19 @@ export default function Dashboard() {
           {
             title: "Total Projects",
             value: dashboardData.summary?.totalProjects || 0,
-            icon: "🏗️",
+            icon: FolderKanban,
             color: "blue"
           },
           {
             title: "Total Tasks",
             value: dashboardData.summary?.totalTasks || 0,
-            icon: "📋",
+            icon: ListChecks,
             color: "green"
           },
           {
             title: "Avg. Progress",
             value: `${dashboardData.summary?.avgProgress || 0}%`,
-            icon: "📊",
+            icon: BarChart3,
             color: "purple",
             isProgress: true,
             progressValue: parseFloat(dashboardData.summary?.avgProgress || 0)
@@ -208,7 +208,7 @@ export default function Dashboard() {
           {
             title: "Total Expenses",
             value: `₦${(dashboardData.summary?.totalExpenses || 0).toLocaleString()}`,
-            icon: "💰",
+            icon: DollarSign,
             color: "red",
             isExpense: true
           }
@@ -264,7 +264,7 @@ export default function Dashboard() {
             ) : (
               <div className="flex items-center justify-center h-[300px] text-gray-500">
                 <div className="text-center">
-                  <div className="text-4xl mb-2">📊</div>
+                  <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-400" />
                   <div>Select a project to view cost trends</div>
                 </div>
               </div>

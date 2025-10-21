@@ -1,8 +1,10 @@
+import { FileText, FolderKanban, ListTodo, User, DollarSign, Package } from 'lucide-react';
+
 export default function ActivityList({ activities = [] }) {
   if (!activities || activities.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <div className="text-4xl mb-2">📝</div>
+        <FileText className="w-12 h-12 mx-auto mb-2 text-gray-400" />
         <div>No recent activities</div>
       </div>
     );
@@ -12,17 +14,17 @@ export default function ActivityList({ activities = [] }) {
   const getEntityIcon = (entityType) => {
     switch (entityType?.toLowerCase()) {
       case 'project':
-        return '🏗️';
+        return FolderKanban;
       case 'task':
-        return '📋';
+        return ListTodo;
       case 'user':
-        return '👤';
+        return User;
       case 'finance':
-        return '💰';
+        return DollarSign;
       case 'resource':
-        return '📦';
+        return Package;
       default:
-        return '📝';
+        return FileText;
     }
   };
 
@@ -75,20 +77,20 @@ export default function ActivityList({ activities = [] }) {
 
   return (
     <div className="space-y-3">
-      {activities.map((activity, index) => (
-        <div 
-          key={activity._id || index}
-          className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          {/* Icon */}
-          <div className="flex-shrink-0 mt-1">
-            <span className="text-lg">
-              {getEntityIcon(activity.entityType)}
-            </span>
-          </div>
+      {activities.map((activity, index) => {
+        const Icon = getEntityIcon(activity.entityType);
+        return (
+          <div 
+            key={activity._id || index}
+            className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            {/* Icon */}
+            <div className="flex-shrink-0 mt-1">
+              <Icon className="w-5 h-5 text-gray-600" />
+            </div>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
+            {/* Content */}
+            <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2 mb-1">
               {/* Action badge */}
               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getActivityColor(activity.action)}`}>
@@ -123,7 +125,8 @@ export default function ActivityList({ activities = [] }) {
             </span>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

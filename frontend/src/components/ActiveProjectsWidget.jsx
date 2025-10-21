@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { FolderKanban } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 
 export default function ActiveProjectsWidget({ projects = [] }) {
@@ -7,7 +8,7 @@ export default function ActiveProjectsWidget({ projects = [] }) {
   if (!projects || projects.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <div className="text-4xl mb-2">🏗️</div>
+        <FolderKanban className="w-12 h-12 mx-auto mb-2 text-gray-400" />
         <div>No active projects</div>
       </div>
     );

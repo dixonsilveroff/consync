@@ -43,6 +43,10 @@ export default function DashboardCard({
     return numericValue > 1000000 ? "text-red-600" : "text-green-600";
   };
 
+  // Check if icon is a React component (Lucide icon) or a string (emoji)
+  const isLucideIcon = icon && typeof icon !== 'string';
+  const IconComponent = isLucideIcon ? icon : null;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 relative overflow-hidden transition-all duration-300 ease-in-out hover:shadow-md hover:translate-y-[-2px] group">
       {/* Gradient accent border */}
@@ -51,7 +55,13 @@ export default function DashboardCard({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center mb-2">
-            <span className="text-xl sm:text-2xl mr-2 sm:mr-3">{icon}</span>
+            {IconComponent ? (
+              <div className={`${bgClass} p-2 rounded-lg mr-2 sm:mr-3`}>
+                <IconComponent className={`w-5 h-5 sm:w-6 sm:h-6 ${textClass}`} />
+              </div>
+            ) : (
+              <span className="text-xl sm:text-2xl mr-2 sm:mr-3">{icon}</span>
+            )}
             <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}</h3>
           </div>
           
