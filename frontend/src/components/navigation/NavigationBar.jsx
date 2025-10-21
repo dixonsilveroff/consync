@@ -25,8 +25,8 @@ const NavigationBar = () => {
       { name: 'Projects', path: '/projects', roles: ['admin', 'engineer', 'client', 'contractor'] },
       { name: 'Tasks', path: '/tasks', roles: ['admin', 'engineer', 'contractor'] },
       { name: 'Resources', path: '/resources', roles: ['admin', 'engineer'] },
-      { name: 'Reports', path: '/reports', roles: ['admin', 'engineer', 'client'] },
-      { name: 'Admin', path: '/admin', roles: ['admin'] },
+      // { name: 'Reports', path: '/reports', roles: ['admin', 'engineer', 'client'] },
+      // { name: 'Admin', path: '/admin', roles: ['admin'] },
     ];
 
     const guestNavItems = [
