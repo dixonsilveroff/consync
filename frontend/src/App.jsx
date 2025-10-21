@@ -13,6 +13,7 @@ import Unauthorized from "./pages/Unauthorized";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetails from "./pages/ProjectDetails";
 import TasksPage from "./pages/TasksPage";
+import ResourcesPage from "./pages/ResourcesPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -68,6 +69,12 @@ const AppContent = () => {
             <Route path="/tasks" element={
               <ProtectedRoute>
                 <TasksPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/resources" element={
+              <ProtectedRoute roles={["admin", "engineer"]}>
+                <ResourcesPage />
               </ProtectedRoute>
             } />
           </Routes>
