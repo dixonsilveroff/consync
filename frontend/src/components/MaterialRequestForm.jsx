@@ -190,7 +190,7 @@ const MaterialRequestForm = ({ onClose, onSuccess, projectId = null }) => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm text-gray-600 mb-1">Estimated Cost ($)</label>
+                    <label className="block text-sm text-gray-600 mb-1">Estimated Cost (₦)</label>
                     <input
                       type="number"
                       value={item.estimatedCost}

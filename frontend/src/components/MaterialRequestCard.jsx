@@ -135,7 +135,7 @@ const MaterialRequestCard = ({ request, onUpdate, vendors = [] }) => {
                   </span>
                   {item.estimatedCost > 0 && (
                     <span className="text-green-600 font-medium">
-                      ${item.estimatedCost.toFixed(2)}
+                      ₦{item.estimatedCost.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
                 </div>
@@ -145,7 +145,7 @@ const MaterialRequestCard = ({ request, onUpdate, vendors = [] }) => {
           {calculateTotalCost() > 0 && (
             <div className="mt-2 flex justify-end">
               <span className="text-sm font-semibold text-gray-700">
-                Total Estimated: ${calculateTotalCost().toFixed(2)}
+                Total Estimated: ₦{calculateTotalCost().toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           )}

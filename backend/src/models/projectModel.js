@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const budgetSchema = new Schema({
   amount: { type: Number, default: 0 },
-  currency: { type: String, default: 'USD' },
+  currency: { type: String, default: 'NGN' },
 }, { _id: false });
 
 const documentSchema = new Schema({

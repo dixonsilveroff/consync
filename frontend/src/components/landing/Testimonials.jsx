@@ -16,7 +16,7 @@ const testimonials = [
     avatar: "https://i.pravatar.cc/150?img=3",
   },
   {
-    quote: "The cost tracking features alone have saved us over $500K in the first year. ConSync is an essential tool for modern construction.",
+    quote: "The cost tracking features alone have saved us over ₦200M in the first year. ConSync is an essential tool for modern construction.",
     author: "Jennifer Rodriguez",
     role: "Operations Director",
     company: "Metro Builders Inc",

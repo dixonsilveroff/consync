@@ -88,7 +88,7 @@ export default function Hero() {
                   <div className="text-gray-600 font-medium">Real-time Updates</div>
                 </div>
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">$2M+</div>
+                  <div className="text-4xl font-bold text-blue-600 mb-2">₦800M+</div>
                   <div className="text-gray-600 font-medium">Cost Savings</div>
                 </div>
               </div>
