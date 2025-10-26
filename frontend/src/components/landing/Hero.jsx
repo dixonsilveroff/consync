@@ -76,11 +76,11 @@ export default function Hero() {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-6">
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
+                  <div className="text-4xl font-bold text-blue-600 mb-2">50+</div>
                   <div className="text-gray-600 font-medium">Projects Managed</div>
                 </div>
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
+                  <div className="text-4xl font-bold text-blue-600 mb-2">99%</div>
                   <div className="text-gray-600 font-medium">Client Satisfaction</div>
                 </div>
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
@@ -88,7 +88,7 @@ export default function Hero() {
                   <div className="text-gray-600 font-medium">Real-time Updates</div>
                 </div>
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">₦800M+</div>
+                  <div className="text-4xl font-bold text-blue-600 mb-2">₦3.5B</div>
                   <div className="text-gray-600 font-medium">Cost Savings</div>
                 </div>
               </div>
