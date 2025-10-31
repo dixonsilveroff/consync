@@ -4,12 +4,37 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Brand Colors from ConSync Brand Guide
         primary: {
-          DEFAULT: '#2563EB',
-          light: '#3C83F5',
-          lighter: '#B5D0FB',
+          DEFAULT: '#1E4E8C', // Blueprint Blue
+          light: '#3C6BA8',
+          lighter: '#5A88C4',
           lightest: '#E6EFFD',
           dark: '#042861',
+        },
+        steel: {
+          DEFAULT: '#2C2F33', // Steel Grey
+          light: '#4A4D51',
+          dark: '#1A1C1E', // Graphite Black
+        },
+        concrete: {
+          DEFAULT: '#F5F6F7', // Concrete White
+          dark: '#E8EAED',
+        },
+        growth: {
+          DEFAULT: '#4CAF50', // Growth Green
+          light: '#66BB6A',
+          dark: '#388E3C',
+        },
+        signal: {
+          DEFAULT: '#F9C74F', // Signal Yellow
+          light: '#FFD666',
+          dark: '#F4A10C',
+        },
+        cloud: {
+          DEFAULT: '#D1D5DB', // Cloud Grey
+          light: '#E5E7EB',
+          dark: '#9CA3AF',
         },
         accent: {
           indigo: '#6366F1',
@@ -17,7 +42,8 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        display: ['Poppins', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.6s ease-in-out',
