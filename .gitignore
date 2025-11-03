@@ -3,3 +3,5 @@ dist/
 .env
 DEPLOYMENT_CHECKLIST.md
 CHANGELOG.md
+assets/
+.gitignore
