@@ -7,10 +7,15 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   role: { type: String, 
     enum: ["admin", "engineer", "client", "contractor"],
-    default: "engineer" },
+    default: "contractor" }, // Changed to contractor for Contractor-First Architecture
   phone: { type: String },
   bio: { type: String, maxlength: 500 },
   refreshTokenHash: { type: String, default: null },
+  // Contractor-First Architecture fields
+  organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', default: null },
+  verified: { type: Boolean, default: true }, // default true for backward compatibility
+  invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  onboardingCompleted: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // static helper to hash password

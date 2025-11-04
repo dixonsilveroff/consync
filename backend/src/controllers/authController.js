@@ -16,8 +16,8 @@ async function register(req, res, next) {
     if (existing) return res.status(409).json({ message: "Email already exists" });
 
     const passwordHash = await User.hashPassword(password);
-    // Set new users as admin by default
-    const user = new User({ name, email, passwordHash, phone, role: 'admin' });
+    // Role defaults to 'contractor' from schema (Contractor-First Architecture)
+    const user = new User({ name, email, passwordHash, phone });
     await user.save();
 
     // generate tokens

@@ -14,7 +14,7 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     company: "",
-    role: "admin",
+    // Role removed - defaults to 'contractor' on backend (Contractor-First Architecture)
   });
   const [errors, setErrors] = useState({});
 
@@ -79,7 +79,7 @@ export default function Register() {
         email: formData.email,
         password: formData.password,
         company: formData.company,
-        role: formData.role
+        // role removed - backend defaults to 'contractor'
       };
       
       await register(registerData);
