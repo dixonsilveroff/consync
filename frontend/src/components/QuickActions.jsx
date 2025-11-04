@@ -1,39 +1,59 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, FolderOpen, ListTodo, BarChart3 } from 'lucide-react';
+import { Plus, FolderOpen, ListTodo, BarChart3, UserPlus } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function QuickActions({ onNewProject }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const actions = [
+  const baseActions = [
     {
       label: 'New Project',
       icon: Plus,
       color: 'blue',
-      onClick: onNewProject
+      onClick: onNewProject,
+      roles: ['contractor'] // Only contractors can create projects
+    },
+    {
+      label: 'Invite Team',
+      icon: UserPlus,
+      color: 'indigo',
+      onClick: () => navigate('/invite-team'),
+      roles: ['contractor'] // Only contractors can invite
     },
     {
       label: 'View Projects',
       icon: FolderOpen,
       color: 'green',
-      onClick: () => navigate('/projects')
+      onClick: () => navigate('/projects'),
+      roles: null // Available to all
     },
     {
       label: 'View Tasks',
       icon: ListTodo,
       color: 'purple',
-      onClick: () => navigate('/tasks')
+      onClick: () => navigate('/tasks'),
+      roles: null // Available to all
     },
     {
       label: 'Analytics',
       icon: BarChart3,
       color: 'orange',
-      onClick: () => navigate('/analytics')
+      onClick: () => navigate('/analytics'),
+      roles: null // Available to all
     }
   ];
+
+  // Filter actions based on user role
+  const actions = baseActions.filter(action => {
+    if (!action.roles) return true; // Available to all
+    return action.roles.includes(user?.role);
+  });
 
   const getColorClasses = (color) => {
     const colors = {
       blue: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
+      indigo: 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100',
       green: 'bg-green-50 text-green-600 hover:bg-green-100',
       purple: 'bg-purple-50 text-purple-600 hover:bg-purple-100',
       orange: 'bg-orange-50 text-orange-600 hover:bg-orange-100'

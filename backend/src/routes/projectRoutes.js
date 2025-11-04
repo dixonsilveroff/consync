@@ -9,8 +9,8 @@ const router = express.Router();
 // Public test route
 router.get('/test', projectController.testRoute);
 
-// Create project - only admin & engineer
-router.post('/', authMiddleware, authorizeRoles('admin', 'engineer'), validate(createProjectSchema), projectController.createProject);
+// Create project - contractor only (Contractor-First Architecture)
+router.post('/', authMiddleware, authorizeRoles('contractor'), validate(createProjectSchema), projectController.createProject);
 
 // List projects - protected
 router.get('/', authMiddleware, projectController.getProjects);
