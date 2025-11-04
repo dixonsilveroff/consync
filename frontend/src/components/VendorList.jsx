@@ -11,7 +11,7 @@ const VendorList = ({ vendors, onUpdate }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState('all'); // 'all', 'active', 'inactive'
 
-  const isAdmin = user?.role === 'admin';
+  const isContractor = user?.role === 'contractor';
 
   const handleDelete = async (vendorId, vendorName) => {
     if (!window.confirm(`Are you sure you want to delete vendor "${vendorName}"?`)) return;
@@ -111,7 +111,7 @@ const VendorList = ({ vendors, onUpdate }) => {
           )}
 
           {/* Actions */}
-          {isAdmin && (
+          {isContractor && (
             <div className="flex gap-2 pt-4 border-t border-gray-200">
               <button
                 onClick={() => setEditingVendor(vendor)}
@@ -152,7 +152,7 @@ const VendorList = ({ vendors, onUpdate }) => {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
-            {isAdmin && (
+            {isContractor && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -190,7 +190,7 @@ const VendorList = ({ vendors, onUpdate }) => {
                   {vendor.active ? 'Active' : 'Inactive'}
                 </span>
               </td>
-              {isAdmin && (
+              {isContractor && (
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => setEditingVendor(vendor)}
@@ -264,7 +264,7 @@ const VendorList = ({ vendors, onUpdate }) => {
           </div>
 
           {/* Add Button */}
-          {isAdmin && (
+          {isContractor && (
             <button
               onClick={() => setShowAddForm(true)}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -279,7 +279,7 @@ const VendorList = ({ vendors, onUpdate }) => {
       {filteredVendors.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <p className="text-gray-500">No vendors found</p>
-          {isAdmin && searchTerm === '' && (
+          {isContractor && searchTerm === '' && (
             <button
               onClick={() => setShowAddForm(true)}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"

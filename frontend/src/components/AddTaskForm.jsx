@@ -14,7 +14,7 @@ export default function AddTaskForm({ projectId, onAdd }) {
   const [error, setError] = useState('');
 
   // Check if user has permission to add tasks
-  const canAddTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
+  const canAddTasks = ['contractor', 'engineer'].includes(user?.role);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -16,8 +16,8 @@ const ResourcesPage = () => {
   const [projectFilter, setProjectFilter] = useState('all');
   const [projects, setProjects] = useState([]);
 
-  const isAdmin = user?.role === 'admin';
-  const canCreateRequest = isAdmin || user?.role === 'engineer';
+  const isContractor = user?.role === 'contractor';
+  const canCreateRequest = isContractor || user?.role === 'engineer';
 
   useEffect(() => {
     fetchData();

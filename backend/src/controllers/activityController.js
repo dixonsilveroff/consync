@@ -23,7 +23,7 @@ export const getActivities = async (req, res, next) => {
         { 'project.assignedUsers': req.user._id }
       ];
     }
-    // Admins can see all activities (no additional filter)
+    // Contractors can see all activities (no additional filter)
 
     // Apply filters if provided
     if (entityType) query.entityType = entityType;
@@ -95,7 +95,7 @@ export const getActivityById = async (req, res, next) => {
 };
 
 /**
- * Delete an activity (admin only)
+ * Delete an activity (contractor only)
  */
 export const deleteActivity = async (req, res, next) => {
   try {

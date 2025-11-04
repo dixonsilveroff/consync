@@ -16,11 +16,11 @@ const router = express.Router();
 router.get('/test', testRoute);
 
 // Cost line CRUD operations
-router.post('/', protect, authorizeRoles('admin', 'engineer'), createCostLine);
+router.post('/', protect, authorizeRoles('contractor', 'engineer'), createCostLine);
 router.get('/', protect, getCostLines);
 router.get('/project/:projectId', protect, getCostLinesByProject);
-router.put('/:id', protect, authorizeRoles('admin', 'engineer'), updateCostLine);
-router.delete('/:id', protect, authorizeRoles('admin'), deleteCostLine);
+router.put('/:id', protect, authorizeRoles('contractor', 'engineer'), updateCostLine);
+router.delete('/:id', protect, authorizeRoles('contractor'), deleteCostLine);
 
 // Project cost summary
 router.get('/summary/:id', protect, getProjectCostSummary);

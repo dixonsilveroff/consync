@@ -18,14 +18,13 @@ router.get('/', authMiddleware, projectController.getProjects);
 // Get single project
 router.get('/:id', authMiddleware, projectController.getProjectById);
 
-// Update project - admin/engineer/owner (authorizeRoles middleware checks role names only;
-// owner access is enforced in controller)
-router.put('/:id', authMiddleware, authorizeRoles('admin', 'engineer'), validate(updateProjectSchema), projectController.updateProject);
+// Update project - contractor/engineer/owner (owner access is enforced in controller)
+router.put('/:id', authMiddleware, authorizeRoles('contractor', 'engineer'), validate(updateProjectSchema), projectController.updateProject);
 
-// Archive/unarchive project - admin or owner (owner enforced in controller)
-router.patch('/:id/archive', authMiddleware, authorizeRoles('admin', 'engineer'), projectController.archiveProject);
+// Archive/unarchive project - contractor or owner (owner enforced in controller)
+router.patch('/:id/archive', authMiddleware, authorizeRoles('contractor', 'engineer'), projectController.archiveProject);
 
-// Delete project - admin only
-router.delete('/:id', authMiddleware, authorizeRoles('admin'), projectController.deleteProject);
+// Delete project - contractor only
+router.delete('/:id', authMiddleware, authorizeRoles('contractor'), projectController.deleteProject);
 
 export default router;

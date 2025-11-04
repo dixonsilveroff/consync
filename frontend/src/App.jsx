@@ -50,7 +50,7 @@ const AppContent = () => {
             } />
 
             <Route path="/admin" element={
-              <ProtectedRoute roles={["admin"]}>
+              <ProtectedRoute roles={["contractor"]}>
                 <AdminPage />
               </ProtectedRoute>
             } />
@@ -86,7 +86,7 @@ const AppContent = () => {
             } />
 
             <Route path="/resources" element={
-              <ProtectedRoute roles={["admin", "engineer"]}>
+              <ProtectedRoute roles={["contractor", "engineer"]}>
                 <ResourcesPage />
               </ProtectedRoute>
             } />

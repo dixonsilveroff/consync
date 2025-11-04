@@ -17,7 +17,7 @@ export const createNotification = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, data: notification });
 });
 
-// Get all notifications (admin view)
+// Get all notifications (contractor view)
 export const getAllNotifications = asyncHandler(async (req, res) => {
   const notifications = await Notification.find()
     .populate('user relatedProject relatedTask')

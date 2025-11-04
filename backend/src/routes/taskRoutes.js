@@ -20,16 +20,16 @@ router.get('/test', testRoute);
 // Protected routes
 router
     .route('/')
-    .post(protect, authorizeRoles('admin', 'engineer'), createTask)
+    .post(protect, authorizeRoles('contractor', 'engineer'), createTask)
     .get(protect, getTasks);
 
 router
     .route('/:id')
     .get(protect, getTaskById)
     .put(protect, updateTask) // Let controller handle authorization
-    .delete(protect, authorizeRoles('admin'), deleteTask);
+    .delete(protect, authorizeRoles('contractor'), deleteTask);
 
-router.patch('/bulk-status', protect, authorizeRoles('admin', 'engineer'), bulkUpdateStatus);
-router.patch('/:id/archive', protect, authorizeRoles('admin', 'engineer'), archiveTask);
+router.patch('/bulk-status', protect, authorizeRoles('contractor', 'engineer'), bulkUpdateStatus);
+router.patch('/:id/archive', protect, authorizeRoles('contractor', 'engineer'), archiveTask);
 
 export default router;

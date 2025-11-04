@@ -147,7 +147,7 @@ export const getTasks = async (req, res, next) => {
                 { project: { $in: req.user.projects } }
             ];
         }
-        // Admins can see all tasks (no additional filter)
+        // Contractors can see all tasks (no additional filter)
 
         // Text search
         if (search) {
@@ -287,14 +287,14 @@ export const updateTask = async (req, res, next) => {
         // Store old status for comparison
         const oldStatus = task.status;
 
-        // Check authorization - Admins can update any task
-        // Others can only update tasks they created, are assigned to, or if they're an engineer/contractor on the project
-        if (req.user.role !== 'admin') {
+        // Check authorization - Contractors can update any task
+        // Others can only update tasks they created, are assigned to, or if they're an engineer on the project
+        if (req.user.role !== 'contractor') {
             const isCreator = task.createdBy.toString() === req.user._id.toString();
             const isAssignee = task.assignedTo?.toString() === req.user._id.toString();
             
-            // Engineers and contractors can update tasks in projects they're part of
-            const isProjectMember = ['engineer', 'contractor'].includes(req.user.role) && 
+            // Engineers can update tasks in projects they're part of
+            const isProjectMember = req.user.role === 'engineer' && 
                                    req.user.projects?.includes(task.project.toString());
             
             const isAuthorized = isCreator || isAssignee || isProjectMember;
@@ -450,7 +450,7 @@ export const bulkUpdateStatus = async (req, res, next) => {
         }
 
         // Check authorization for each task
-        if (req.user.role !== 'admin') {
+        if (req.user.role !== 'contractor') {
             const unauthorized = tasks.some(task => {
                 const isAuthorized = 
                     task.createdBy.toString() === req.user._id.toString() ||
@@ -510,7 +510,7 @@ export const archiveTask = async (req, res, next) => {
         }
 
         // Check authorization
-        if (req.user.role !== 'admin') {
+        if (req.user.role !== 'contractor') {
             const project = await Project.findById(task.project);
             const isAuthorized = 
                 task.createdBy.toString() === req.user._id.toString() ||
@@ -537,7 +537,7 @@ export const archiveTask = async (req, res, next) => {
     }
 };
 
-// Delete task (admin only)
+// Delete task (contractor only)
 export const deleteTask = async (req, res, next) => {
     try {
         const { id } = req.params;

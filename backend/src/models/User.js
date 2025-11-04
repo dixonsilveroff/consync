@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
   role: { type: String, 
-    enum: ["admin", "engineer", "client", "contractor"],
-    default: "contractor" }, // Changed to contractor for Contractor-First Architecture
+    enum: ["engineer", "client", "contractor", "supplier"],
+    default: "contractor" }, // Contractor is the primary admin role
   phone: { type: String },
   bio: { type: String, maxlength: 500 },
   refreshTokenHash: { type: String, default: null },

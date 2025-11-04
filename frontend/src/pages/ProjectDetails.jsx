@@ -18,7 +18,7 @@ export default function ProjectDetails() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [taskRefreshTrigger, setTaskRefreshTrigger] = useState(0);
   
-  const canManageTasks = ['admin', 'engineer', 'contractor'].includes(user?.role);
+  const canManageTasks = ['contractor', 'engineer'].includes(user?.role);
 
   const fetchProject = useCallback(async () => {
     try {

@@ -12,11 +12,11 @@ import {
 
 const router = express.Router();
 
-// Create notification (admin only)
-router.post('/', protect, authorizeRoles(['admin']), createNotification);
+// Create notification (contractor only)
+router.post('/', protect, authorizeRoles(['contractor']), createNotification);
 
-// Get all notifications (admin only)
-router.get('/', protect, authorizeRoles(['admin']), getAllNotifications);
+// Get all notifications (contractor only)
+router.get('/', protect, authorizeRoles(['contractor']), getAllNotifications);
 
 // Get user's notifications
 router.get('/me', protect, getUserNotifications);

@@ -39,7 +39,7 @@ export default function ProjectsPage() {
     <div className="p-3 sm:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
         <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Projects</h1>
-        {!authLoading && (user?.role === 'admin' || user?.role === 'engineer') && (
+        {!authLoading && (user?.role === 'contractor' || user?.role === 'engineer') && (
           <button
             onClick={() => setOpenModal(true)}
             className="flex items-center bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full sm:w-auto justify-center"

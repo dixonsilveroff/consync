@@ -12,10 +12,10 @@ const MaterialRequestCard = ({ request, onUpdate, vendors = [] }) => {
   const [rejectReason, setRejectReason] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const isAdmin = user?.role === 'admin';
-  const canApprove = isAdmin && request.status === 'pending';
-  const canAssignVendor = isAdmin && request.status === 'approved';
-  const canMarkDelivered = (isAdmin || user?.role === 'engineer') && request.status === 'assigned';
+  const isContractor = user?.role === 'contractor';
+  const canApprove = isContractor && request.status === 'pending';
+  const canAssignVendor = isContractor && request.status === 'approved';
+  const canMarkDelivered = (isContractor || user?.role === 'engineer') && request.status === 'assigned';
 
   const getStatusColor = (status) => {
     const colors = {

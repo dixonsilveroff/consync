@@ -13,11 +13,11 @@ export const testRoute = (req, res) => {
 
 /**
  * Create a new project
- * Roles allowed: admin, engineer
+ * Roles allowed: contractor, engineer
  */
 export const createProject = async (req, res, next) => {
   try {
-    const allowedRoles = ['admin', 'engineer'];
+    const allowedRoles = ['contractor', 'engineer'];
     if (!req.user) return res.status(401).json({ success: false, message: 'Not authenticated' });
     if (!allowedRoles.includes(req.user.role)) return res.status(403).json({ success: false, message: 'Forbidden' });
 
@@ -98,14 +98,14 @@ export const getProjects = async (req, res, next) => {
       console.warn('User role is undefined, applying restrictive filter for user:', userId);
     }
 
-    if (role === 'admin' || role === 'engineer') {
+    if (role === 'contractor' || role === 'engineer') {
       // no extra constraints - can see all projects
-      console.log('Admin/Engineer access - no additional filters');
+      console.log('Contractor/Engineer access - no additional filters');
     } else if (role === 'client') {
       filter.client = userId; // MongoDB will handle the type conversion
       console.log('Client access - filtering by client:', userId);
     } else {
-      // contractor/other/undefined: assigned, owner, or createdBy only
+      // supplier/other/undefined: assigned, owner, or createdBy only
       filter.$or = [
         { assignedUsers: new mongoose.Types.ObjectId(userId) },
         { owner: new mongoose.Types.ObjectId(userId) },
@@ -157,12 +157,12 @@ export const getProjectById = async (req, res, next) => {
     const role = req.user && req.user.role;
     const userId = req.user && (req.user._id || req.user.id);
 
-    const isAdmin = role === 'admin';
+    const isContractor = role === 'contractor';
     const isClient = project.client && project.client._id && project.client._id.toString() === userId;
     const isOwner = project.owner && project.owner._id && project.owner._id.toString() === userId;
     const isAssigned = project.assignedUsers && project.assignedUsers.some(u => u._id && u._id.toString() === userId);
 
-    if (!(isAdmin || isClient || isOwner || isAssigned)) {
+    if (!(isContractor || isClient || isOwner || isAssigned)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
@@ -186,11 +186,11 @@ export const updateProject = async (req, res, next) => {
     const userId = req.user && (req.user._id || req.user.id);
     const role = req.user && req.user.role;
 
-    const isAdmin = role === 'admin';
+    const isContractor = role === 'contractor';
     const isOwner = project.owner && project.owner.toString() === userId;
     const isAssigned = project.assignedUsers && project.assignedUsers.map(String).includes(String(userId));
 
-    if (!(isAdmin || isOwner || isAssigned)) {
+    if (!(isContractor || isOwner || isAssigned)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
@@ -226,10 +226,10 @@ export const archiveProject = async (req, res, next) => {
     const userId = req.user && (req.user._id || req.user.id);
     const role = req.user && req.user.role;
 
-    const isAdmin = role === 'admin';
+    const isContractor = role === 'contractor';
     const isOwner = project.owner && project.owner.toString() === userId;
 
-    if (!(isAdmin || isOwner)) return res.status(403).json({ success: false, message: 'Forbidden' });
+    if (!(isContractor || isOwner)) return res.status(403).json({ success: false, message: 'Forbidden' });
 
     project.archived = !project.archived;
     project.updatedBy = userId;
@@ -242,14 +242,14 @@ export const archiveProject = async (req, res, next) => {
 };
 
 /**
- * Hard delete a project - admin only
+ * Hard delete a project - contractor only
  */
 export const deleteProject = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ success: false, message: 'Invalid project id' });
 
-    if (!req.user || req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Forbidden' });
+    if (!req.user || req.user.role !== 'contractor') return res.status(403).json({ success: false, message: 'Forbidden' });
 
     const result = await Project.deleteOne({ _id: id });
     

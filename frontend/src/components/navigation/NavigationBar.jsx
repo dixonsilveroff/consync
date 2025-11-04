@@ -21,12 +21,12 @@ const NavigationBar = () => {
 
   const getNavigationItems = () => {
     const authNavItems = [
-      { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'engineer', 'client', 'contractor'] },
-      { name: 'Projects', path: '/projects', roles: ['admin', 'engineer', 'client', 'contractor'] },
-      { name: 'Tasks', path: '/tasks', roles: ['admin', 'engineer', 'contractor'] },
-      { name: 'Resources', path: '/resources', roles: ['admin', 'engineer'] },
-      // { name: 'Reports', path: '/reports', roles: ['admin', 'engineer', 'client'] },
-      // { name: 'Admin', path: '/admin', roles: ['admin'] },
+      { name: 'Dashboard', path: '/dashboard', roles: ['contractor', 'engineer', 'client', 'supplier'] },
+      { name: 'Projects', path: '/projects', roles: ['contractor', 'engineer', 'client', 'supplier'] },
+      { name: 'Tasks', path: '/tasks', roles: ['contractor', 'engineer'] },
+      { name: 'Resources', path: '/resources', roles: ['contractor', 'engineer'] },
+      // { name: 'Reports', path: '/reports', roles: ['contractor', 'engineer', 'client'] },
+      // { name: 'Admin', path: '/admin', roles: ['contractor'] },
     ];
 
     const guestNavItems = [

@@ -16,6 +16,6 @@ router.get('/test', testRoute);
 // Protected routes
 router.get('/', protect, getActivities);
 router.get('/:id', protect, getActivityById);
-router.delete('/:id', protect, authorize('admin'), deleteActivity);
+router.delete('/:id', protect, authorize('contractor'), deleteActivity);
 
 export default router;

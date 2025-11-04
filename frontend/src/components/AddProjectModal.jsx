@@ -36,9 +36,9 @@ export default function AddProjectModal({ close, refresh, project = null }) {
       // Refresh user profile first to ensure we have latest permissions
       await fetchProfile();
 
-      // Validate user role after fetching fresh profile
-      if (!user?.role || !['admin', 'engineer'].includes(user.role)) {
-        setError('Insufficient permissions. Only administrators and engineers can manage projects.');
+      // Validate user role after fetching fresh profile - contractor is the admin role
+      if (!user?.role || !['contractor', 'engineer'].includes(user.role)) {
+        setError('Insufficient permissions. Only contractors and engineers can manage projects.');
         setLoading(false);
         return;
       }

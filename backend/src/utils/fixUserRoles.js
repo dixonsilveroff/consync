@@ -49,11 +49,11 @@ async function fixUserRoles() {
     // Update each user to have a default role
     let updated = 0;
     for (const user of usersWithoutRole) {
-      // Set to 'admin' by default - you can change this logic
-      user.role = 'admin';
+      // Set to 'contractor' by default (contractor is the admin role)
+      user.role = 'contractor';
       await user.save();
       updated++;
-      console.log(`Updated user ${user.email} with role: admin`);
+      console.log(`Updated user ${user.email} with role: contractor`);
     }
 
     console.log(`\nSuccessfully updated ${updated} users`);

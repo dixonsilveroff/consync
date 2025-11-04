@@ -11,9 +11,9 @@ router.get("/profile", authMiddleware, userController.getProfile);
 // Update current user's profile
 router.put("/profile", authMiddleware, userController.updateProfile);
 
-// Example admin-only route
-router.get("/admin/data", authMiddleware, authorizeRoles("admin"), (req, res) => {
-  res.json({ secret: "admin only data" });
+// Example contractor-only route (contractor is the admin role)
+router.get("/admin/data", authMiddleware, authorizeRoles("contractor"), (req, res) => {
+  res.json({ secret: "contractor only data" });
 });
 
 // Change password (requires current password)
