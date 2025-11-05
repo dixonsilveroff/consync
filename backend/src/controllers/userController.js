@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Organization from "../models/organizationModel.js";
 import bcrypt from "bcryptjs";
 
 const COOKIE_NAME = "consync_rt";
@@ -81,4 +82,96 @@ export async function changePassword(req, res, next) {
     next(err);
   }
 }
-export default { getProfile, updateProfile, changePassword };
+
+// POST /api/users/complete-onboarding
+export async function completeOnboarding(req, res, next) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+    const { profile, organization } = req.body;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Only contractors should use onboarding
+    if (user.role !== 'contractor') {
+      return res.status(403).json({ message: "Onboarding is only for contractors" });
+    }
+
+    // Check if already completed
+    if (user.onboardingCompleted) {
+      return res.status(400).json({ message: "Onboarding already completed" });
+    }
+
+    // Update profile fields if provided
+    if (profile) {
+      if (profile.phone) user.phone = profile.phone;
+      if (profile.bio) {
+        if (profile.bio.length > 500) {
+          return res.status(400).json({ message: "Bio must be 500 characters or less" });
+        }
+        user.bio = profile.bio;
+      }
+    }
+
+    // Create or update organization
+    if (organization) {
+      const { name, industry, location, phone, website } = organization;
+
+      // Validate required organization fields
+      if (!name || !industry || !location) {
+        return res.status(400).json({ 
+          message: "Organization name, industry, and location are required" 
+        });
+      }
+
+      // Check if user already has an organization
+      if (user.organization) {
+        // Update existing organization
+        const org = await Organization.findById(user.organization);
+        if (org) {
+          org.name = name;
+          org.industry = industry;
+          org.location = location;
+          if (phone) org.phone = phone;
+          if (website) org.website = website;
+          await org.save();
+        }
+      } else {
+        // Create new organization
+        const newOrg = await Organization.create({
+          name,
+          industry,
+          location,
+          phone: phone || undefined,
+          website: website || undefined,
+          owner: userId,
+          members: [userId],
+          active: true,
+        });
+
+        user.organization = newOrg._id;
+      }
+    }
+
+    // Mark onboarding as completed
+    user.onboardingCompleted = true;
+    await user.save();
+
+    // Return updated user without sensitive fields
+    const updatedUser = await User.findById(userId)
+      .select("-passwordHash -refreshTokenHash")
+      .populate('organization');
+
+    return res.json({ 
+      message: "Onboarding completed successfully", 
+      user: updatedUser 
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export default { getProfile, updateProfile, changePassword, completeOnboarding };

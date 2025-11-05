@@ -19,4 +19,7 @@ router.get("/admin/data", authMiddleware, authorizeRoles("contractor"), (req, re
 // Change password (requires current password)
 router.post("/change-password", authMiddleware, userController.changePassword);
 
+// Complete onboarding (contractors only)
+router.post("/complete-onboarding", authMiddleware, userController.completeOnboarding);
+
 export default router;

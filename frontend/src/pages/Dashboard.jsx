@@ -10,6 +10,7 @@ import ProjectSelector from "../components/ProjectSelector";
 import ActiveProjectsWidget from "../components/ActiveProjectsWidget";
 import QuickActions from "../components/QuickActions";
 import AddProjectModal from "../components/AddProjectModal";
+import OnboardingModal from "../components/OnboardingModal";
 import { RefreshCw, ListChecks, BarChart3, DollarSign, FolderKanban } from 'lucide-react';
 import { USE_MOCK, simulateDelay, simulateError } from "../config/mock";
 import { 
@@ -21,12 +22,13 @@ import {
 } from "../data/mockData";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, fetchProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [dashboardData, setDashboardData] = useState({
     summary: null,
@@ -119,6 +121,32 @@ export default function Dashboard() {
     if (selectedProjectId) {
       handleProjectSelect(selectedProjectId);
     }
+  };
+
+  // Check if user needs onboarding
+  useEffect(() => {
+    if (user && user.role === 'contractor' && !user.onboardingCompleted) {
+      setShowOnboarding(true);
+    }
+  }, [user]);
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = async () => {
+    setShowOnboarding(false);
+    // Refresh user data to get updated onboardingCompleted status
+    try {
+      await fetchProfile();
+    } catch (err) {
+      console.error('Failed to refresh user profile:', err);
+    }
+    // Optionally show success message
+    console.log('Onboarding completed!');
+  };
+
+  // Handle onboarding skip
+  const handleOnboardingSkip = () => {
+    setShowOnboarding(false);
+    // User can still complete onboarding later from settings
   };
 
   if (loading) {
@@ -300,6 +328,15 @@ export default function Dashboard() {
             fetchDashboardData(true);
             setShowAddProjectModal(false);
           }}
+        />
+      )}
+
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <OnboardingModal
+          user={user}
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
         />
       )}
 
