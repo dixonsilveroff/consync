@@ -3,7 +3,10 @@ import mongoose from 'mongoose';
 import CostLine from '../models/costLineModel.js';
 import Project from '../models/projectModel.js';
 import Notification from '../models/notificationModel.js';
+import User from '../models/User.js';
 import logActivity from '../middleware/activityLogger.js';
+import { sendEmail } from '../services/emailService.js';
+import { budgetAlertEmail } from '../templates/emailTemplates.js';
 
 // ✅ TEST ROUTE
 export const testRoute = (req, res) => {
@@ -32,7 +35,7 @@ export const createCostLine = asyncHandler(async (req, res) => {
 
   // Check if it's an expense and if there's a budget overrun
   if (type === 'expense') {
-    const projectDetails = await Project.findById(project);
+    const projectDetails = await Project.findById(project).populate('manager', 'name email');
     if (projectDetails && projectDetails.budget) {
       const totalExpenses = await CostLine.aggregate([
         { $match: { project: new mongoose.Types.ObjectId(project), type: 'expense' } },
@@ -41,13 +44,38 @@ export const createCostLine = asyncHandler(async (req, res) => {
       
       const totalSpent = totalExpenses[0]?.total || 0;
       if (totalSpent > projectDetails.budget) {
+        const overage = totalSpent - projectDetails.budget;
+        const percentOver = ((overage / projectDetails.budget) * 100).toFixed(1);
+
+        // Create in-app notification
         await Notification.create({
           title: 'Budget Overrun Alert',
-          message: `Project ${projectDetails.title} has exceeded its budget by ${(totalSpent - projectDetails.budget).toFixed(2)}`,
+          message: `Project ${projectDetails.title} has exceeded its budget by $${overage.toFixed(2)} (${percentOver}%)`,
           type: 'warning',
           relatedProject: project,
-          user: projectDetails.owner // Notify project owner
+          user: projectDetails.manager._id
         });
+
+        // Send email notification to project manager (contractor)
+        if (projectDetails.manager?.email) {
+          const emailTemplate = budgetAlertEmail(
+            projectDetails.manager.name,
+            projectDetails.title,
+            projectDetails.budget,
+            totalSpent,
+            overage,
+            percentOver,
+            description || category || 'New expense',
+            `${process.env.FRONTEND_URL}/projects/${project}`
+          );
+          
+          await sendEmail(
+            projectDetails.manager.email,
+            emailTemplate.subject,
+            emailTemplate.html,
+            emailTemplate.text
+          );
+        }
       }
     }
   }
@@ -150,7 +178,7 @@ export const updateCostLine = asyncHandler(async (req, res) => {
 
   // Check for budget overrun if expense amount changed
   if (type === 'expense' && amount !== undefined) {
-    const projectDetails = await Project.findById(costLine.project);
+    const projectDetails = await Project.findById(costLine.project).populate('manager', 'name email');
     if (projectDetails && projectDetails.budget) {
       const totalExpenses = await CostLine.aggregate([
         { $match: { project: new mongoose.Types.ObjectId(costLine.project), type: 'expense' } },
@@ -159,13 +187,38 @@ export const updateCostLine = asyncHandler(async (req, res) => {
       
       const totalSpent = totalExpenses[0]?.total || 0;
       if (totalSpent > projectDetails.budget) {
+        const overage = totalSpent - projectDetails.budget;
+        const percentOver = ((overage / projectDetails.budget) * 100).toFixed(1);
+
+        // Create in-app notification
         await Notification.create({
           title: 'Budget Overrun Alert',
-          message: `Project ${projectDetails.title} has exceeded its budget by ${(totalSpent - projectDetails.budget).toFixed(2)}`,
+          message: `Project ${projectDetails.title} has exceeded its budget by $${overage.toFixed(2)} (${percentOver}%)`,
           type: 'warning',
           relatedProject: costLine.project,
-          user: projectDetails.owner
+          user: projectDetails.manager._id
         });
+
+        // Send email notification
+        if (projectDetails.manager?.email) {
+          const emailTemplate = budgetAlertEmail(
+            projectDetails.manager.name,
+            projectDetails.title,
+            projectDetails.budget,
+            totalSpent,
+            overage,
+            percentOver,
+            description || category || 'Updated expense',
+            `${process.env.FRONTEND_URL}/projects/${costLine.project}`
+          );
+          
+          await sendEmail(
+            projectDetails.manager.email,
+            emailTemplate.subject,
+            emailTemplate.html,
+            emailTemplate.text
+          );
+        }
       }
     }
   }

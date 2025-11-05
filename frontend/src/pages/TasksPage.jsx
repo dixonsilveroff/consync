@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../api/apiClient';
+import TaskEditModal from '../components/TaskEditModal';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon,
@@ -10,12 +10,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function TasksPage() {
-  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     project: 'all',
     status: 'all',
@@ -118,9 +119,17 @@ export default function TasksPage() {
   };
 
   const handleTaskClick = (task) => {
-    if (task.project?._id) {
-      navigate(`/projects/${task.project._id}`);
-    }
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleTaskUpdate = () => {
+    fetchData(); // Refresh the task list
   };
 
   if (loading) {
@@ -379,6 +388,14 @@ export default function TasksPage() {
           </div>
         )}
       </div>
+
+      {/* Task Edit Modal */}
+      <TaskEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        task={selectedTask}
+        onUpdate={handleTaskUpdate}
+      />
     </div>
   );
 }

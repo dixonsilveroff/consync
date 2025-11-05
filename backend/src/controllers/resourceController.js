@@ -1,7 +1,16 @@
 import asyncHandler from 'express-async-handler';
 import MaterialRequest from '../models/materialRequestModel.js';
 import Vendor from '../models/vendorModel.js';
+import Project from '../models/projectModel.js';
+import User from '../models/User.js';
+import Notification from '../models/notificationModel.js';
 import logActivity from '../middleware/activityLogger.js';
+import { sendEmail } from '../services/emailService.js';
+import { 
+  materialRequestSubmittedEmail, 
+  materialRequestApprovedEmail, 
+  materialRequestRejectedEmail 
+} from '../templates/emailTemplates.js';
 
 // ✅ TEST ROUTE
 export const testRoute = (req, res) => {
@@ -23,8 +32,53 @@ export const createMaterialRequest = asyncHandler(async (req, res) => {
     notes
   });
 
+  await materialRequest.populate([
+    { path: 'project', select: 'title manager' },
+    { path: 'requestedBy', select: 'name email' }
+  ]);
+
   await logActivity('MATERIAL_REQUEST_CREATED', 'Resource', materialRequest._id, req.user._id,
     `Material request created for project ${project}`, project);
+
+  // Notify project manager (contractor) about new material request
+  if (materialRequest.project.manager) {
+    const manager = await User.findById(materialRequest.project.manager).select('name email');
+    
+    if (manager) {
+      // Create in-app notification
+      await Notification.create({
+        user: manager._id,
+        title: 'New Material Request',
+        message: `${materialRequest.requestedBy.name} submitted a material request for ${materialRequest.project.title}`,
+        type: 'material',
+        relatedProject: project
+      });
+
+      // Send email notification
+      if (manager.email) {
+        // Extract first item for email subject
+        const firstItem = items[0];
+        const emailTemplate = materialRequestSubmittedEmail(
+          manager.name,
+          firstItem.materialName,
+          firstItem.quantity,
+          firstItem.unit,
+          firstItem.estimatedCost,
+          materialRequest.requestedBy.name,
+          materialRequest.project.title,
+          firstItem.urgency || 'normal',
+          `${process.env.FRONTEND_URL}/resources`
+        );
+        
+        await sendEmail(
+          manager.email,
+          emailTemplate.subject,
+          emailTemplate.html,
+          emailTemplate.text
+        );
+      }
+    }
+  }
 
   res.status(201).json({ success: true, data: materialRequest });
 });
@@ -32,7 +86,12 @@ export const createMaterialRequest = asyncHandler(async (req, res) => {
 // ✅ APPROVE MATERIAL REQUEST
 export const approveMaterialRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const materialRequest = await MaterialRequest.findById(id);
+  const { notes } = req.body;
+  
+  const materialRequest = await MaterialRequest.findById(id)
+    .populate('requestedBy', 'name email')
+    .populate('project', 'title');
+    
   if (!materialRequest) {
     res.status(404);
     throw new Error('Material request not found');
@@ -40,10 +99,44 @@ export const approveMaterialRequest = asyncHandler(async (req, res) => {
 
   materialRequest.status = 'approved';
   materialRequest.approvedBy = req.user._id;
+  if (notes) materialRequest.notes = notes;
   await materialRequest.save();
 
   await logActivity('MATERIAL_REQUEST_APPROVED', 'Resource', id, req.user._id,
-    `Material request approved`, materialRequest.project);
+    `Material request approved`, materialRequest.project._id);
+
+  // Notify requester about approval
+  if (materialRequest.requestedBy) {
+    // Create in-app notification
+    await Notification.create({
+      user: materialRequest.requestedBy._id,
+      title: 'Material Request Approved',
+      message: `Your material request for ${materialRequest.project.title} has been approved`,
+      type: 'material',
+      relatedProject: materialRequest.project._id
+    });
+
+    // Send email notification
+    if (materialRequest.requestedBy.email) {
+      const firstItem = materialRequest.items[0];
+      const emailTemplate = materialRequestApprovedEmail(
+        materialRequest.requestedBy.name,
+        firstItem.materialName,
+        firstItem.quantity,
+        firstItem.unit,
+        req.user.name,
+        notes,
+        `${process.env.FRONTEND_URL}/resources`
+      );
+      
+      await sendEmail(
+        materialRequest.requestedBy.email,
+        emailTemplate.subject,
+        emailTemplate.html,
+        emailTemplate.text
+      );
+    }
+  }
 
   res.json({ success: true, data: materialRequest });
 });
@@ -171,7 +264,10 @@ export const rejectMaterialRequest = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body;
 
-  const materialRequest = await MaterialRequest.findById(id);
+  const materialRequest = await MaterialRequest.findById(id)
+    .populate('requestedBy', 'name email')
+    .populate('project', 'title');
+    
   if (!materialRequest) {
     res.status(404);
     throw new Error('Material request not found');
@@ -182,7 +278,40 @@ export const rejectMaterialRequest = asyncHandler(async (req, res) => {
   await materialRequest.save();
 
   await logActivity('MATERIAL_REQUEST_REJECTED', 'Resource', id, req.user._id,
-    `Material request rejected`, materialRequest.project);
+    `Material request rejected`, materialRequest.project._id);
+
+  // Notify requester about rejection
+  if (materialRequest.requestedBy) {
+    // Create in-app notification
+    await Notification.create({
+      user: materialRequest.requestedBy._id,
+      title: 'Material Request Rejected',
+      message: `Your material request for ${materialRequest.project.title} has been rejected`,
+      type: 'material',
+      relatedProject: materialRequest.project._id
+    });
+
+    // Send email notification
+    if (materialRequest.requestedBy.email) {
+      const firstItem = materialRequest.items[0];
+      const emailTemplate = materialRequestRejectedEmail(
+        materialRequest.requestedBy.name,
+        firstItem.materialName,
+        firstItem.quantity,
+        firstItem.unit,
+        req.user.name,
+        reason,
+        `${process.env.FRONTEND_URL}/resources`
+      );
+      
+      await sendEmail(
+        materialRequest.requestedBy.email,
+        emailTemplate.subject,
+        emailTemplate.html,
+        emailTemplate.text
+      );
+    }
+  }
 
   res.json({ success: true, data: materialRequest });
 });

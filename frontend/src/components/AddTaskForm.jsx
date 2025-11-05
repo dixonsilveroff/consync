@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,13 +8,32 @@ export default function AddTaskForm({ projectId, onAdd }) {
     title: '',
     description: '',
     deadline: '',
-    priority: 'medium'
+    priority: 'medium',
+    assignedTo: ''
   });
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Check if user has permission to add tasks
   const canAddTasks = ['contractor', 'engineer'].includes(user?.role);
+
+  const fetchOrganizationMembers = async () => {
+    try {
+      const res = await api.get(`/api/organizations/${user.organization}/members`);
+      setUsers(res.data?.members || []);
+    } catch (err) {
+      console.error('Failed to fetch organization members:', err);
+    }
+  };
+
+  // Fetch organization members
+  useEffect(() => {
+    if (user?.organization) {
+      fetchOrganizationMembers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.organization]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +50,8 @@ export default function AddTaskForm({ projectId, onAdd }) {
         ...formData,
         project: projectId,
         createdBy: user.id,
-        status: 'todo' // Using the default status from the schema
+        status: 'todo', // Using the default status from the schema
+        assignedTo: formData.assignedTo || undefined // Only include if assigned
       };
       
       await api.post('/api/tasks', taskData);
@@ -41,7 +61,8 @@ export default function AddTaskForm({ projectId, onAdd }) {
         title: '',
         description: '',
         deadline: '',
-        priority: 'medium'
+        priority: 'medium',
+        assignedTo: ''
       });
       
       // Notify parent component to refresh task list
@@ -107,6 +128,24 @@ export default function AddTaskForm({ projectId, onAdd }) {
           <option value="medium">Medium</option>
           <option value="high">High</option>
           <option value="critical">Critical</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Assign To
+        </label>
+        <select
+          value={formData.assignedTo}
+          onChange={(e) => setFormData(prev => ({ ...prev, assignedTo: e.target.value }))}
+          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Unassigned</option>
+          {users.map((u) => (
+            <option key={u._id} value={u._id}>
+              {u.name} ({u.role})
+            </option>
+          ))}
         </select>
       </div>
 

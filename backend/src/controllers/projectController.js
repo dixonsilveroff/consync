@@ -3,6 +3,8 @@ import Project from '../models/projectModel.js';
 import User from '../models/User.js';
 import Notification from '../models/notificationModel.js';
 import logActivity from '../middleware/activityLogger.js';
+import { sendEmail } from '../services/emailService.js';
+import { projectAssignmentEmail } from '../templates/emailTemplates.js';
 
 /**
  * Simple test route to verify projects router is mounted.
@@ -30,28 +32,82 @@ export const createProject = async (req, res, next) => {
     payload.createdBy = userId;
 
     const project = await Project.create(payload);
-    await project.populate([{ path: 'client', select: 'name email' }, { path: 'owner', select: 'name email' }, { path: 'assignedUsers', select: 'name email' }]);
+    await project.populate([
+      { path: 'client', select: 'name email' }, 
+      { path: 'owner', select: 'name email' }, 
+      { path: 'manager', select: 'name email' },
+      { path: 'assignedUsers', select: 'name email' }
+    ]);
     
-    // Create notification for project creation
-    await Notification.create({
-      title: 'New Project Created',
-      message: `${req.user.name} created a new project: ${project.title}`,
-      type: 'info',
-      relatedProject: project._id,
-      user: project.client // Notify the client
-    });
+    // Create notification for project creation (client)
+    if (project.client) {
+      await Notification.create({
+        title: 'New Project Assigned',
+        message: `You have been assigned to project: ${project.title}`,
+        type: 'project',
+        relatedProject: project._id,
+        user: project.client._id
+      });
+
+      // Send email to client
+      if (project.client.email) {
+        const managerName = req.user.name || 'Project Manager';
+        
+        const emailTemplate = projectAssignmentEmail(
+          project.client.name,
+          project.title,
+          project.description,
+          project.startDate,
+          project.endDate,
+          project.budget,
+          managerName,
+          `${process.env.FRONTEND_URL}/projects/${project._id}`
+        );
+        
+        await sendEmail(
+          project.client.email,
+          emailTemplate.subject,
+          emailTemplate.html,
+          emailTemplate.text
+        );
+      }
+    }
 
     // Notify assigned users
     if (project.assignedUsers && project.assignedUsers.length > 0) {
-      await Promise.all(project.assignedUsers.map(user => 
-        Notification.create({
+      const managerName = req.user.name || 'Project Manager';
+      
+      await Promise.all(project.assignedUsers.map(async (user) => {
+        // In-app notification
+        await Notification.create({
           title: 'Project Assignment',
-          message: `You have been assigned to the project: ${project.title}`,
-          type: 'info',
+          message: `You have been assigned to project: ${project.title}`,
+          type: 'project',
           relatedProject: project._id,
           user: user._id
-        })
-      ));
+        });
+
+        // Email notification
+        if (user.email) {
+          const emailTemplate = projectAssignmentEmail(
+            user.name,
+            project.title,
+            project.description,
+            project.startDate,
+            project.endDate,
+            project.budget,
+            managerName,
+            `${process.env.FRONTEND_URL}/projects/${project._id}`
+          );
+          
+          await sendEmail(
+            user.email,
+            emailTemplate.subject,
+            emailTemplate.html,
+            emailTemplate.text
+          );
+        }
+      }));
     }
 
     // Log project creation activity

@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
 import Task from '../models/taskModel.js';
 import Project from '../models/projectModel.js';
+import User from '../models/User.js';
 import Notification from '../models/notificationModel.js';
 import logActivity from '../middleware/activityLogger.js';
 import calculateProjectProgress from '../utils/progressCalculator.js';
+import { sendEmail } from '../services/emailService.js';
+import { taskAssignmentEmail } from '../templates/emailTemplates.js';
 
 // Test route
 export const testRoute = (req, res) => {
@@ -100,6 +103,43 @@ export const createTask = async (req, res, next) => {
             task.project,
             { status: task.status, priority: task.priority }
         );
+
+        // Send notification and email if task is assigned to someone
+        if (populatedTask.assignedTo && populatedTask.assignedTo._id) {
+            // Create in-app notification
+            await Notification.create({
+                user: populatedTask.assignedTo._id,
+                title: 'New Task Assigned',
+                message: `You have been assigned: ${populatedTask.title}`,
+                type: 'task',
+                relatedTask: task._id,
+                relatedProject: task.project
+            });
+
+            // Send email notification
+            if (populatedTask.assignedTo.email) {
+                const assignerName = req.user.name || 'A team member';
+                const projectName = populatedTask.project?.title || 'Unknown Project';
+                
+                const emailTemplate = taskAssignmentEmail(
+                    populatedTask.assignedTo.name,
+                    populatedTask.title,
+                    populatedTask.description,
+                    populatedTask.dueDate,
+                    populatedTask.priority || 'medium',
+                    projectName,
+                    assignerName,
+                    `${process.env.FRONTEND_URL}/projects/${populatedTask.project._id}`
+                );
+                
+                await sendEmail(
+                    populatedTask.assignedTo.email,
+                    emailTemplate.subject,
+                    emailTemplate.html,
+                    emailTemplate.text
+                );
+            }
+        }
 
         res.status(201).json({
             success: true,
@@ -276,7 +316,7 @@ export const updateTask = async (req, res, next) => {
         }
 
         // Get existing task
-        const task = await Task.findById(id);
+        const task = await Task.findById(id).populate('assignedTo', 'email name');
         if (!task) {
             return res.status(404).json({
                 success: false,
@@ -284,8 +324,9 @@ export const updateTask = async (req, res, next) => {
             });
         }
 
-        // Store old status for comparison
+        // Store old values for comparison
         const oldStatus = task.status;
+        const oldAssignee = task.assignedTo?._id?.toString();
 
         // Check authorization - Contractors can update any task
         // Others can only update tasks they created, are assigned to, or if they're an engineer on the project
@@ -399,6 +440,44 @@ export const updateTask = async (req, res, next) => {
                 console.error('Caught error, continuing with response...');
                 // Continue execution - don't fail the request if logging fails
                 // DO NOT rethrow the error!
+            }
+        }
+
+        // Check if task was reassigned to a new person
+        const newAssignee = updatedTask.assignedTo?._id?.toString();
+        if (updates.assignedTo && newAssignee && newAssignee !== oldAssignee) {
+            // Create in-app notification
+            await Notification.create({
+                user: updatedTask.assignedTo._id,
+                title: 'Task Reassigned',
+                message: `You have been assigned: ${updatedTask.title}`,
+                type: 'task',
+                relatedTask: updatedTask._id,
+                relatedProject: updatedTask.project._id
+            });
+
+            // Send email notification
+            if (updatedTask.assignedTo.email) {
+                const assignerName = req.user.name || 'A team member';
+                const projectName = updatedTask.project?.title || 'Unknown Project';
+                
+                const emailTemplate = taskAssignmentEmail(
+                    updatedTask.assignedTo.name,
+                    updatedTask.title,
+                    updatedTask.description,
+                    updatedTask.dueDate,
+                    updatedTask.priority || 'medium',
+                    projectName,
+                    assignerName,
+                    `${process.env.FRONTEND_URL}/projects/${updatedTask.project._id}`
+                );
+                
+                await sendEmail(
+                    updatedTask.assignedTo.email,
+                    emailTemplate.subject,
+                    emailTemplate.html,
+                    emailTemplate.text
+                );
             }
         }
 
