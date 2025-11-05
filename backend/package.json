@@ -28,6 +28,7 @@
     "dev": "nodemon --experimental-specifier-resolution=node src/server.js",
     "start": "node src/server.js",
     "fix-user-roles": "node src/utils/fixUserRoles.js",
-    "generate-secrets": "node scripts/generateSecrets.js"
+    "generate-secrets": "node scripts/generateSecrets.js",
+    "test-email": "node scripts/testEmail.js"
   }
 }

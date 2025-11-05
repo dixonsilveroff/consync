@@ -2,6 +2,8 @@ import Invitation from "../models/invitationModel.js";
 import Organization from "../models/organizationModel.js";
 import User from "../models/User.js";
 import { signAccessToken } from "../utils/jwt.js";
+import { sendEmail } from "../services/emailService.js";
+import { invitationEmail } from "../templates/emailTemplates.js";
 
 // Send invitation to a new user
 export async function sendInvitation(req, res) {
@@ -82,9 +84,40 @@ export async function sendInvitation(req, res) {
 
     await invitation.save();
 
-    // TODO: Send email with invitation link
-    // For now, return the token in response
+    // Send invitation email
     const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/accept-invite/${token}`;
+    
+    try {
+      // Get inviter details for email
+      const inviter = await User.findById(inviterId);
+      
+      // Generate email content
+      const emailContent = invitationEmail(
+        inviter.name,
+        organization.name,
+        role,
+        inviteLink,
+        invitation.expiresAt,
+        message
+      );
+
+      // Send email (non-blocking - don't fail request if email fails)
+      const emailResult = await sendEmail(
+        email,
+        emailContent.subject,
+        emailContent.html,
+        emailContent.text
+      );
+
+      if (emailResult.success) {
+        console.log(`✓ Invitation email sent to ${email}`);
+      } else {
+        console.error(`✗ Failed to send invitation email to ${email}:`, emailResult.error);
+      }
+    } catch (emailError) {
+      // Log email error but don't fail the request
+      console.error('Email sending error:', emailError.message);
+    }
 
     res.status(201).json({
       message: "Invitation sent successfully",
@@ -249,6 +282,7 @@ export async function listInvitations(req, res) {
         expiresAt: inv.expiresAt,
         createdAt: inv.createdAt,
         acceptedAt: inv.acceptedAt,
+        inviteLink: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/accept-invite/${inv.token}`,
       }))
     });
 
@@ -308,6 +342,40 @@ export async function resendInvitation(req, res) {
     await invitation.save();
 
     const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/accept-invite/${invitation.token}`;
+
+    // Send invitation email
+    try {
+      // Get inviter and organization details for email
+      const inviter = await User.findById(inviterId);
+      const organization = await Organization.findById(invitation.organization);
+      
+      // Generate email content
+      const emailContent = invitationEmail(
+        inviter.name,
+        organization.name,
+        invitation.role,
+        inviteLink,
+        invitation.expiresAt,
+        invitation.message
+      );
+
+      // Send email (non-blocking - don't fail request if email fails)
+      const emailResult = await sendEmail(
+        invitation.email,
+        emailContent.subject,
+        emailContent.html,
+        emailContent.text
+      );
+
+      if (emailResult.success) {
+        console.log(`✓ Invitation email resent to ${invitation.email}`);
+      } else {
+        console.error(`✗ Failed to resend invitation email to ${invitation.email}:`, emailResult.error);
+      }
+    } catch (emailError) {
+      // Log email error but don't fail the request
+      console.error('Email sending error:', emailError.message);
+    }
 
     res.json({
       message: "Invitation resent successfully",
