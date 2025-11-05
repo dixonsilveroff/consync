@@ -18,7 +18,6 @@ export default function InviteTeam() {
   const roleDescriptions = {
     engineer: 'Manages tasks, updates progress, and tracks project execution',
     client: 'Views project progress and provides approvals',
-    supplier: 'Manages material requests and delivery schedules',
   };
 
   const handleChange = (e) => {
@@ -99,7 +98,7 @@ export default function InviteTeam() {
             Invite Team Members
           </h1>
           <p className="mt-2 text-gray-600">
-            Invite engineers, clients, and suppliers to collaborate on your projects
+            Invite engineers and clients to collaborate on your projects
           </p>
         </div>
 
@@ -144,7 +143,6 @@ export default function InviteTeam() {
                 >
                   <option value="engineer">Engineer</option>
                   <option value="client">Client</option>
-                  <option value="supplier">Supplier</option>
                 </select>
                 <p className="mt-1 text-sm text-gray-600">
                   {roleDescriptions[formData.role]}

@@ -19,11 +19,11 @@ export async function sendInvitation(req, res) {
       return res.status(403).json({ message: "Only contractors can send invitations" });
     }
 
-    // Validate role (can't invite contractors, they self-register)
-    const allowedRoles = ['engineer', 'client', 'supplier'];
+    // Validate role (only engineers and clients can be invited - contractors and suppliers self-register)
+    const allowedRoles = ['engineer', 'client'];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ 
-        message: `Invalid role. Allowed roles: ${allowedRoles.join(', ')}. Contractors must self-register.` 
+        message: `Invalid role. Allowed roles: ${allowedRoles.join(', ')}. Contractors and suppliers must self-register.` 
       });
     }
 

@@ -8,7 +8,7 @@ const invitationSchema = new Schema({
   role: { 
     type: String, 
     required: true,
-    enum: ["engineer", "client", "supplier"], // Only non-contractor roles can be invited
+    enum: ["engineer", "client"], // Only engineer and client can be invited (suppliers self-register for marketplace)
   },
   token: { type: String, required: true, unique: true },
   organization: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
