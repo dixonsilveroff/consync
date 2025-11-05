@@ -86,7 +86,7 @@ export default function OnboardingModal({ user, onComplete, onSkip }) {
 
     setIsLoading(true);
     try {
-      await api.post('/users/complete-onboarding', {
+      await api.post('/api/users/complete-onboarding', {
         profile: {
           phone: formData.phone || undefined,
           bio: formData.bio || undefined,
