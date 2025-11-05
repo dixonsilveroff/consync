@@ -35,7 +35,6 @@ export const createProject = async (req, res, next) => {
     await project.populate([
       { path: 'client', select: 'name email' }, 
       { path: 'owner', select: 'name email' }, 
-      { path: 'manager', select: 'name email' },
       { path: 'assignedUsers', select: 'name email' }
     ]);
     

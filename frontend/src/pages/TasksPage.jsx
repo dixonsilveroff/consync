@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import api from '../api/apiClient';
+import { useAuth } from '../context/AuthContext';
 import TaskEditModal from '../components/TaskEditModal';
+import TaskCreateModal from '../components/TaskCreateModal';
 import { 
   MagnifyingGlassIcon, 
-  FunnelIcon,
+  PlusIcon,
   CheckCircleIcon,
   ClockIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 
 export default function TasksPage() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +20,7 @@ export default function TasksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     project: 'all',
     status: 'all',
@@ -132,6 +136,21 @@ export default function TasksPage() {
     fetchData(); // Refresh the task list
   };
 
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  const handleTaskCreated = () => {
+    fetchData(); // Refresh the task list
+  };
+
+  // Check if user has permission to create tasks
+  const canCreateTasks = ['contractor', 'engineer'].includes(user?.role);
+
   if (loading) {
     return (
       <div className="p-8">
@@ -164,9 +183,20 @@ export default function TasksPage() {
       )}
 
       {/* Header */}
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">All Tasks</h1>
-        <p className="text-sm sm:text-base text-gray-600 mt-1">View and manage all tasks across your projects</p>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">All Tasks</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">View and manage all tasks across your projects</p>
+        </div>
+        {canCreateTasks && (
+          <button
+            onClick={handleOpenCreateModal}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+          >
+            <PlusIcon className="h-5 w-5" />
+            <span>Create Task</span>
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -395,6 +425,13 @@ export default function TasksPage() {
         onClose={handleCloseEditModal}
         task={selectedTask}
         onUpdate={handleTaskUpdate}
+      />
+
+      {/* Task Create Modal */}
+      <TaskCreateModal
+        isOpen={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+        onTaskCreated={handleTaskCreated}
       />
     </div>
   );
