@@ -25,6 +25,8 @@ const NavigationBar = () => {
       { name: 'Projects', path: '/projects', roles: ['contractor', 'engineer', 'client', 'supplier'] },
       { name: 'Tasks', path: '/tasks', roles: ['contractor', 'engineer'] },
       { name: 'Resources', path: '/resources', roles: ['contractor', 'engineer'] },
+      { name: 'Finance', path: '/finance', roles: ['contractor', 'engineer'] },
+      { name: 'Analytics', path: '/analytics', roles: ['contractor', 'engineer', 'client'] },
       // { name: 'Reports', path: '/reports', roles: ['contractor', 'engineer', 'client'] },
       // { name: 'Admin', path: '/admin', roles: ['contractor'] },
     ];

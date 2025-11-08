@@ -60,18 +60,52 @@ export default function Dashboard() {
           activeProjects: mockActiveProjects
         });
       } else {
-        // Fetch all data in parallel
-        const [summaryRes, activityTrendsRes, activitiesRes, projectsRes] = await Promise.all([
-          api.get("/api/analytics/summary/global"),
+        // Determine what data to fetch based on role
+        const isContractor = user?.role === 'contractor';
+        const isClient = user?.role === 'client';
+        const isEngineer = user?.role === 'engineer';
+
+        // Build project query based on role
+        let projectQuery = 'status=active&limit=5';
+        if (isClient) {
+          // Clients see only their projects
+          projectQuery = `status=active&limit=5&client=${user._id}`;
+        } else if (isEngineer) {
+          // Engineers see projects they're assigned to
+          projectQuery = `status=active&limit=5&assignedUser=${user._id}`;
+        }
+        // Contractors see all projects (no additional filter)
+
+        // Fetch data - contractors get global analytics, others get filtered
+        const requests = [
+          isContractor 
+            ? api.get("/api/analytics/summary/global")
+            : api.get("/api/projects?" + projectQuery).then(res => {
+                // Calculate summary from filtered projects
+                const projects = res.data.data || [];
+                const totalProgress = projects.reduce((sum, p) => sum + (Number(p.progressPercent) || 0), 0);
+                return {
+                  data: {
+                    data: {
+                      totalProjects: projects.length,
+                      totalTasks: projects.reduce((sum, p) => sum + (Number(p.taskCount) || 0), 0),
+                      totalExpenses: projects.reduce((sum, p) => sum + (Number(p.totalExpenses) || 0), 0),
+                      avgProgress: projects.length > 0 ? totalProgress / projects.length : 0
+                    }
+                  }
+                };
+              }),
           api.get("/api/analytics/trends/activity"),
           api.get("/api/activities?limit=10"),
-          api.get("/api/projects?status=active&limit=5")
-        ]);
+          api.get("/api/projects?" + projectQuery)
+        ];
+
+        const [summaryRes, activityTrendsRes, activitiesRes, projectsRes] = await Promise.all(requests);
 
         setDashboardData({
           summary: summaryRes.data.data,
           activityTrends: activityTrendsRes.data.data,
-          costTrends: [], // Will be populated when a project is selected
+          costTrends: [],
           recentActivities: activitiesRes.data.data,
           activeProjects: projectsRes.data.data || []
         });
@@ -89,6 +123,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Export the handleProjectSelect function to be used by the project selector component
@@ -175,14 +210,20 @@ export default function Dashboard() {
       <div className="mb-4 sm:mb-6 transition-opacity duration-300 ease-in-out">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-2">
-            ConSync Project Dashboard
+            {user?.role === 'contractor' && 'ConSync Project Dashboard'}
+            {user?.role === 'engineer' && 'My Engineering Dashboard'}
+            {user?.role === 'client' && 'My Projects Dashboard'}
+            {user?.role === 'supplier' && 'Supplier Dashboard'}
           </h1>
           <p className="text-xs sm:text-sm text-gray-500">
-            Monitor progress, cost, and activity across all projects.
+            {user?.role === 'contractor' && 'Monitor progress, cost, and activity across all projects.'}
+            {user?.role === 'engineer' && 'Track your assigned projects and tasks.'}
+            {user?.role === 'client' && 'View and monitor your project progress.'}
+            {user?.role === 'supplier' && 'Manage material requests and deliveries.'}
           </p>
           {user && (
             <p className="text-xs sm:text-sm text-gray-600 mt-1">
-              Welcome back, <span className="font-medium">{user.name}</span> ({user.role})
+              Welcome back, <span className="font-medium">{user.name}</span>
             </p>
           )}
         </div>
@@ -214,32 +255,32 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {[
           {
-            title: "Total Projects",
-            value: dashboardData.summary?.totalProjects || 0,
+            title: user?.role === 'contractor' ? "Total Projects" : "My Projects",
+            value: Number(dashboardData.summary?.totalProjects) || 0,
             icon: FolderKanban,
             color: "blue"
           },
           {
-            title: "Total Tasks",
-            value: dashboardData.summary?.totalTasks || 0,
+            title: user?.role === 'contractor' ? "Total Tasks" : "My Tasks",
+            value: Number(dashboardData.summary?.totalTasks) || 0,
             icon: ListChecks,
             color: "green"
           },
           {
             title: "Avg. Progress",
-            value: `${dashboardData.summary?.avgProgress || 0}%`,
+            value: `${(Number(dashboardData.summary?.avgProgress) || 0).toFixed(1)}%`,
             icon: BarChart3,
             color: "purple",
             isProgress: true,
-            progressValue: parseFloat(dashboardData.summary?.avgProgress || 0)
+            progressValue: Number(dashboardData.summary?.avgProgress) || 0
           },
-          {
-            title: "Total Expenses",
-            value: `₦${(dashboardData.summary?.totalExpenses || 0).toLocaleString()}`,
+          ...(user?.role !== 'client' ? [{
+            title: user?.role === 'contractor' ? "Total Expenses" : "Project Expenses",
+            value: `₦${(Number(dashboardData.summary?.totalExpenses) || 0).toLocaleString()}`,
             icon: DollarSign,
             color: "red",
             isExpense: true
-          }
+          }] : [])
         ].map((card, index) => (
           <div key={card.title} 
                className="transition-all duration-300 ease-in-out"
@@ -250,63 +291,65 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 transition-all duration-300 ease-in-out hover:shadow-md">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
-            Recent Activity Volume
-          </h3>
-          <div className="transition-opacity duration-500 ease-in-out">
-            <TrendChart
-              data={dashboardData.activityTrends}
-              type="line"
-              xKey="_id"
-              yKey="count"
-              color="#2563EB"
-              height={300}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 transition-all duration-300 ease-in-out hover:shadow-md">
-          <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between mb-4">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex-shrink-0">
-              Project Cost Trends
+      {user?.role !== 'client' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 transition-all duration-300 ease-in-out hover:shadow-md">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
+              {user?.role === 'contractor' ? 'System Activity Volume' : 'My Activity Trends'}
             </h3>
-            <div className="w-full sm:w-auto sm:min-w-[200px] sm:max-w-[300px]">
-              <ProjectSelector 
-                onProjectSelect={handleProjectSelect}
-                selectedProjectId={selectedProjectId}
+            <div className="transition-opacity duration-500 ease-in-out">
+              <TrendChart
+                data={dashboardData.activityTrends}
+                type="line"
+                xKey="_id"
+                yKey="count"
+                color="#2563EB"
+                height={300}
               />
             </div>
           </div>
-          <div className="transition-opacity duration-500 ease-in-out">
-            {dashboardData.costTrends.length > 0 ? (
-              <TrendChart
-                data={dashboardData.costTrends}
-                type="area"
-                xKey="_id"
-                yKey="total"
-                color="#16A34A"
-                height={300}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-gray-500">
-                <div className="text-center">
-                  <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                  <div>Select a project to view cost trends</div>
-                </div>
+
+          <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 transition-all duration-300 ease-in-out hover:shadow-md">
+            <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 flex-shrink-0">
+                Project Cost Trends
+              </h3>
+              <div className="w-full sm:w-auto sm:min-w-[200px] sm:max-w-[300px]">
+                <ProjectSelector 
+                  onProjectSelect={handleProjectSelect}
+                  selectedProjectId={selectedProjectId}
+                />
               </div>
-            )}
+            </div>
+            <div className="transition-opacity duration-500 ease-in-out">
+              {dashboardData.costTrends.length > 0 ? (
+                <TrendChart
+                  data={dashboardData.costTrends}
+                  type="area"
+                  xKey="_id"
+                  yKey="total"
+                  color="#16A34A"
+                  height={300}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-500">
+                  <div className="text-center">
+                    <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                    <div>Select a project to view cost trends</div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Section: Active Projects & Recent Activities */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {/* Active Projects */}
         <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
-            Active Projects
+            {user?.role === 'contractor' ? 'Active Projects' : 'My Active Projects'}
           </h3>
           <ActiveProjectsWidget projects={dashboardData.activeProjects} />
         </div>
@@ -314,7 +357,7 @@ export default function Dashboard() {
         {/* Recent Activities */}
         <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
-            Recent System Activities
+            {user?.role === 'contractor' ? 'Recent System Activities' : 'Recent Activities'}
           </h3>
           <ActivityList activities={dashboardData.recentActivities} />
         </div>

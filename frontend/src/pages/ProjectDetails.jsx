@@ -1,12 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft, Plus, DollarSign } from 'lucide-react';
 import api from '../api/apiClient';
 import { useAuth } from '../context/AuthContext';
 import TaskList from '../components/TaskList';
 import AddTaskForm from '../components/AddTaskForm';
 import ProgressBar from '../components/ProgressBar';
-import CostTracker from '../components/CostTracker';
 import { formatCurrency } from '../utils/formatCurrency';
 
 export default function ProjectDetails() {
@@ -131,11 +130,26 @@ export default function ProjectDetails() {
         />
       </div>
 
-      {/* Cost Tracker Section */}
-      <div className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-        <h3 className="text-lg font-semibold mb-4">Cost Tracking</h3>
-        <CostTracker projectId={id} />
-      </div>
+      {/* Finance Section - Link to Finance Page */}
+      {['contractor', 'engineer'].includes(user?.role) && (
+        <div className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Cost Tracking & Budget</h3>
+              <p className="text-sm text-gray-600">
+                Manage cost lines, track expenses, and monitor budget for this project
+              </p>
+            </div>
+            <Link
+              to={`/finance?project=${id}`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+            >
+              <DollarSign className="h-5 w-5" />
+              <span>View Finance</span>
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

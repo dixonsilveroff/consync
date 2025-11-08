@@ -23,6 +23,8 @@ const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const InviteTeam = lazy(() => import("./pages/InviteTeam"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
+const FinancePage = lazy(() => import("./pages/FinancePage"));
+const AnalyticsPage = lazy(() => import("./pages/AnalyticsPage"));
 
 const AppContent = () => {
   const location = useLocation();
@@ -100,6 +102,18 @@ const AppContent = () => {
             <Route path="/invite-team" element={
               <ProtectedRoute roles={["contractor"]}>
                 <InviteTeam />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/finance" element={
+              <ProtectedRoute roles={["contractor", "engineer"]}>
+                <FinancePage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/analytics" element={
+              <ProtectedRoute>
+                <AnalyticsPage />
               </ProtectedRoute>
             } />
           </Routes>
