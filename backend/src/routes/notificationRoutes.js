@@ -21,6 +21,19 @@ router.get('/', protect, authorizeRoles(['contractor']), getAllNotifications);
 // Get user's notifications
 router.get('/me', protect, getUserNotifications);
 
+// Get unread count
+router.get('/unread-count', protect, async (req, res, next) => {
+  try {
+    const count = await require('../models/notificationModel.js').default.countDocuments({
+      user: req.user._id,
+      isRead: false
+    });
+    res.json({ success: true, count });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Mark notification as read
 router.patch('/:id/read', protect, markAsRead);
 
