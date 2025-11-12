@@ -153,10 +153,15 @@ export const getProjects = async (req, res, next) => {
       console.warn('User role is undefined, applying restrictive filter for user:', userId);
     }
 
-    if (role === 'contractor' || role === 'engineer') {
-      // no extra constraints - can see all projects
-      console.log('Contractor/Engineer access - no additional filters');
+    if (role === 'contractor') {
+      // Contractors can see all projects
+      console.log('Contractor access - no additional filters');
+    } else if (role === 'engineer') {
+      // Engineers can only see projects they're assigned to
+      filter.assignedUsers = new mongoose.Types.ObjectId(userId);
+      console.log('Engineer access - filtering by assignedUsers:', userId);
     } else if (role === 'client') {
+      // Clients can only see their own projects
       filter.client = userId; // MongoDB will handle the type conversion
       console.log('Client access - filtering by client:', userId);
     } else {

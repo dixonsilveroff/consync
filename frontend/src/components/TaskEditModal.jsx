@@ -78,6 +78,26 @@ export default function TaskEditModal({ isOpen, onClose, task, onUpdate }) {
     }
   };
 
+  const handleMarkAsDone = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      await api.put(`/api/tasks/${task._id}`, {
+        status: 'done'
+      });
+      
+      onUpdate(); // Refresh the task list
+      onClose(); // Close the modal
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to mark task as done. Please try again.';
+      setError(errorMessage);
+      console.error('Failed to mark task as done:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async () => {
     setLoading(true);
     setError('');
@@ -98,6 +118,12 @@ export default function TaskEditModal({ isOpen, onClose, task, onUpdate }) {
   // Check if user has permission to edit/delete tasks
   const canEditTasks = ['contractor', 'engineer'].includes(user?.role);
   const canDeleteTasks = ['contractor', 'engineer'].includes(user?.role);
+  
+  // Check if current user is assigned to this task
+  const isAssignedToTask = task?.assignedTo?._id === user?._id || task?.assignedTo === user?._id;
+  
+  // Engineers assigned to the task can at least change status to done
+  const canMarkAsDone = isAssignedToTask && user?.role === 'engineer';
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -182,7 +208,7 @@ export default function TaskEditModal({ isOpen, onClose, task, onUpdate }) {
                         value={formData.status}
                         onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        disabled={!canEditTasks}
+                        disabled={!canEditTasks && !canMarkAsDone}
                       >
                         <option value="todo">To Do</option>
                         <option value="in_progress">In Progress</option>
@@ -268,9 +294,26 @@ export default function TaskEditModal({ isOpen, onClose, task, onUpdate }) {
                   )}
 
                   {/* Permission Warning */}
-                  {!canEditTasks && (
+                  {!canEditTasks && !canMarkAsDone && (
                     <div className="text-amber-600 text-sm bg-amber-50 p-3 rounded-lg border border-amber-200">
                       You do not have permission to edit tasks. Only contractors and engineers can edit tasks.
+                    </div>
+                  )}
+
+                  {/* Quick Action for Assigned Engineers */}
+                  {canMarkAsDone && task.status !== 'done' && (
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-700 mb-2">
+                        This task is assigned to you. Quick action:
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleMarkAsDone}
+                        disabled={loading}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
+                      >
+                        ✓ Mark as Done
+                      </button>
                     </div>
                   )}
 

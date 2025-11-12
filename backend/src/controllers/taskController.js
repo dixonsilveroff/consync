@@ -328,22 +328,33 @@ export const updateTask = async (req, res, next) => {
         const oldStatus = task.status;
         const oldAssignee = task.assignedTo?._id?.toString();
 
-        // Check authorization - Contractors can update any task
-        // Others can only update tasks they created, are assigned to, or if they're an engineer on the project
+        // Check authorization
+        // - Contractors can update any task
+        // - Engineers can update tasks they're assigned to OR tasks on projects they're assigned to
+        // - Others can only update tasks they created or are assigned to
         if (req.user.role !== 'contractor') {
             const isCreator = task.createdBy.toString() === req.user._id.toString();
             const isAssignee = task.assignedTo?.toString() === req.user._id.toString();
             
-            // Engineers can update tasks in projects they're part of
-            const isProjectMember = req.user.role === 'engineer' && 
-                                   req.user.projects?.includes(task.project.toString());
+            // Engineers can update tasks in projects they're assigned to
+            let isProjectMember = false;
+            if (req.user.role === 'engineer' && task.project) {
+                // Fetch the project to check if engineer is assigned
+                const Project = mongoose.model('Project');
+                const project = await Project.findById(task.project);
+                if (project && project.assignedUsers) {
+                    isProjectMember = project.assignedUsers.some(
+                        userId => userId.toString() === req.user._id.toString()
+                    );
+                }
+            }
             
             const isAuthorized = isCreator || isAssignee || isProjectMember;
 
             if (!isAuthorized) {
                 return res.status(403).json({
                     success: false,
-                    message: 'Not authorized to update this task'
+                    message: 'Not authorized to update this task. You must be the creator, assignee, or a team member on the project.'
                 });
             }
         }
