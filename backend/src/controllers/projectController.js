@@ -29,6 +29,12 @@ export const createProject = async (req, res, next) => {
     const userId = req.user.id || req.user._id;
     payload.createdBy = userId;
 
+    // Fetch user to get organization
+    const user = await User.findById(userId);
+    if (user && user.organization) {
+      payload.organization = user.organization;
+    }
+
     const project = await Project.create(payload);
     await project.populate([{ path: 'client', select: 'name email' }, { path: 'owner', select: 'name email' }, { path: 'assignedUsers', select: 'name email' }]);
     
@@ -98,20 +104,27 @@ export const getProjects = async (req, res, next) => {
       console.warn('User role is undefined, applying restrictive filter for user:', userId);
     }
 
-    if (role === 'contractor' || role === 'engineer') {
-      // no extra constraints - can see all projects
-      console.log('Contractor/Engineer access - no additional filters');
-    } else if (role === 'client') {
+    if (role === 'client') {
       filter.client = userId; // MongoDB will handle the type conversion
       console.log('Client access - filtering by client:', userId);
     } else {
-      // supplier/other/undefined: assigned, owner, or createdBy only
-      filter.$or = [
+      // For contractors, engineers, suppliers, etc.
+      // Fetch user to check for organization
+      const user = await User.findById(userId);
+      const userOrgId = user ? user.organization : null;
+
+      const orConditions = [
         { assignedUsers: new mongoose.Types.ObjectId(userId) },
         { owner: new mongoose.Types.ObjectId(userId) },
         { createdBy: new mongoose.Types.ObjectId(userId) },
       ];
-      console.log('Restrictive access - filtering by assignment/ownership');
+
+      if (userOrgId) {
+        orConditions.push({ organization: new mongoose.Types.ObjectId(userOrgId) });
+      }
+
+      filter.$or = orConditions;
+      console.log(`Access controlled - filtering by assignment/ownership${userOrgId ? '/organization' : ''}`);
     }
 
     const total = await Project.countDocuments(filter);
@@ -157,12 +170,20 @@ export const getProjectById = async (req, res, next) => {
     const role = req.user && req.user.role;
     const userId = req.user && (req.user._id || req.user.id);
 
-    const isContractor = role === 'contractor';
+    // Fetch user for organization check
+    const user = await User.findById(userId);
+    const userOrgId = user ? user.organization : null;
+
     const isClient = project.client && project.client._id && project.client._id.toString() === userId;
     const isOwner = project.owner && project.owner._id && project.owner._id.toString() === userId;
     const isAssigned = project.assignedUsers && project.assignedUsers.some(u => u._id && u._id.toString() === userId);
+    const isCreatedBy = project.createdBy && project.createdBy.toString() === userId;
 
-    if (!(isContractor || isClient || isOwner || isAssigned)) {
+    // Check organization match
+    const isOrgMember = userOrgId && project.organization && project.organization.toString() === userOrgId.toString();
+
+    // Allow if user is related to project or in same organization
+    if (!(isClient || isOwner || isAssigned || isCreatedBy || isOrgMember)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
 
