@@ -27,6 +27,7 @@ const projectSchema = new Schema({
   description: { type: String, default: '' },
   budget: { type: budgetSchema, default: () => ({}) },
   status: { type: String, enum: ['proposed','planned','active','paused','completed','cancelled'], default: 'proposed' },
+  organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
   client: { type: Schema.Types.ObjectId, ref: 'User' },
   owner: { type: Schema.Types.ObjectId, ref: 'User' },
   assignedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
@@ -49,5 +50,6 @@ projectSchema.index({ title: 'text', description: 'text' });
 projectSchema.index({ status: 1 });
 projectSchema.index({ client: 1 });
 projectSchema.index({ owner: 1 });
+projectSchema.index({ organization: 1 });
 
 export default mongoose.model('Project', projectSchema);
