@@ -1,24 +1,35 @@
 {
   "name": "consync",
-  "version": "1.0.0",
-  "description": "NICE Innovation Challenge",
-  "main": "index.js",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dixonsilveroff/consync.git"
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie": "^0.6.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.3",
+    "cookie": "^1.1.1",
+    "jsonwebtoken": "^9.0.3",
+    "next": "16.2.1",
+    "prisma": "^6.19.2",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/dixonsilveroff/consync/issues"
-  },
-  "homepage": "https://github.com/dixonsilveroff/consync#readme",
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
