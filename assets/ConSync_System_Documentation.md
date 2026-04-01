@@ -17,9 +17,12 @@ ConSync is a transaction-driven construction control system designed to enforce 
 ## 3. System Architecture
 
 ### 3.1 High-Level Components
-- Frontend Interface (Web + WhatsApp integration)
+- Frontend Interface (Web (Next + Typescript) + WhatsApp integration)
+- State Management (Zustand)
+- UI (Tailwind and lucide icons)
 - Backend API (Node.js)
-- Database (PostgreSQL)
+- Database (Neon DB)
+- Authentication (Auth0)
 - Payment/Escrow Service Integration
 - File Storage (Images, Videos)
 - Notification System (SMS/WhatsApp)
