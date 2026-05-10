@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": true,
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "noEmit": true,
+    "target": "ESNext",
+    "paths": {
+      "convex/_generated/*": ["./_generated/*"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "../node_modules/convex/src/server/index.d.ts"],
+  "exclude": ["node_modules", "./_generated"]
+}

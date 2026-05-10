@@ -1,0 +1,276 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Enforcer Architect Design System ─── */
+/* "Sovereign Precision" — Monolithic Structure */
+
+@layer base {
+  /* Override shadcn defaults with Enforcer Architect dark theme */
+  :root {
+    /* Surface Hierarchy */
+    --surface: #111316;
+    --surface-container-lowest: #0d0e10;
+    --surface-container-low: #1a1c1f;
+    --surface-container: #222427;
+    --surface-container-high: #282a2d;
+    --surface-container-highest: #333538;
+    --surface-bright: #3a3c3f;
+
+    /* Brand */
+    --primary: oklch(0.78 0.08 250);
+    --primary-foreground: oklch(0.15 0.04 250);
+    --primary-hex: #adc8f5;
+    --primary-container: #1e3a5f;
+    --on-primary: #0a1929;
+
+    /* Semantic */
+    --control-green: #2E7D32;
+    --critical-red: #D32F2F;
+    --warning-amber: #F9A825;
+
+    /* Text */
+    --on-surface: #e2e2e5;
+    --on-surface-variant: #c4c6cf;
+
+    /* Outline */
+    --outline: #8e9099;
+    --outline-variant: #43474e;
+
+    /* shadcn Token Overrides — mapped to Enforcer theme */
+    --background: oklch(0.10 0.005 260);
+    --foreground: oklch(0.91 0.005 260);
+    --card: oklch(0.17 0.005 260);
+    --card-foreground: oklch(0.91 0.005 260);
+    --popover: oklch(0.17 0.005 260);
+    --popover-foreground: oklch(0.91 0.005 260);
+    --secondary: oklch(0.22 0.005 260);
+    --secondary-foreground: oklch(0.91 0.005 260);
+    --muted: oklch(0.22 0.005 260);
+    --muted-foreground: oklch(0.65 0.01 260);
+    --accent: oklch(0.22 0.005 260);
+    --accent-foreground: oklch(0.91 0.005 260);
+    --destructive: oklch(0.55 0.2 25);
+    --border: oklch(0.30 0.005 260);
+    --input: oklch(0.25 0.005 260);
+    --ring: oklch(0.78 0.08 250);
+    --radius: 0rem; /* Enforcer Architect: 0px radius */
+
+    /* Sidebar tokens */
+    --sidebar: oklch(0.12 0.005 260);
+    --sidebar-foreground: oklch(0.91 0.005 260);
+    --sidebar-primary: oklch(0.78 0.08 250);
+    --sidebar-primary-foreground: oklch(0.15 0.04 250);
+    --sidebar-accent: oklch(0.20 0.005 260);
+    --sidebar-accent-foreground: oklch(0.91 0.005 260);
+    --sidebar-border: oklch(0.25 0.005 260);
+    --sidebar-ring: oklch(0.78 0.08 250);
+
+    /* Chart tokens */
+    --chart-1: oklch(0.78 0.08 250);
+    --chart-2: oklch(0.55 0.15 160);
+    --chart-3: oklch(0.65 0.15 45);
+    --chart-4: oklch(0.55 0.2 25);
+    --chart-5: oklch(0.45 0.01 260);
+  }
+
+  /* Remove the shadcn .dark class — we are always dark */
+  .dark {
+    /* Intentionally empty — :root IS dark mode */
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: var(--font-inter), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* ─── Scrollbar Styling ─── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--surface-container-low);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--outline-variant);
+    border-radius: 0px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--outline);
+  }
+
+  /* ─── Selection ─── */
+  ::selection {
+    background-color: var(--primary-container);
+    color: var(--primary-hex);
+  }
+}
+
+/* ─── Enforcer Component Primitives ─── */
+@layer components {
+  /* CTA Buttons — 0px radius, machined metal gradient */
+  .btn-primary {
+    @apply font-heading font-semibold
+           px-6 py-3 text-label-lg uppercase tracking-wider
+           transition-all duration-200 ease-out
+           active:scale-[0.98];
+    background: linear-gradient(135deg, #adc8f5, #1e3a5f);
+    color: #0a1929;
+    border-radius: 0px;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #c4d8f9, #2a4d75);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .btn-secondary {
+    @apply bg-surface-container-high text-on-surface
+           font-body font-medium
+           px-6 py-3 text-label-lg
+           transition-all duration-200 ease-out
+           hover:bg-surface-container-highest;
+    border-radius: 0px;
+  }
+
+  /* Tertiary Button — No background, bottom accent line on hover */
+  .btn-tertiary {
+    @apply font-body text-label-md uppercase
+           bg-transparent px-4 py-2
+           border-b-2 border-transparent
+           transition-all duration-200 ease-out;
+    color: var(--primary-hex);
+  }
+
+  .btn-tertiary:hover {
+    border-bottom-color: var(--primary-hex);
+  }
+
+  /* Input Fields — Ledger-style left border on focus */
+  .input-enforcer {
+    @apply bg-surface-container-lowest text-on-surface
+           font-body text-body-md
+           px-4 py-3 w-full
+           border-l-2 border-transparent
+           outline-none
+           transition-all duration-200 ease-out;
+    border-radius: 0px;
+  }
+
+  .input-enforcer:focus {
+    border-left-color: var(--primary-hex);
+  }
+
+  .input-enforcer::placeholder {
+    color: rgba(196, 198, 207, 0.5);
+  }
+
+  /* Cards — Tonal shift, no borders, no dividers */
+  .card-enforcer {
+    @apply bg-surface-container-high p-6;
+    border-radius: 0px;
+  }
+
+  .card-enforcer-elevated {
+    @apply bg-surface-container-highest p-6 shadow-subtle;
+    border-radius: 0px;
+  }
+
+  /* Status Chips — Sharp corners, data-driven color */
+  .chip-status {
+    @apply inline-flex items-center px-3 py-1
+           font-body text-label-sm uppercase tracking-widest
+           font-medium;
+    border-radius: 0px;
+  }
+
+  .chip-approved { @apply chip-status; background: rgba(46, 125, 50, 0.2); color: #2E7D32; }
+  .chip-rejected { @apply chip-status; background: rgba(211, 47, 47, 0.2); color: #D32F2F; }
+  .chip-pending  { @apply chip-status; background: rgba(249, 168, 37, 0.2); color: #F9A825; }
+  .chip-review   { @apply chip-status; background: #1e3a5f; color: #adc8f5; }
+
+  /* Blueprint Labels — ALL-CAPS metadata */
+  .label-blueprint {
+    @apply text-label-sm uppercase tracking-widest font-body;
+    color: var(--on-surface-variant);
+  }
+
+  /* Data Table — Ghost border striping */
+  .table-enforcer tr:nth-child(3n) {
+    background: var(--surface-container-low);
+  }
+
+  .table-enforcer th {
+    @apply text-label-sm uppercase tracking-widest
+           font-body font-medium py-3 px-4 text-left;
+    color: var(--on-surface-variant);
+  }
+
+  .table-enforcer td {
+    @apply text-body-sm font-body py-3 px-4;
+    color: var(--on-surface);
+  }
+
+  /* Ghost Border — 15% opacity for data tables */
+  .ghost-border {
+    border: 1px solid rgba(67, 71, 78, 0.15);
+  }
+
+  /* Glass Overlay — for floating menus */
+  .glass-overlay {
+    background: rgba(58, 60, 63, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Money Bar — persistent escrow tracker */
+  .money-bar {
+    @apply px-6 py-3 flex items-center justify-between;
+    background: var(--primary-container);
+  }
+}
+
+/* ─── Animations ─── */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulseSubtle 2s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
