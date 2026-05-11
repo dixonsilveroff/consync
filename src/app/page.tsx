@@ -1,3 +1,4 @@
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { Building2, Shield, Brain, Wallet, ArrowRight } from "lucide-react";
 
@@ -14,13 +15,27 @@ export default function HomePage() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/sign-in" className="btn-tertiary">
-              Sign In
-            </Link>
-            <Link href="/sign-up" className="btn-primary flex items-center gap-2">
-              Get Started
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <Show when="signed-out">
+              <SignInButton>
+                <button className="btn-tertiary">Sign In</button>
+              </SignInButton>
+              <SignUpButton>
+                <button className="btn-primary flex items-center gap-2">
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </SignUpButton>
+            </Show>
+            <Show when="signed-in">
+              <Link href="/owner/projects" className="btn-secondary">
+                Dashboard
+              </Link>
+              <UserButton
+                appearance={{
+                  elements: { avatarBox: "w-8 h-8" },
+                }}
+              />
+            </Show>
           </div>
         </div>
       </header>
@@ -41,16 +56,29 @@ export default function HomePage() {
             confidence to release milestone payments through secure Squad escrow.
           </p>
           <div className="flex items-center gap-4">
-            <Link
-              href="/sign-up"
-              className="btn-primary flex items-center gap-2"
-            >
-              Start a Project
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link href="/sign-in" className="btn-secondary">
-              Sign In
-            </Link>
+            <Show when="signed-out">
+              <SignUpButton>
+                <button className="btn-primary flex items-center gap-2">
+                  Start a Project
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </SignUpButton>
+              <SignInButton>
+                <button className="btn-secondary">Sign In</button>
+              </SignInButton>
+            </Show>
+            <Show when="signed-in">
+              <Link
+                href="/owner/projects/new"
+                className="btn-primary flex items-center gap-2"
+              >
+                New Project
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/owner/projects" className="btn-secondary">
+                My Projects
+              </Link>
+            </Show>
           </div>
         </div>
       </section>
