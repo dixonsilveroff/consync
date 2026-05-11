@@ -10,7 +10,7 @@ import { ConvexError } from "convex/values";
 export const getOwnerProjects = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
+    if (!identity) return [];
 
     return await ctx.db
       .query("projects")
@@ -25,7 +25,7 @@ export const getOwnerProjects = query({
 export const getContractorProjects = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
+    if (!identity) return [];
 
     return await ctx.db
       .query("projects")
@@ -43,17 +43,17 @@ export const getProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
+    if (!identity) return null;
 
     const project = await ctx.db.get(projectId);
-    if (!project) throw new ConvexError("Project not found");
+    if (!project) return null;
 
     // Authorize: user must be owner or contractor
     if (
       project.ownerClerkId !== identity.subject &&
       project.contractorClerkId !== identity.subject
     ) {
-      throw new ConvexError("Access denied");
+      return null;
     }
 
     return project;

@@ -30,6 +30,14 @@ export default function OwnerProjectDashboard() {
     );
   }
 
+  if (project === null) {
+    return (
+      <div className="animate-fade-in p-8 text-center text-on-surface-variant">
+        Project not found or access denied.
+      </div>
+    );
+  }
+
   const statusConfig = getStatusConfig(project.status);
 
   const handleFundEscrow = () => {
