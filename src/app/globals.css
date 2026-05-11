@@ -126,3 +126,93 @@
     text-wrap: balance;
   }
 }
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply px-4 py-2 bg-surface border border-border text-text-primary font-medium rounded-md hover:bg-background transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-tertiary {
+    @apply px-3 py-1.5 text-text-secondary hover:text-text-primary text-small font-medium transition-colors disabled:opacity-50;
+  }
+
+  /* Cards */
+  .card-enforcer {
+    @apply bg-surface border border-border rounded-lg p-5 shadow-sm;
+  }
+  .bg-surface-container-high {
+    @apply bg-background border border-border rounded-lg;
+  }
+
+  /* Typography */
+  .label-blueprint {
+    @apply text-micro font-medium text-text-muted uppercase tracking-wide;
+  }
+  .font-heading {
+    @apply font-display;
+  }
+  .text-headline-sm {
+    @apply text-h4;
+  }
+  .text-display-sm {
+    @apply text-h2;
+  }
+  .text-body-md {
+    @apply text-body;
+  }
+  .text-body-sm {
+    @apply text-small;
+  }
+  .text-on-surface {
+    @apply text-text-primary;
+  }
+  .text-on-surface-variant {
+    @apply text-text-secondary;
+  }
+  .text-label-sm {
+    @apply text-micro font-medium;
+  }
+  .text-error {
+    @apply text-danger;
+  }
+
+  /* Chips */
+  .chip-pending {
+    @apply px-2.5 py-1 rounded-full text-micro font-medium bg-warning-bg text-warning border border-warning-border inline-flex items-center;
+  }
+  .chip-approved {
+    @apply px-2.5 py-1 rounded-full text-micro font-medium bg-success-bg text-success border border-success-border inline-flex items-center;
+  }
+  .chip-rejected {
+    @apply px-2.5 py-1 rounded-full text-micro font-medium bg-danger-bg text-danger border border-danger-border inline-flex items-center;
+  }
+  .chip-review {
+    @apply px-2.5 py-1 rounded-full text-micro font-medium bg-escrow-bg text-escrow border border-escrow-border inline-flex items-center;
+  }
+
+  /* Domain specific */
+  .money-bar {
+    @apply flex items-center justify-between p-4 bg-background border border-border rounded-lg shadow-sm;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn var(--duration-base) var(--ease-out);
+  }
+  .animate-pulse-subtle {
+    animation: pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}

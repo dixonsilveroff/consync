@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
+import { useAuth } from "@clerk/nextjs";
 import { PhotoUpload } from "@/components/photo-upload";
 import { AiVerdictPanel } from "@/components/ai-verdict-panel";
 import { ArrowLeft, Loader2, Clock } from "lucide-react";
@@ -11,9 +12,29 @@ import { ArrowLeft, Loader2, Clock } from "lucide-react";
 export default function MilestoneSubmitPage() {
   const params = useParams();
   const router = useRouter();
+  const { isLoaded, isSignedIn } = useAuth();
   const milestoneId = params.milestoneId as Id<"milestones">;
 
-  const detail = useQuery(api.milestones.getMilestoneDetail, { milestoneId });
+  const detail = useQuery(
+    api.milestones.getMilestoneDetail,
+    isLoaded && isSignedIn ? { milestoneId } : "skip"
+  );
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="p-8 text-center text-on-surface-variant">
+        Please sign in to view this milestone.
+      </div>
+    );
+  }
 
   if (detail === undefined) {
     return (
