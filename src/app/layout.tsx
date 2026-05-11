@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Inter, Geist } from "next/font/google";
+import { Poppins, Inter, Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,13 @@ const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -46,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn(poppins.variable, inter.variable, "font-sans", geist.variable)}>
+    <html lang="en" className={cn(poppins.variable, inter.variable, jetbrainsMono.variable, "font-sans", geist.variable)}>
       <body className="font-body antialiased">
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>

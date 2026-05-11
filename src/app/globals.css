@@ -2,90 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Enforcer Architect Design System ─── */
-/* "Sovereign Precision" — Monolithic Structure */
+/* ─── ConSync Design System v2.0 ─── */
+/* Financial Trust Instrument - Light Theme Base */
 
 @layer base {
-  /* Override shadcn defaults with Enforcer Architect dark theme */
   :root {
-    /* Surface Hierarchy */
-    --surface: #111316;
-    --surface-container-lowest: #0d0e10;
-    --surface-container-low: #1a1c1f;
-    --surface-container: #222427;
-    --surface-container-high: #282a2d;
-    --surface-container-highest: #333538;
-    --surface-bright: #3a3c3f;
+    /* Core Brand */
+    --color-primary:          #1E4E8C;
+    --color-primary-dark:     #163A6B;
+    --color-primary-light:    #2F6FD6;
+    --color-primary-faint:    #EFF6FF;
 
-    /* Brand */
-    --primary: oklch(0.78 0.08 250);
-    --primary-foreground: oklch(0.15 0.04 250);
-    --primary-hex: #adc8f5;
-    --primary-container: #1e3a5f;
-    --on-primary: #0a1929;
-
-    /* Semantic */
-    --control-green: #2E7D32;
-    --critical-red: #D32F2F;
-    --warning-amber: #F9A825;
+    /* Backgrounds */
+    --color-bg:               #F5F6F7;
+    --color-surface:          #FFFFFF;
+    --color-surface-raised:   #FFFFFF;
 
     /* Text */
-    --on-surface: #e2e2e5;
-    --on-surface-variant: #c4c6cf;
+    --color-text-primary:     #1A1C1E;
+    --color-text-secondary:   #2C2F33;
+    --color-text-muted:       #94A3B8;
+    --color-text-inverse:     #FFFFFF;
 
-    /* Outline */
-    --outline: #8e9099;
-    --outline-variant: #43474e;
+    /* Borders */
+    --color-border:           #E2E8F0;
+    --color-border-strong:    #CBD5E1;
 
-    /* shadcn Token Overrides — mapped to Enforcer theme */
-    --background: oklch(0.10 0.005 260);
-    --foreground: oklch(0.91 0.005 260);
-    --card: oklch(0.17 0.005 260);
-    --card-foreground: oklch(0.91 0.005 260);
-    --popover: oklch(0.17 0.005 260);
-    --popover-foreground: oklch(0.91 0.005 260);
-    --secondary: oklch(0.22 0.005 260);
-    --secondary-foreground: oklch(0.91 0.005 260);
-    --muted: oklch(0.22 0.005 260);
-    --muted-foreground: oklch(0.65 0.01 260);
-    --accent: oklch(0.22 0.005 260);
-    --accent-foreground: oklch(0.91 0.005 260);
-    --destructive: oklch(0.55 0.2 25);
-    --border: oklch(0.30 0.005 260);
-    --input: oklch(0.25 0.005 260);
-    --ring: oklch(0.78 0.08 250);
-    --radius: 0rem; /* Enforcer Architect: 0px radius */
+    /* Status: Positive */
+    --color-success:          #4CAF50;
+    --color-success-bg:       #F0FDF4;
+    --color-success-border:   #BBF7D0;
 
-    /* Sidebar tokens */
-    --sidebar: oklch(0.12 0.005 260);
-    --sidebar-foreground: oklch(0.91 0.005 260);
-    --sidebar-primary: oklch(0.78 0.08 250);
-    --sidebar-primary-foreground: oklch(0.15 0.04 250);
-    --sidebar-accent: oklch(0.20 0.005 260);
-    --sidebar-accent-foreground: oklch(0.91 0.005 260);
-    --sidebar-border: oklch(0.25 0.005 260);
-    --sidebar-ring: oklch(0.78 0.08 250);
+    /* Status: Pending */
+    --color-warning:          #F9C74F;
+    --color-warning-bg:       #FEFCE8;
+    --color-warning-border:   #FDE68A;
 
-    /* Chart tokens */
-    --chart-1: oklch(0.78 0.08 250);
-    --chart-2: oklch(0.55 0.15 160);
-    --chart-3: oklch(0.65 0.15 45);
-    --chart-4: oklch(0.55 0.2 25);
-    --chart-5: oklch(0.45 0.01 260);
-  }
+    /* Status: Escrow */
+    --color-escrow:           #3B82F6;
+    --color-escrow-bg:        #EFF6FF;
+    --color-escrow-border:    #BFDBFE;
 
-  /* Remove the shadcn .dark class — we are always dark */
-  .dark {
-    /* Intentionally empty — :root IS dark mode */
+    /* Status: Alert */
+    --color-danger:           #E63946;
+    --color-danger-bg:        #FFF1F2;
+    --color-danger-border:    #FECDD3;
+
+    /* Spacing */
+    --space-1:    4px;
+    --space-2:    8px;
+    --space-3:    12px;
+    --space-4:    16px;
+    --space-5:    20px;
+    --space-6:    24px;
+    --space-8:    32px;
+    --space-10:   40px;
+    --space-12:   48px;
+    --space-16:   64px;
+
+    /* Radius */
+    --radius-sm:  4px;
+    --radius:     8px;
+    --radius-md:  12px;
+    --radius-lg:  16px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.12);
+
+    /* Motion */
+    --duration-fast:    150ms;
+    --duration-base:    200ms;
+    --duration-slow:    300ms;
+    --duration-release: 600ms;
+    --ease-out:         cubic-bezier(0.0, 0.0, 0.2, 1.0);
+    --ease-in:          cubic-bezier(0.4, 0.0, 1.0, 1.0);
+    --ease-in-out:      cubic-bezier(0.4, 0.0, 0.2, 1.0);
   }
 
   * {
-    border-color: var(--border);
+    border-color: var(--color-border);
   }
 
   body {
-    background-color: var(--surface);
-    color: var(--on-surface);
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
     font-family: var(--font-inter), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -100,177 +103,26 @@
     width: 6px;
     height: 6px;
   }
-
   ::-webkit-scrollbar-track {
-    background: var(--surface-container-low);
+    background: var(--color-bg);
   }
-
   ::-webkit-scrollbar-thumb {
-    background: var(--outline-variant);
-    border-radius: 0px;
+    background: var(--color-border-strong);
+    border-radius: var(--radius-full);
   }
-
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--outline);
+    background: var(--color-text-muted);
   }
 
-  /* ─── Selection ─── */
+  /* ─── Typography Selection ─── */
   ::selection {
-    background-color: var(--primary-container);
-    color: var(--primary-hex);
+    background-color: var(--color-primary-light);
+    color: var(--color-text-inverse);
   }
 }
 
-/* ─── Enforcer Component Primitives ─── */
-@layer components {
-  /* CTA Buttons — 0px radius, machined metal gradient */
-  .btn-primary {
-    @apply font-heading font-semibold
-           px-6 py-3 text-label-lg uppercase tracking-wider
-           transition-all duration-200 ease-out
-           active:scale-[0.98];
-    background: linear-gradient(135deg, #adc8f5, #1e3a5f);
-    color: #0a1929;
-    border-radius: 0px;
-  }
-
-  .btn-primary:hover {
-    background: linear-gradient(135deg, #c4d8f9, #2a4d75);
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
-  }
-
-  .btn-secondary {
-    @apply bg-surface-container-high text-on-surface
-           font-body font-medium
-           px-6 py-3 text-label-lg
-           transition-all duration-200 ease-out
-           hover:bg-surface-container-highest;
-    border-radius: 0px;
-  }
-
-  /* Tertiary Button — No background, bottom accent line on hover */
-  .btn-tertiary {
-    @apply font-body text-label-md uppercase
-           bg-transparent px-4 py-2
-           border-b-2 border-transparent
-           transition-all duration-200 ease-out;
-    color: var(--primary-hex);
-  }
-
-  .btn-tertiary:hover {
-    border-bottom-color: var(--primary-hex);
-  }
-
-  /* Input Fields — Ledger-style left border on focus */
-  .input-enforcer {
-    @apply bg-surface-container-lowest text-on-surface
-           font-body text-body-md
-           px-4 py-3 w-full
-           border-l-2 border-transparent
-           outline-none
-           transition-all duration-200 ease-out;
-    border-radius: 0px;
-  }
-
-  .input-enforcer:focus {
-    border-left-color: var(--primary-hex);
-  }
-
-  .input-enforcer::placeholder {
-    color: rgba(196, 198, 207, 0.5);
-  }
-
-  /* Cards — Tonal shift, no borders, no dividers */
-  .card-enforcer {
-    @apply bg-surface-container-high p-6;
-    border-radius: 0px;
-  }
-
-  .card-enforcer-elevated {
-    @apply bg-surface-container-highest p-6 shadow-subtle;
-    border-radius: 0px;
-  }
-
-  /* Status Chips — Sharp corners, data-driven color */
-  .chip-status {
-    @apply inline-flex items-center px-3 py-1
-           font-body text-label-sm uppercase tracking-widest
-           font-medium;
-    border-radius: 0px;
-  }
-
-  .chip-approved { @apply chip-status; background: rgba(46, 125, 50, 0.2); color: #2E7D32; }
-  .chip-rejected { @apply chip-status; background: rgba(211, 47, 47, 0.2); color: #D32F2F; }
-  .chip-pending  { @apply chip-status; background: rgba(249, 168, 37, 0.2); color: #F9A825; }
-  .chip-review   { @apply chip-status; background: #1e3a5f; color: #adc8f5; }
-
-  /* Blueprint Labels — ALL-CAPS metadata */
-  .label-blueprint {
-    @apply text-label-sm uppercase tracking-widest font-body;
-    color: var(--on-surface-variant);
-  }
-
-  /* Data Table — Ghost border striping */
-  .table-enforcer tr:nth-child(3n) {
-    background: var(--surface-container-low);
-  }
-
-  .table-enforcer th {
-    @apply text-label-sm uppercase tracking-widest
-           font-body font-medium py-3 px-4 text-left;
-    color: var(--on-surface-variant);
-  }
-
-  .table-enforcer td {
-    @apply text-body-sm font-body py-3 px-4;
-    color: var(--on-surface);
-  }
-
-  /* Ghost Border — 15% opacity for data tables */
-  .ghost-border {
-    border: 1px solid rgba(67, 71, 78, 0.15);
-  }
-
-  /* Glass Overlay — for floating menus */
-  .glass-overlay {
-    background: rgba(58, 60, 63, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-
-  /* Money Bar — persistent escrow tracker */
-  .money-bar {
-    @apply px-6 py-3 flex items-center justify-between;
-    background: var(--primary-container);
-  }
-}
-
-/* ─── Animations ─── */
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+  .text-balance {
+    text-wrap: balance;
   }
-
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out forwards;
-  }
-
-  .animate-pulse-subtle {
-    animation: pulseSubtle 2s ease-in-out infinite;
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulseSubtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
 }

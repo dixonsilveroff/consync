@@ -5,6 +5,7 @@ import { api } from "@convex/_generated/api";
 import { ProjectCard } from "@/components/project-card";
 import { FolderPlus, Building2 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function OwnerProjectsPage() {
   const projects = useQuery(api.projects.getOwnerProjects);
@@ -14,16 +15,18 @@ export default function OwnerProjectsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-heading text-display-sm text-on-surface">
+          <h1 className="font-display text-h1 text-text-primary">
             Projects
           </h1>
-          <p className="text-body-lg text-on-surface-variant mt-1">
+          <p className="text-body text-text-secondary mt-1">
             Manage your construction projects and milestone payments
           </p>
         </div>
-        <Link href="/owner/projects/new" className="btn-primary flex items-center gap-2">
-          <FolderPlus className="w-4 h-4" />
-          New Project
+        <Link href="/owner/projects/new">
+          <Button variant="default" className="gap-2">
+            <FolderPlus className="w-4 h-4" />
+            New Project
+          </Button>
         </Link>
       </div>
 
@@ -33,7 +36,7 @@ export default function OwnerProjectsPage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="card-enforcer animate-pulse-subtle h-64"
+              className="bg-surface rounded-xl border border-border h-64 animate-pulse-subtle"
             />
           ))}
         </div>
@@ -41,18 +44,20 @@ export default function OwnerProjectsPage() {
 
       {/* Empty State */}
       {projects !== undefined && projects.length === 0 && (
-        <div className="card-enforcer text-center py-16">
-          <Building2 className="w-12 h-12 text-on-surface-variant mx-auto mb-4" />
-          <h2 className="font-heading text-headline-md text-on-surface mb-2">
+        <div className="bg-surface rounded-xl border border-border text-center py-16 px-6">
+          <Building2 className="w-12 h-12 text-text-muted mx-auto mb-4" />
+          <h2 className="font-display text-h2 text-text-primary mb-2">
             No projects yet
           </h2>
-          <p className="text-body-lg text-on-surface-variant mb-6 max-w-md mx-auto">
+          <p className="text-body text-text-secondary mb-6 max-w-md mx-auto">
             Create your first construction project to start tracking milestones
             and managing payments.
           </p>
-          <Link href="/owner/projects/new" className="btn-primary inline-flex items-center gap-2">
-            <FolderPlus className="w-4 h-4" />
-            Create Project
+          <Link href="/owner/projects/new">
+            <Button variant="default" className="gap-2">
+              <FolderPlus className="w-4 h-4" />
+              Create Project
+            </Button>
           </Link>
         </div>
       )}

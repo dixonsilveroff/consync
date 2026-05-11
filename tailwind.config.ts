@@ -9,100 +9,120 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ─── shadcn Required Tokens (CSS Variable References) ───
-        background: "var(--surface)",
-        foreground: "var(--on-surface)",
+        // ─── ConSync v2.0 Brand Colors ───
+        primary: {
+          DEFAULT: "var(--color-primary)",
+          dark: "var(--color-primary-dark)",
+          light: "var(--color-primary-light)",
+          faint: "var(--color-primary-faint)",
+          foreground: "var(--color-text-inverse)",
+        },
+        
+        // ─── Backgrounds ───
+        background: "var(--color-bg)",
+        surface: {
+          DEFAULT: "var(--color-surface)",
+          raised: "var(--color-surface-raised)",
+        },
+
+        // ─── Text ───
+        text: {
+          primary: "var(--color-text-primary)",
+          secondary: "var(--color-text-secondary)",
+          muted: "var(--color-text-muted)",
+          inverse: "var(--color-text-inverse)",
+        },
+        
+        // ─── shadcn mappings (to support UI components) ───
+        foreground: "var(--color-text-primary)",
         card: {
-          DEFAULT: "var(--surface-container-high)",
-          foreground: "var(--on-surface)",
+          DEFAULT: "var(--color-surface)",
+          foreground: "var(--color-text-primary)",
         },
         popover: {
-          DEFAULT: "var(--surface-container-high)",
-          foreground: "var(--on-surface)",
+          DEFAULT: "var(--color-surface-raised)",
+          foreground: "var(--color-text-primary)",
         },
         muted: {
-          DEFAULT: "var(--surface-container)",
-          foreground: "var(--on-surface-variant)",
+          DEFAULT: "var(--color-bg)",
+          foreground: "var(--color-text-muted)",
         },
         accent: {
-          DEFAULT: "var(--surface-container-high)",
-          foreground: "var(--on-surface)",
+          DEFAULT: "var(--color-primary-faint)",
+          foreground: "var(--color-primary)",
         },
         destructive: {
-          DEFAULT: "var(--critical-red)",
-          foreground: "#ffffff",
+          DEFAULT: "var(--color-danger)",
+          foreground: "var(--color-text-inverse)",
         },
-        border: "var(--outline-variant)",
-        input: "var(--outline-variant)",
-        ring: "var(--primary-hex, #adc8f5)",
-        // ─── Surface Hierarchy (Enforcer Architect) ───
-        surface: {
-          DEFAULT: "#111316",
-          "container-lowest": "#0d0e10",
-          "container-low": "#1a1c1f",
-          "container": "#222427",
-          "container-high": "#282a2d",
-          "container-highest": "#333538",
-          bright: "#3a3c3f",
+        border: "var(--color-border)",
+        input: "var(--color-border)",
+        ring: "var(--color-primary-light)",
+
+        // ─── Status / Semantic Colors ───
+        success: {
+          DEFAULT: "var(--color-success)",
+          bg: "var(--color-success-bg)",
+          border: "var(--color-success-border)",
         },
-        // ─── Brand Colors ───
-        primary: {
-          DEFAULT: "#adc8f5",
-          foreground: "#0a1929",
-          container: "#1e3a5f",
-          "on": "#0a1929",
+        warning: {
+          DEFAULT: "var(--color-warning)",
+          bg: "var(--color-warning-bg)",
+          border: "var(--color-warning-border)",
         },
-        secondary: {
-          DEFAULT: "#333538",
-          foreground: "#e2e2e5",
+        escrow: {
+          DEFAULT: "var(--color-escrow)",
+          bg: "var(--color-escrow-bg)",
+          border: "var(--color-escrow-border)",
         },
-        // ─── Semantic Colors ───
-        "control-green": "#2E7D32",
-        "critical-red": "#D32F2F",
-        "warning-amber": "#F9A825",
-        // ─── Outline ───
-        outline: {
-          DEFAULT: "#8e9099",
-          variant: "#43474e",
-        },
-        // ─── On-surface ───
-        "on-surface": {
-          DEFAULT: "#e2e2e5",
-          variant: "#c4c6cf",
+        danger: {
+          DEFAULT: "var(--color-danger)",
+          bg: "var(--color-danger-bg)",
+          border: "var(--color-danger-border)",
         },
       },
       fontFamily: {
-        heading: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        display: ["var(--font-poppins)", "system-ui", "sans-serif"],
         body: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
       fontSize: {
-        "display-lg": ["3.5rem", { lineHeight: "1.1", fontWeight: "600" }],
-        "display-md": ["2.75rem", { lineHeight: "1.15", fontWeight: "600" }],
-        "display-sm": ["2.25rem", { lineHeight: "1.2", fontWeight: "600" }],
-        "headline-lg": ["1.75rem", { lineHeight: "1.3", fontWeight: "600" }],
-        "headline-md": ["1.5rem", { lineHeight: "1.35", fontWeight: "600" }],
-        "headline-sm": ["1.25rem", { lineHeight: "1.4", fontWeight: "600" }],
-        "label-lg": ["0.875rem", { lineHeight: "1.45", fontWeight: "500" }],
-        "label-md": ["0.75rem", { lineHeight: "1.5", fontWeight: "500", letterSpacing: "0.05em" }],
-        "label-sm": ["0.6875rem", { lineHeight: "1.5", fontWeight: "500", letterSpacing: "0.08em" }],
-        "body-lg": ["1rem", { lineHeight: "1.6", fontWeight: "400" }],
-        "body-md": ["0.875rem", { lineHeight: "1.6", fontWeight: "400" }],
-        "body-sm": ["0.75rem", { lineHeight: "1.5", fontWeight: "400" }],
+        "display": ["3rem", { lineHeight: "1.1", fontWeight: "700" }],
+        "h1": ["2.25rem", { lineHeight: "1.2", fontWeight: "600" }],
+        "h2": ["1.75rem", { lineHeight: "1.3", fontWeight: "600" }],
+        "h3": ["1.375rem", { lineHeight: "1.4", fontWeight: "600" }],
+        "h4": ["1.125rem", { lineHeight: "1.4", fontWeight: "600" }],
+        "body": ["1rem", { lineHeight: "1.6", fontWeight: "400" }],
+        "small": ["0.875rem", { lineHeight: "1.5", fontWeight: "400" }],
+        "micro": ["0.75rem", { lineHeight: "1.4", fontWeight: "400" }],
       },
       borderRadius: {
-        // Enforcer Architect: 0px radius everywhere
         none: "0px",
+        sm: "var(--radius-sm)",
+        DEFAULT: "var(--radius)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        full: "var(--radius-full)",
       },
       boxShadow: {
-        ambient: "0px 20px 40px rgba(0, 0, 0, 0.4)",
-        subtle: "0px 4px 12px rgba(0, 0, 0, 0.25)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
       },
-      spacing: {
-        "section": "1.75rem",
+      transitionDuration: {
+        fast: "var(--duration-fast)",
+        base: "var(--duration-base)",
+        slow: "var(--duration-slow)",
+        release: "var(--duration-release)",
+      },
+      transitionTimingFunction: {
+        "ease-out": "var(--ease-out)",
+        "ease-in": "var(--ease-in)",
+        "ease-in-out": "var(--ease-in-out)",
       },
       backgroundImage: {
-        "cta-gradient": "linear-gradient(135deg, #adc8f5, #1e3a5f)",
-        "cta-gradient-hover": "linear-gradient(135deg, #c4d8f9, #2a4d75)",
+        "cta-gradient": "linear-gradient(135deg, var(--color-primary-light), var(--color-primary))",
+        "cta-gradient-hover": "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
       },
     },
   },
