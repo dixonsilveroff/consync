@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 
@@ -107,5 +107,81 @@ export const getSubmissionHistory = query({
       .collect();
 
     return submissions.sort((a, b) => b.submittedAt - a.submittedAt);
+  },
+});
+
+/**
+ * Owner approves a milestone — marks milestone and latest submission as APPROVED
+ */
+export const approveMilestone = mutation({
+  args: { milestoneId: v.id("milestones") },
+  handler: async (ctx, { milestoneId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    const milestone = await ctx.db.get(milestoneId);
+    if (!milestone) throw new ConvexError("Milestone not found");
+
+    const project = await ctx.db.get(milestone.projectId);
+    if (!project) throw new ConvexError("Project not found");
+    if (project.ownerClerkId !== identity.subject) {
+      throw new ConvexError("Only the project owner can approve milestones");
+    }
+
+    if (milestone.status !== "ANALYSIS_DONE") {
+      throw new ConvexError("Milestone must be in ANALYSIS_DONE status to approve");
+    }
+
+    await ctx.db.patch(milestoneId, { status: "APPROVED" });
+
+    // Mark latest submission as approved
+    const submissions = await ctx.db
+      .query("submissions")
+      .withIndex("by_milestone", (q) => q.eq("milestoneId", milestoneId))
+      .take(10);
+    const latest = submissions.sort((a, b) => b.submittedAt - a.submittedAt)[0];
+    if (latest) {
+      await ctx.db.patch(latest._id, { status: "APPROVED" });
+    }
+
+    // TODO: Phase 3 — trigger Squad milestone payment release
+  },
+});
+
+/**
+ * Owner rejects a milestone — marks milestone and latest submission as REJECTED
+ */
+export const rejectMilestone = mutation({
+  args: {
+    milestoneId: v.id("milestones"),
+    reason: v.string(),
+  },
+  handler: async (ctx, { milestoneId, reason }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    const milestone = await ctx.db.get(milestoneId);
+    if (!milestone) throw new ConvexError("Milestone not found");
+
+    const project = await ctx.db.get(milestone.projectId);
+    if (!project) throw new ConvexError("Project not found");
+    if (project.ownerClerkId !== identity.subject) {
+      throw new ConvexError("Only the project owner can reject milestones");
+    }
+
+    await ctx.db.patch(milestoneId, { status: "REJECTED" });
+
+    // Mark latest submission as rejected with reason
+    const submissions = await ctx.db
+      .query("submissions")
+      .withIndex("by_milestone", (q) => q.eq("milestoneId", milestoneId))
+      .take(10);
+    const latest = submissions.sort((a, b) => b.submittedAt - a.submittedAt)[0];
+    if (latest) {
+      await ctx.db.patch(latest._id, { status: "REJECTED", rejectionReason: reason });
+    }
+
+    // Reset milestone so contractor can resubmit
+    await ctx.db.patch(milestoneId, { status: "REJECTED" });
   },
 });

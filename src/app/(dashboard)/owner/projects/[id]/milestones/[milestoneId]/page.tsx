@@ -1,0 +1,134 @@
+"use client";
+
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { useParams, useRouter } from "next/navigation";
+import { Id } from "@convex/_generated/dataModel";
+import { AiVerdictPanel } from "@/components/ai-verdict-panel";
+import { ArrowLeft, Loader2, Clock } from "lucide-react";
+import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
+
+export default function MilestoneDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const milestoneId = params.milestoneId as Id<"milestones">;
+
+  const detail = useQuery(api.milestones.getMilestoneDetail, { milestoneId });
+
+  if (detail === undefined) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!detail) {
+    return (
+      <div className="p-8 text-center text-on-surface-variant">
+        Milestone not found or access denied.
+      </div>
+    );
+  }
+
+  const { milestone, submission, analysis, photoUrls } = detail;
+  const statusCfg = getStatusConfig(milestone.status);
+
+  return (
+    <div className="animate-fade-in max-w-3xl mx-auto">
+      {/* Back */}
+      <button
+        onClick={() => router.back()}
+        className="btn-tertiary flex items-center gap-1 mb-6"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Back to Project
+      </button>
+
+      {/* Milestone Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h1 className="font-heading text-display-sm text-on-surface">{milestone.name}</h1>
+          <p className="text-body-md text-on-surface-variant mt-1">{milestone.description}</p>
+        </div>
+        <span className={statusCfg.className}>{statusCfg.label}</span>
+      </div>
+
+      {/* Milestone Meta */}
+      <div className="card-enforcer mb-6 flex flex-wrap gap-6">
+        <div>
+          <p className="label-blueprint">Value</p>
+          <p className="font-mono text-headline-sm text-primary mt-1">
+            {formatNaira(milestone.valueKobo)}
+          </p>
+        </div>
+        <div>
+          <p className="label-blueprint">Created</p>
+          <p className="text-body-md text-on-surface mt-1">{formatDate(milestone.createdAt)}</p>
+        </div>
+        <div>
+          <p className="label-blueprint">Acceptance Criteria</p>
+          <ul className="mt-1 space-y-1">
+            {milestone.acceptanceCriteria.map((c, i) => (
+              <li key={i} className="text-body-sm text-on-surface flex gap-2">
+                <span className="text-primary">·</span> {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* No submission yet */}
+      {!submission && (
+        <div className="card-enforcer flex items-center gap-3 text-on-surface-variant py-8 justify-center flex-col">
+          <Clock className="w-8 h-8" />
+          <p className="text-body-md">No submission yet for this milestone.</p>
+        </div>
+      )}
+
+      {/* Submission photos */}
+      {submission && photoUrls.length > 0 && (
+        <div className="card-enforcer mb-6">
+          <h2 className="label-blueprint mb-3">Submitted Photos</h2>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {(photoUrls.filter(Boolean) as string[]).map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={url}
+                alt={`Site photo ${i + 1}`}
+                className="aspect-square rounded-lg object-cover w-full"
+              />
+            ))}
+          </div>
+          {submission.contractorNote && (
+            <p className="text-body-sm text-on-surface-variant mt-3 italic">
+              &ldquo;{submission.contractorNote}&rdquo;
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Analysis in progress */}
+      {milestone.status === "SUBMITTED" && (
+        <div className="card-enforcer flex flex-col items-center justify-center py-12 gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p className="font-heading text-headline-sm text-on-surface">AI analysis running…</p>
+          <p className="text-body-md text-on-surface-variant text-center">
+            Gemini Vision is verifying the site photos against your acceptance criteria.
+          </p>
+        </div>
+      )}
+
+      {/* AI Verdict */}
+      {analysis && (
+        <AiVerdictPanel
+          analysis={analysis}
+          milestoneId={milestoneId}
+          milestoneStatus={milestone.status}
+          role="owner"
+        />
+      )}
+    </div>
+  );
+}
