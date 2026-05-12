@@ -54,12 +54,23 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
       const storageIds: Id<"_storage">[] = [];
       for (const file of files) {
         const uploadUrl = await generateUploadUrl();
+        if (!uploadUrl) {
+          throw new Error("Could not generate upload URL. Please try again.");
+        }
+
+        console.log(`[PhotoUpload] Uploading ${file.name} to:`, uploadUrl);
+
         const res = await fetch(uploadUrl, {
           method: "POST",
-          headers: { "Content-Type": file.type },
+          headers: { "Content-Type": file.type || "image/jpeg" },
           body: file,
         });
-        if (!res.ok) throw new Error(`Upload failed for ${file.name}`);
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Upload failed for ${file.name}: ${res.status} ${errorText}`);
+        }
+
         const { storageId } = await res.json();
         storageIds.push(storageId as Id<"_storage">);
       }
