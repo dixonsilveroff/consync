@@ -8,11 +8,13 @@ import { ReactNode } from "react";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
-// Lazily initialize the client only if URL is available
-let convex: ConvexReactClient | null = null;
-if (convexUrl) {
-  convex = new ConvexReactClient(convexUrl);
+if (!convexUrl) {
+  throw new Error(
+    "Missing NEXT_PUBLIC_CONVEX_URL. Set it in your environment so Convex can initialize.",
+  );
 }
+
+const convex = new ConvexReactClient(convexUrl);
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   return (
@@ -28,14 +30,9 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
         },
       }}
     >
-      {convex ? (
-        <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          {children}
-        </ConvexProviderWithClerk>
-      ) : (
-        // Render children without Convex when URL not configured
-        <>{children}</>
-      )}
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        {children}
+      </ConvexProviderWithClerk>
     </ClerkProvider>
   );
 }
