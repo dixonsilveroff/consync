@@ -92,3 +92,10 @@ export const saveAnalysisResult = internalMutation({
     await ctx.db.patch(args.milestoneId, { status: "ANALYSIS_DONE" });
   },
 });
+
+export const getLatestSubmission = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("submissions").order("desc").take(1);
+  }
+});

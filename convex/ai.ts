@@ -4,6 +4,7 @@ import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { GoogleGenAI } from "@google/genai";
+import { Buffer } from "buffer";
 
 // ─── GEMINI SYSTEM PROMPT ────────────────────────────────────────────────────
 
@@ -54,8 +55,9 @@ export const runMilestoneAnalysis = internalAction({
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    // 1. Fetch all data via internal query (in aiData.ts — default runtime)
-    const data = await ctx.runQuery(internal.aiData.fetchSubmissionData, {
+    try {
+      // 1. Fetch all data via internal query (in aiData.ts — default runtime)
+      const data = await ctx.runQuery(internal.aiData.fetchSubmissionData, {
       submissionId: args.submissionId,
     });
 
@@ -113,7 +115,13 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
       return;
     }
 
-    const credentials = JSON.parse(credentialsJson);
+    let credentials;
+    try {
+      credentials = JSON.parse(credentialsJson);
+    } catch (err) {
+      console.error("[AI] Invalid JSON in GOOGLE_APPLICATION_CREDENTIALS_JSON");
+      return;
+    }
 
     const ai = new GoogleGenAI({
       vertexai: true,
@@ -196,5 +204,26 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
     console.log(
       `[AI] Analysis complete — ${args.milestoneId}: ${parsed.verificationStatus} @ ${parsed.confidenceScore}%`
     );
+    } catch (err) {
+      console.error("[AI] CRITICAL ERROR in runMilestoneAnalysis:", err);
+      // Not throwing the error ensures the function doesn't infinitely retry in Convex
+    }
   },
+});
+
+export const testRunAnalysis = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const submissions = await ctx.runQuery(internal.aiData.getLatestSubmission, {});
+    if (submissions && submissions.length > 0) {
+      const sub = submissions[0];
+      await ctx.runAction(internal.ai.runMilestoneAnalysis, {
+        submissionId: sub._id,
+        milestoneId: sub.milestoneId,
+        projectId: sub.projectId,
+      });
+      return "Triggered on submission " + sub._id;
+    }
+    return "No submissions found";
+  }
 });
