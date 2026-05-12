@@ -137,7 +137,7 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
     let rawJson: string;
     try {
       const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash-001",
+        model: "gemini-1.5-flash",
         contents: [
           {
             role: "user",
@@ -206,24 +206,15 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
     );
     } catch (err) {
       console.error("[AI] CRITICAL ERROR in runMilestoneAnalysis:", err);
-      // Not throwing the error ensures the function doesn't infinitely retry in Convex
+      // Ensure the frontend stops loading by marking it as rejected
+      try {
+        await ctx.runMutation(internal.aiData.saveAnalysisFailure, {
+          submissionId: args.submissionId,
+          milestoneId: args.milestoneId,
+        });
+      } catch (patchErr) {
+        console.error("[AI] Failed to update status on error:", patchErr);
+      }
     }
   },
-});
-
-export const testRunAnalysis = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const submissions = await ctx.runQuery(internal.aiData.getLatestSubmission, {});
-    if (submissions && submissions.length > 0) {
-      const sub = submissions[0];
-      await ctx.runAction(internal.ai.runMilestoneAnalysis, {
-        submissionId: sub._id,
-        milestoneId: sub.milestoneId,
-        projectId: sub.projectId,
-      });
-      return "Triggered on submission " + sub._id;
-    }
-    return "No submissions found";
-  }
 });

@@ -99,3 +99,17 @@ export const getLatestSubmission = internalQuery({
     return await ctx.db.query("submissions").order("desc").take(1);
   }
 });
+
+/**
+ * Internal mutation: save analysis failure and update statuses
+ */
+export const saveAnalysisFailure = internalMutation({
+  args: {
+    submissionId: v.id("submissions"),
+    milestoneId: v.id("milestones"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.submissionId, { status: "REJECTED" });
+    await ctx.db.patch(args.milestoneId, { status: "REJECTED" });
+  },
+});
