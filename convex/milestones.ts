@@ -9,16 +9,16 @@ export const getMilestones = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
+    if (!identity) return [];
 
     // Validate project access
     const project = await ctx.db.get(projectId);
-    if (!project) throw new ConvexError("Project not found");
+    if (!project) return [];
     if (
       project.ownerClerkId !== identity.subject &&
       project.contractorClerkId !== identity.subject
     ) {
-      throw new ConvexError("Access denied");
+      return [];
     }
 
     const milestones = await ctx.db
@@ -38,19 +38,19 @@ export const getMilestoneDetail = query({
   args: { milestoneId: v.id("milestones") },
   handler: async (ctx, { milestoneId }) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
+    if (!identity) return null;
 
     const milestone = await ctx.db.get(milestoneId);
-    if (!milestone) throw new ConvexError("Milestone not found");
+    if (!milestone) return null;
 
     // Validate project access
     const project = await ctx.db.get(milestone.projectId);
-    if (!project) throw new ConvexError("Project not found");
+    if (!project) return null;
     if (
       project.ownerClerkId !== identity.subject &&
       project.contractorClerkId !== identity.subject
     ) {
-      throw new ConvexError("Access denied");
+      return null;
     }
 
     // Get the latest submission
