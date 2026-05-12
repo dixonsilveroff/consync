@@ -117,9 +117,11 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
 
     let credentials;
     try {
-      credentials = JSON.parse(credentialsJson);
+      // The env var is base64-encoded to avoid shell escaping issues
+      const decoded = Buffer.from(credentialsJson, "base64").toString("utf-8");
+      credentials = JSON.parse(decoded);
     } catch (err) {
-      console.error("[AI] Invalid JSON in GOOGLE_APPLICATION_CREDENTIALS_JSON");
+      console.error("[AI] Failed to decode/parse GOOGLE_APPLICATION_CREDENTIALS_JSON:", err);
       return;
     }
 
@@ -137,7 +139,7 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
     let rawJson: string;
     try {
       const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-pro",
         contents: [
           {
             role: "user",
