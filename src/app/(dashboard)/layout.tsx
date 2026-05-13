@@ -2,7 +2,7 @@
 
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -42,9 +42,21 @@ export default function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const user = useQuery(api.users.currentUser);
+  const bankStatus = useQuery(api.users.contractorBankStatus);
+  const verifyBankDetails = useAction(api.squad.verifyAndSaveBankDetails);
 
   const isOwnerPath = pathname.startsWith("/owner");
   const isContractorPath = pathname.startsWith("/contractor");
+  const shouldPromptBankDetails =
+    user?.role === "contractor" &&
+    bankStatus?.hasBankDetails === false &&
+    isContractorPath;
+
+  const [bankModalOpen, setBankModalOpen] = useState(false);
+  const [bankCode, setBankCode] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [bankError, setBankError] = useState<string | null>(null);
+  const [bankSaving, setBankSaving] = useState(false);
 
   useEffect(() => {
     if (user === undefined) return;
@@ -64,6 +76,34 @@ export default function DashboardLayout({
       router.replace("/owner/projects");
     }
   }, [user, isOwnerPath, isContractorPath, router]);
+
+  useEffect(() => {
+    if (shouldPromptBankDetails) {
+      setBankModalOpen(true);
+    }
+  }, [shouldPromptBankDetails]);
+
+  const submitBankDetails = async () => {
+    if (!bankCode.trim() || !accountNumber.trim()) {
+      setBankError("Bank code and account number are required");
+      return;
+    }
+
+    setBankSaving(true);
+    setBankError(null);
+    try {
+      await verifyBankDetails({
+        bankCode: bankCode.trim(),
+        bankAccountNumber: accountNumber.trim(),
+      });
+      setBankModalOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to save bank details";
+      setBankError(message);
+    } finally {
+      setBankSaving(false);
+    }
+  };
 
   // Loading state
   if (user === undefined) {
@@ -131,7 +171,7 @@ export default function DashboardLayout({
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-6 flex items-center gap-3 border-b border-border hidden md:flex">
+        <div className="p-6 items-center gap-3 border-b border-border hidden md:flex">
           <Building2 className="w-6 h-6 text-primary" />
           <span className="font-display text-h3 text-text-primary">ConSync</span>
         </div>
@@ -204,6 +244,56 @@ export default function DashboardLayout({
           className="fixed inset-0 bg-text-primary/50 z-30 md:hidden transition-opacity"
           onClick={() => setMobileMenuOpen(false)}
         />
+      )}
+
+      {bankModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-surface w-full max-w-md rounded-xl border border-border p-6 shadow-lg">
+            <h3 className="font-display text-h3 text-text-primary mb-2">
+              Add payout bank details
+            </h3>
+            <p className="text-body text-text-secondary mb-6">
+              Provide your bank details once so owners can release milestone payments instantly.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-small font-medium text-text-primary">Bank code</label>
+                <p className="text-micro text-text-secondary mt-1">
+                  Use the Squad bank code (e.g. 000013 for GTBank).
+                </p>
+                <input
+                  value={bankCode}
+                  onChange={(event) => setBankCode(event.target.value)}
+                  placeholder="000013"
+                  inputMode="numeric"
+                  className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-3 text-body text-text-primary"
+                />
+              </div>
+              <div>
+                <label className="text-small font-medium text-text-primary">Account number</label>
+                <input
+                  value={accountNumber}
+                  onChange={(event) => setAccountNumber(event.target.value)}
+                  placeholder="0123456789"
+                  inputMode="numeric"
+                  className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-3 text-body text-text-primary"
+                />
+              </div>
+              {bankError && (
+                <p className="text-small text-red-500">{bankError}</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={submitBankDetails}
+                  disabled={bankSaving}
+                  className="btn-primary flex-1"
+                >
+                  {bankSaving ? "Saving..." : "Save details"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

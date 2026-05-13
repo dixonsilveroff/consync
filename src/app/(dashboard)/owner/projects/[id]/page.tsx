@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { EscrowBalance } from "@/components/escrow-balance";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { getStatusConfig, formatDate } from "@/lib/utils";
 
 export default function OwnerProjectDashboard() {
@@ -43,9 +44,19 @@ export default function OwnerProjectDashboard() {
 
   const statusConfig = getStatusConfig(project.status);
 
-  const handleFundEscrow = () => {
-    // TODO: Phase 3 — initiateEscrowPayment action → redirect to Squad checkout
-    console.log("Fund escrow clicked — Squad integration pending");
+  const initiateEscrow = useAction(api.squad.initiateEscrowPayment);
+  const [funding, setFunding] = useState(false);
+
+  const handleFundEscrow = async () => {
+    setFunding(true);
+    try {
+      const result = await initiateEscrow({ projectId });
+      if (result?.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      }
+    } finally {
+      setFunding(false);
+    }
   };
 
   return (
@@ -132,6 +143,7 @@ export default function OwnerProjectDashboard() {
             escrowBalanceKobo={project.escrowBalanceKobo}
             projectStatus={project.status}
             onFundEscrow={handleFundEscrow}
+            isFunding={funding}
           />
 
           {/* Project Info */}

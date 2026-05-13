@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 
@@ -82,5 +82,62 @@ export const currentUser = query({
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .first();
+  },
+});
+
+/**
+ * Check whether the current contractor has verified bank details.
+ */
+export const contractorBankStatus = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { hasBankDetails: false };
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .first();
+
+    if (!user || user.role !== "contractor") {
+      return { hasBankDetails: false };
+    }
+
+    return {
+      hasBankDetails:
+        Boolean(user.bankCode) &&
+        Boolean(user.bankAccountNumber) &&
+        Boolean(user.bankAccountName),
+      bankAccountName: user.bankAccountName ?? null,
+      bankCode: user.bankCode ?? null,
+      bankAccountNumber: user.bankAccountNumber
+        ? user.bankAccountNumber.slice(-4)
+        : null,
+    };
+  },
+});
+
+/**
+ * Internal mutation: save verified contractor bank details.
+ */
+export const saveContractorBankDetails = internalMutation({
+  args: {
+    userId: v.id("users"),
+    bankCode: v.string(),
+    bankAccountNumber: v.string(),
+    bankAccountName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    await ctx.db.patch(args.userId, {
+      bankCode: args.bankCode,
+      bankAccountNumber: args.bankAccountNumber,
+      bankAccountName: args.bankAccountName,
+      bankVerifiedAt: Date.now(),
+    });
   },
 });

@@ -9,6 +9,10 @@ export default defineSchema({
     firstName: v.string(),
     lastName: v.optional(v.string()),
     role: v.string(), // "owner" or "contractor"
+    bankCode: v.optional(v.string()),
+    bankAccountNumber: v.optional(v.string()),
+    bankAccountName: v.optional(v.string()),
+    bankVerifiedAt: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_clerkId", ["clerkId"]),
 

@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
+import { internal } from "./_generated/api";
 
 /**
  * Get all milestones for a project (ordered by orderIndex)
@@ -132,6 +133,26 @@ export const approveMilestone = mutation({
       throw new ConvexError("Milestone must be in ANALYSIS_DONE status to approve");
     }
 
+    if (project.escrowBalanceKobo < milestone.valueKobo) {
+      throw new ConvexError("Insufficient escrow balance");
+    }
+
+    const contractorId = project.contractorClerkId;
+    if (!contractorId) {
+      throw new ConvexError("Contractor not linked to project");
+    }
+
+    const contractor = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", contractorId))
+      .first();
+
+    if (!contractor?.bankCode || !contractor.bankAccountNumber || !contractor.bankAccountName) {
+      throw new ConvexError("Contractor bank details are missing");
+    }
+
+    const transactionRef = `CSYNC_TRF_${milestoneId}_${Date.now()}`;
+
     await ctx.db.patch(milestoneId, { status: "APPROVED" });
 
     // Mark latest submission as approved
@@ -144,7 +165,26 @@ export const approveMilestone = mutation({
       await ctx.db.patch(latest._id, { status: "APPROVED" });
     }
 
-    // TODO: Phase 3 — trigger Squad milestone payment release
+    await ctx.db.insert("payments", {
+      projectId: project._id,
+      milestoneId: milestone._id,
+      type: "MILESTONE_RELEASE",
+      amountKobo: milestone.valueKobo,
+      status: "INITIATED",
+      squadTransactionRef: transactionRef,
+      squadGatewayRef: undefined,
+      checkoutUrl: undefined,
+      createdAt: Date.now(),
+    });
+
+    await ctx.scheduler.runAfter(0, internal.squad.releaseMilestonePayment, {
+      milestoneId: milestone._id,
+      amountKobo: milestone.valueKobo,
+      bankCode: contractor.bankCode,
+      bankAccountNumber: contractor.bankAccountNumber,
+      bankAccountName: contractor.bankAccountName,
+      transactionRef,
+    });
   },
 });
 

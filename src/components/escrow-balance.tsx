@@ -8,6 +8,7 @@ interface EscrowBalanceProps {
   escrowBalanceKobo: number;
   projectStatus: string;
   onFundEscrow?: () => void;
+  isFunding?: boolean;
 }
 
 export function EscrowBalance({
@@ -15,6 +16,7 @@ export function EscrowBalance({
   escrowBalanceKobo,
   projectStatus,
   onFundEscrow,
+  isFunding = false,
 }: EscrowBalanceProps) {
   const fundedPercentage =
     totalValueKobo > 0
@@ -87,9 +89,10 @@ export function EscrowBalance({
       {needsFunding && onFundEscrow && (
         <button
           onClick={onFundEscrow}
+          disabled={isFunding}
           className="btn-primary w-full flex items-center justify-center gap-2"
         >
-          Fund Escrow
+          {isFunding ? "Redirecting..." : "Fund Escrow"}
           <ArrowRight className="w-4 h-4" />
         </button>
       )}
