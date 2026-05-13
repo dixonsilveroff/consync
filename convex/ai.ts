@@ -64,7 +64,7 @@ async function getAccessToken(credentials: {
   return tokenResponse.token;
 }
 
-// ─── Helper: Call Vertex AI REST API directly via fetch ───────────────────────
+// ─── Helper: Call Vertex AI REST API with retry + timeout ────────────────────
 
 async function callVertexAI(
   accessToken: string,
@@ -74,35 +74,87 @@ async function callVertexAI(
   requestBody: object,
 ): Promise<string> {
   const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:generateContent`;
+  const bodyStr = JSON.stringify(requestBody);
+  console.log(`[AI] Endpoint: ${endpoint}`);
+  console.log(`[AI] JSON body size: ${(bodyStr.length / 1024).toFixed(1)} KB`);
 
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
+  const MAX_RETRIES = 4;
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(
-      `Vertex AI returned ${response.status}: ${errorBody}`,
-    );
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    console.log(`[AI] Attempt ${attempt}/${MAX_RETRIES}...`);
+
+    try {
+      const controller = new AbortController();
+      // 90-second timeout — generous for multimodal model
+      const timer = setTimeout(() => controller.abort(), 90_000);
+
+      let response: Response;
+      try {
+        response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: bodyStr,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Vertex AI HTTP ${response.status}: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      const candidates = data.candidates;
+      if (!candidates || candidates.length === 0) {
+        throw new Error("Vertex AI returned no candidates");
+      }
+      const parts = candidates[0].content?.parts;
+      if (!parts || parts.length === 0) {
+        throw new Error("Vertex AI returned no content parts");
+      }
+      console.log(`[AI] Attempt ${attempt} succeeded.`);
+      return parts.map((p: { text?: string }) => p.text ?? "").join("");
+    } catch (err: unknown) {
+      // Dig into the error — undici wraps ECONNRESET inside err.cause
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const causeMsg =
+        err instanceof Error && err.cause instanceof Error
+          ? err.cause.message
+          : "";
+      const causeCode =
+        err instanceof Error && err.cause instanceof Error
+          ? (err.cause as NodeJS.ErrnoException).code ?? ""
+          : "";
+
+      const isNetwork =
+        errMsg.includes("fetch failed") ||
+        errMsg.includes("ECONNRESET") ||
+        causeMsg.includes("ECONNRESET") ||
+        causeCode === "ECONNRESET" ||
+        errMsg.includes("socket hang up") ||
+        (err instanceof Error && err.name === "AbortError");
+
+      console.warn(
+        `[AI] Attempt ${attempt} failed — msg: "${errMsg}", cause: "${causeMsg}", code: "${causeCode}", isNetwork: ${isNetwork}`,
+      );
+
+      if (isNetwork && attempt < MAX_RETRIES) {
+        const delay = attempt * 3000; // 3s, 6s, 9s
+        console.log(`[AI] Retrying in ${delay / 1000}s...`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+
+      throw err;
+    }
   }
 
-  const data = await response.json();
-
-  // Extract text from the Vertex AI REST response structure
-  const candidates = data.candidates;
-  if (!candidates || candidates.length === 0) {
-    throw new Error("Vertex AI returned no candidates");
-  }
-  const parts = candidates[0].content?.parts;
-  if (!parts || parts.length === 0) {
-    throw new Error("Vertex AI returned no content parts");
-  }
-  return parts.map((p: { text?: string }) => p.text ?? "").join("");
+  throw new Error("[AI] callVertexAI: all retries exhausted");
 }
 
 // ─── MAIN ACTION: Run Gemini Vision analysis ──────────────────────────────────
@@ -115,7 +167,7 @@ export const runMilestoneAnalysis = internalAction({
   },
   handler: async (ctx, args) => {
     try {
-      // 1. Fetch all data via internal query (in aiData.ts — default runtime)
+      // 1. Fetch all data via internal query
       const data = await ctx.runQuery(internal.aiData.fetchSubmissionData, {
         submissionId: args.submissionId,
       });
@@ -152,6 +204,14 @@ export const runMilestoneAnalysis = internalAction({
         return;
       }
 
+      const totalKB = photoParts.reduce(
+        (acc, p) => acc + p.inlineData.data.length,
+        0,
+      ) / 1024;
+      console.log(
+        `[AI] ${photoParts.length} photo(s) loaded. Total base64: ${totalKB.toFixed(1)} KB`,
+      );
+
       // 3. Build user prompt
       const criteriaText = data.acceptanceCriteria
         .map((c: string, i: number) => `${i + 1}. ${c}`)
@@ -168,18 +228,10 @@ ${data.contractorNote ? `Contractor's note: "${data.contractorNote}"` : ""}
 
 Analyze the ${photoParts.length} attached photo(s) and determine whether this milestone has been completed.`;
 
-      // 4. Parse service account credentials and get access token
+      // 4. Parse service account credentials
       const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
       const projectId = process.env.GOOGLE_VERTEX_PROJECT_ID;
       const location = process.env.GOOGLE_VERTEX_LOCATION ?? "us-central1";
-
-      const totalBase64Size = photoParts.reduce(
-        (acc, p) => acc + p.inlineData.data.length,
-        0,
-      );
-      console.log(
-        `[AI] Preparing Vertex AI REST call for ${photoParts.length} photos. Payload: ${(totalBase64Size / 1024 / 1024).toFixed(2)} MB`,
-      );
 
       if (!credentialsJson || !projectId) {
         console.error("[AI] Missing Vertex AI environment variables");
@@ -188,24 +240,19 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
 
       let credentials: { client_email: string; private_key: string };
       try {
-        const decoded = Buffer.from(credentialsJson, "base64").toString(
-          "utf-8",
-        );
+        const decoded = Buffer.from(credentialsJson, "base64").toString("utf-8");
         credentials = JSON.parse(decoded);
       } catch (err) {
-        console.error(
-          "[AI] Failed to decode/parse GOOGLE_APPLICATION_CREDENTIALS_JSON:",
-          err,
-        );
+        console.error("[AI] Failed to parse credentials:", err);
         return;
       }
 
       // 5. Get OAuth2 access token
-      console.log("[AI] Obtaining access token from service account...");
+      console.log("[AI] Obtaining access token...");
       const accessToken = await getAccessToken(credentials);
-      console.log("[AI] Access token obtained. Calling Vertex AI REST API...");
+      console.log("[AI] Token obtained. Starting Vertex AI call...");
 
-      // 6. Build the Vertex AI REST request body
+      // 6. Build request body
       const requestBody = {
         contents: [
           {
@@ -218,12 +265,12 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
         },
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 16384,
         },
       };
 
-      // 7. Call Vertex AI directly via fetch (bypassing the SDK)
-      const MODEL_ID = "gemini-2.0-flash-001";
+      // 7. Call Vertex AI REST API (with retry logic)
+      const MODEL_ID = "gemini-2.5-pro";
       let rawJson: string;
       try {
         rawJson = await callVertexAI(
@@ -234,13 +281,13 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
           requestBody,
         );
       } catch (err) {
-        console.error("[AI] Vertex AI REST call failed:", err);
+        console.error("[AI] Vertex AI call failed after all retries:", err);
         return;
       }
 
-      console.log("[AI] Received response from Vertex AI. Parsing JSON...");
+      console.log("[AI] Response received. Parsing JSON...");
 
-      // 8. Parse JSON response (strip any markdown fences)
+      // 8. Parse JSON response
       let parsed: {
         verificationStatus:
           | "CONFIRMED"
@@ -271,11 +318,11 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
           .trim();
         parsed = JSON.parse(cleaned);
       } catch (err) {
-        console.error("[AI] JSON parse failed. Raw response:", rawJson, err);
+        console.error("[AI] JSON parse failed. Raw:", rawJson, err);
         return;
       }
 
-      // 9. Persist result via internal mutation (in aiData.ts — default runtime)
+      // 9. Persist result
       await ctx.runMutation(internal.aiData.saveAnalysisResult, {
         submissionId: args.submissionId,
         milestoneId: args.milestoneId,
@@ -290,18 +337,17 @@ Analyze the ${photoParts.length} attached photo(s) and determine whether this mi
       });
 
       console.log(
-        `[AI] Analysis complete — ${args.milestoneId}: ${parsed.verificationStatus} @ ${parsed.confidenceScore}%`,
+        `[AI] ✅ Analysis complete — ${parsed.verificationStatus} @ ${parsed.confidenceScore}%`,
       );
     } catch (err) {
-      console.error("[AI] CRITICAL ERROR in runMilestoneAnalysis:", err);
-      // Ensure the frontend stops loading by marking it as rejected
+      console.error("[AI] CRITICAL ERROR:", err);
       try {
         await ctx.runMutation(internal.aiData.saveAnalysisFailure, {
           submissionId: args.submissionId,
           milestoneId: args.milestoneId,
         });
       } catch (patchErr) {
-        console.error("[AI] Failed to update status on error:", patchErr);
+        console.error("[AI] Failed to save failure state:", patchErr);
       }
     }
   },
