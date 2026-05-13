@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { EscrowBalance } from "@/components/escrow-balance";
-import { ArrowLeft, MapPin, Building2, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Building2, Calendar, Loader2 } from "lucide-react";
 import { getStatusConfig, formatDate } from "@/lib/utils";
 
 export default function OwnerProjectDashboard() {

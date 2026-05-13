@@ -5,7 +5,7 @@ import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
-import { ArrowLeft, MapPin, Building2, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Building2, Calendar, Loader2 } from "lucide-react";
 import { getStatusConfig, formatDate } from "@/lib/utils";
 
 export default function ContractorProjectDashboard() {

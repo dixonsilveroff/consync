@@ -70,7 +70,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Building2 className="w-12 h-12 text-primary animate-pulse" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-on-surface-variant font-medium animate-pulse">
             Loading profile...
           </p>
