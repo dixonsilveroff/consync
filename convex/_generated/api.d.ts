@@ -13,6 +13,7 @@ import type * as aiData from "../aiData.js";
 import type * as milestones from "../milestones.js";
 import type * as projects from "../projects.js";
 import type * as submissions from "../submissions.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   milestones: typeof milestones;
   projects: typeof projects;
   submissions: typeof submissions;
+  users: typeof users;
 }>;
 
 /**

@@ -5,6 +5,7 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 import { dark } from "@clerk/themes";
 import { ReactNode } from "react";
+import { AuthSync } from "./auth-sync";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -31,6 +32,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
       }}
     >
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        <AuthSync />
         {children}
       </ConvexProviderWithClerk>
     </ClerkProvider>
