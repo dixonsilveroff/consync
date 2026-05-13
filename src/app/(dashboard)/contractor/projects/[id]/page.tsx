@@ -5,11 +5,10 @@ import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
-import { EscrowBalance } from "@/components/escrow-balance";
 import { ArrowLeft, MapPin, Building2, Calendar } from "lucide-react";
 import { getStatusConfig, formatDate } from "@/lib/utils";
 
-export default function OwnerProjectDashboard() {
+export default function ContractorProjectDashboard() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as Id<"projects">;
@@ -43,39 +42,16 @@ export default function OwnerProjectDashboard() {
 
   const statusConfig = getStatusConfig(project.status);
 
-  const handleFundEscrow = () => {
-    // TODO: Phase 3 — initiateEscrowPayment action → redirect to Squad checkout
-    console.log("Fund escrow clicked — Squad integration pending");
-  };
-
   return (
     <div className="animate-fade-in">
       {/* Back Link */}
       <button
-        onClick={() => router.push("/owner/projects")}
+        onClick={() => router.push("/contractor/projects")}
         className="btn-tertiary flex items-center gap-1 mb-6"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         All Projects
       </button>
-
-      {/* Money Bar */}
-      {project.status === "ACTIVE" && (
-        <div className="money-bar mb-6">
-          <div className="flex items-center gap-2">
-            <span className="label-blueprint text-primary/70">
-              ESCROW BALANCE
-            </span>
-          </div>
-          <span className="font-heading text-headline-sm text-primary">
-            {new Intl.NumberFormat("en-NG", {
-              style: "currency",
-              currency: "NGN",
-              minimumFractionDigits: 0,
-            }).format(project.escrowBalanceKobo / 100)}
-          </span>
-        </div>
-      )}
 
       {/* Project Header */}
       <div className="flex items-start justify-between mb-8">
@@ -120,20 +96,13 @@ export default function OwnerProjectDashboard() {
             <MilestoneList
               milestones={milestones}
               projectId={projectId}
-              role="owner"
+              role="contractor"
             />
           </div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <EscrowBalance
-            totalValueKobo={project.totalValueKobo}
-            escrowBalanceKobo={project.escrowBalanceKobo}
-            projectStatus={project.status}
-            onFundEscrow={handleFundEscrow}
-          />
-
           {/* Project Info */}
           <div className="card-enforcer">
             <h3 className="label-blueprint mb-4">Project Details</h3>
@@ -143,22 +112,12 @@ export default function OwnerProjectDashboard() {
               </p>
             )}
             <div className="space-y-3">
-              {project.contractorEmail && (
-                <div>
-                  <p className="label-blueprint">Contractor</p>
-                  <p className="text-body-md text-on-surface mt-1">
-                    {project.contractorEmail}
-                  </p>
-                </div>
-              )}
-              {project.squadVirtualAccountNumber && (
-                <div>
-                  <p className="label-blueprint">Virtual Account</p>
-                  <p className="text-body-md text-primary font-mono mt-1">
-                    {project.squadVirtualAccountNumber}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="label-blueprint">Owner Clerk ID</p>
+                <p className="text-body-md text-on-surface mt-1 truncate">
+                  {project.ownerClerkId}
+                </p>
+              </div>
             </div>
           </div>
         </div>

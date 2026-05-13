@@ -149,4 +149,13 @@ export default defineSchema({
   })
     .index("by_project", ["projectId"])
     .index("by_transaction_ref", ["squadTransactionRef"]),
+
+  // ─── INVITATIONS ───────────────────────────────────────────
+  invitations: defineTable({
+    email: v.string(),
+    projectId: v.id("projects"),
+    role: v.string(), // e.g., "contractor"
+    inviterClerkId: v.string(),
+    createdAt: v.number(),
+  }).index("by_email", ["email"]),
 });

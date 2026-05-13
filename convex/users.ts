@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 
@@ -36,16 +36,51 @@ export const syncUser = mutation({
       });
       return existingUser._id;
     } else {
-      // Create new user with default role "owner"
+      // Check for pending invitations for this email
+      const invitations = await ctx.db
+        .query("invitations")
+        .withIndex("by_email", (q) => q.eq("email", args.email))
+        .collect();
+
+      const initialRole = invitations.length > 0 ? "contractor" : "owner";
+
+      // Create new user
       const newUserId = await ctx.db.insert("users", {
         clerkId,
         email: args.email,
         firstName: args.firstName,
         lastName: args.lastName,
-        role: "owner", // Default role
+        role: initialRole,
         createdAt: Date.now(),
       });
+
+      // If they were invited, link them to the projects and clean up invitations
+      if (invitations.length > 0) {
+        for (const invite of invitations) {
+          await ctx.db.patch(invite.projectId, {
+            contractorClerkId: clerkId,
+          });
+          await ctx.db.delete(invite._id);
+        }
+      }
+
       return newUserId;
     }
+  },
+});
+
+/**
+ * Get the currently authenticated user's profile.
+ */
+export const currentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .first();
   },
 });

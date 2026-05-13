@@ -17,8 +17,9 @@ export default function MilestoneDetailPage() {
 
   if (detail === undefined) {
     return (
-      <div className="flex items-center justify-center py-24">
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-on-surface-variant font-medium animate-pulse">Loading milestone...</p>
       </div>
     );
   }
@@ -113,7 +114,7 @@ export default function MilestoneDetailPage() {
       {milestone.status === "SUBMITTED" && (
         <div className="card-enforcer flex flex-col items-center justify-center py-12 gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="font-heading text-headline-sm text-on-surface">AI analysis running…</p>
+          <p className="font-heading text-headline-sm text-on-surface">Loading analysis…</p>
           <p className="text-body-md text-on-surface-variant text-center">
             Gemini Vision is verifying the site photos against your acceptance criteria.
           </p>

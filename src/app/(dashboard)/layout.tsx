@@ -1,16 +1,20 @@
 "use client";
 
-import { UserButton, useUser } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { useRouter, usePathname } from "next/navigation";
 import {
   FolderPlus,
   HardHat,
   Building2,
   Menu,
   X,
+  ShieldAlert,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -25,7 +29,7 @@ const ownerNav: NavItem[] = [
 ];
 
 const contractorNav: NavItem[] = [
-  { label: "My Contracts", href: "/contractor/contracts", icon: <HardHat className="w-5 h-5" /> },
+  { label: "My Contracts", href: "/contractor/projects", icon: <HardHat className="w-5 h-5" /> },
 ];
 
 export default function DashboardLayout({
@@ -33,13 +37,68 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useUser();
+  const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Simple role check based on pathname for MVP.
-  // In a real app, this would be tied to user.publicMetadata.role
-  const isOwner = pathname.startsWith("/owner");
+  const user = useQuery(api.users.currentUser);
+
+  const isOwnerPath = pathname.startsWith("/owner");
+  const isContractorPath = pathname.startsWith("/contractor");
+
+  useEffect(() => {
+    if (user === undefined) return;
+
+    if (user === null) {
+      // Not logged in or not synced
+      return;
+    }
+
+    // RBAC: If on owner path but user is contractor, redirect to contractor dashboard
+    if (isOwnerPath && user.role !== "owner") {
+      router.replace("/contractor/projects");
+    }
+
+    // RBAC: If on contractor path but user is owner, redirect to owner dashboard
+    if (isContractorPath && user.role !== "contractor") {
+      router.replace("/owner/projects");
+    }
+  }, [user, isOwnerPath, isContractorPath, router]);
+
+  // Loading state
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Building2 className="w-12 h-12 text-primary animate-pulse" />
+          <p className="text-on-surface-variant font-medium animate-pulse">
+            Loading profile...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not synced state
+  if (user === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-8 text-center">
+        <div className="max-w-md space-y-4">
+          <ShieldAlert className="w-12 h-12 text-critical-red mx-auto" />
+          <h2 className="text-h2 text-text-primary">Account Not Found</h2>
+          <p className="text-body text-text-secondary">
+            We couldn't find your profile in our system. If you just signed up, 
+            it might take a moment to synchronize.
+          </p>
+          <Link href="/">
+            <button className="btn-primary mt-4">Return Home</button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwner = user.role === "owner";
   const navItems = isOwner ? ownerNav : contractorNav;
 
   return (
@@ -120,10 +179,10 @@ export default function DashboardLayout({
           <div className="flex items-center gap-4">
             <div className="text-right mr-2">
               <p className="text-small font-medium text-text-primary">
-                {user?.fullName || "User"}
+                {user?.firstName} {user?.lastName}
               </p>
               <p className="text-micro text-text-muted">
-                {user?.primaryEmailAddress?.emailAddress}
+                {user?.email}
               </p>
             </div>
             <UserButton

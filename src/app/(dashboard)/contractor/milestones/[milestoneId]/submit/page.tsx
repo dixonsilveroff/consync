@@ -22,8 +22,9 @@ export default function MilestoneSubmitPage() {
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center py-24">
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-on-surface-variant font-medium animate-pulse">Loading auth...</p>
       </div>
     );
   }
@@ -38,8 +39,9 @@ export default function MilestoneSubmitPage() {
 
   if (detail === undefined) {
     return (
-      <div className="flex items-center justify-center py-24">
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-on-surface-variant font-medium animate-pulse">Loading milestone...</p>
       </div>
     );
   }
@@ -97,7 +99,7 @@ export default function MilestoneSubmitPage() {
       {milestone.status === "SUBMITTED" && (
         <div className="card-enforcer flex flex-col items-center justify-center py-16 gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="font-heading text-headline-sm text-on-surface">Analysis in progress…</p>
+          <p className="font-heading text-headline-sm text-on-surface">Loading analysis…</p>
           <p className="text-body-md text-on-surface-variant text-center">
             ConSync AI is reviewing your photos. This usually takes 15–30 seconds.
           </p>

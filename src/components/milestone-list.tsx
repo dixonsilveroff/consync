@@ -41,7 +41,7 @@ export function MilestoneList({
         const href =
           role === "owner"
             ? `/owner/projects/${projectId}/milestones/${milestone._id}`
-            : `/contractor/projects/${projectId}`;
+            : `/contractor/milestones/${milestone._id}/submit`;
 
         return (
           <Link key={milestone._id} href={href} className="block group">

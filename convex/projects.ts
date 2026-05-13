@@ -106,6 +106,17 @@ export const createProject = mutation({
       createdAt: now,
     });
 
+    // Handle contractor invitation if email provided
+    if (args.contractorEmail) {
+      await ctx.db.insert("invitations", {
+        email: args.contractorEmail,
+        projectId,
+        role: "contractor",
+        inviterClerkId: identity.subject,
+        createdAt: now,
+      });
+    }
+
     // Create milestones
     for (let i = 0; i < args.milestones.length; i++) {
       const milestone = args.milestones[i];

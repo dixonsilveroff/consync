@@ -28,7 +28,7 @@ export default function HomePage() {
               </SignUpButton>
             </Show>
             <Show when="signed-in">
-              <Link href="/owner/projects">
+              <Link href="/dashboard">
                 <Button variant="secondary">Dashboard</Button>
               </Link>
               <UserButton
@@ -69,14 +69,11 @@ export default function HomePage() {
               </SignInButton>
             </Show>
             <Show when="signed-in">
-              <Link href="/owner/projects/new">
+              <Link href="/dashboard">
                 <Button variant="default" size="lg" className="gap-2">
-                  New Project
+                  My Projects
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-              </Link>
-              <Link href="/owner/projects">
-                <Button variant="secondary" size="lg">My Projects</Button>
               </Link>
             </Show>
           </div>

@@ -3,12 +3,11 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { ProjectCard } from "@/components/project-card";
-import { FolderPlus, Building2, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Building2, ClipboardList, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function OwnerProjectsPage() {
-  const projects = useQuery(api.projects.getOwnerProjects);
+export default function ContractorProjectsPage() {
+  const projects = useQuery(api.projects.getContractorProjects);
 
   return (
     <div className="animate-fade-in">
@@ -16,18 +15,12 @@ export default function OwnerProjectsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-h1 text-text-primary">
-            Projects
+            Assigned Projects
           </h1>
           <p className="text-body text-text-secondary mt-1">
-            Manage your construction projects and milestone payments
+            Projects where you are the assigned contractor
           </p>
         </div>
-        <Link href="/owner/projects/new">
-          <Button variant="default" className="gap-2">
-            <FolderPlus className="w-4 h-4" />
-            New Project
-          </Button>
-        </Link>
       </div>
 
       {/* Loading State */}
@@ -53,30 +46,23 @@ export default function OwnerProjectsPage() {
         <div className="bg-surface rounded-xl border border-border text-center py-16 px-6">
           <Building2 className="w-12 h-12 text-text-muted mx-auto mb-4" />
           <h2 className="font-display text-h2 text-text-primary mb-2">
-            No projects yet
+            No projects assigned
           </h2>
           <p className="text-body text-text-secondary mb-6 max-w-md mx-auto">
-            Create your first construction project to start tracking milestones
-            and managing payments.
+            You haven't been assigned to any construction projects yet. 
+            Once an owner invites you via email, projects will appear here.
           </p>
-          <Link href="/owner/projects/new">
-            <Button variant="default" className="gap-2">
-              <FolderPlus className="w-4 h-4" />
-              Create Project
-            </Button>
-          </Link>
         </div>
       )}
 
       {/* Project Grid */}
       {projects !== undefined && projects.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {projects.map((project: any) => (
+          {projects.map((project) => (
             <ProjectCard
               key={project._id}
               project={project}
-              role="owner"
+              role="contractor"
             />
           ))}
         </div>
