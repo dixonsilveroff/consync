@@ -70,7 +70,7 @@ export default function MilestoneDetailPage() {
         <div>
           <p className="label-blueprint">Acceptance Criteria</p>
           <ul className="mt-1 space-y-1">
-            {milestone.acceptanceCriteria.map((c, i) => (
+            {milestone.acceptanceCriteria.map((c: string, i: number) => (
               <li key={i} className="text-body-sm text-on-surface flex gap-2">
                 <span className="text-primary">·</span> {c}
               </li>

@@ -58,7 +58,7 @@ export default function ContractorProjectsPage() {
       {/* Project Grid */}
       {projects !== undefined && projects.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {projects.map((project: any) => (
             <ProjectCard
               key={project._id}
               project={project}

@@ -101,7 +101,7 @@ export const verifyAndSaveBankDetails = action({
  */
 export const initiateEscrowPayment = action({
   args: { projectId: v.id("projects") },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ checkoutUrl: string; transactionRef: string }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new ConvexError("Not authenticated");

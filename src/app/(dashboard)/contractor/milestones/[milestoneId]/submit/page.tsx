@@ -74,7 +74,7 @@ export default function MilestoneSubmitPage() {
         <h1 className="font-heading text-display-sm text-on-surface">{milestone.name}</h1>
         <p className="text-body-md text-on-surface-variant mt-1">{milestone.description}</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {milestone.acceptanceCriteria.map((c, i) => (
+          {milestone.acceptanceCriteria.map((c: string, i: number) => (
             <span key={i} className="label-blueprint text-xs px-2 py-1 bg-primary/8 rounded-md">
               {c}
             </span>
