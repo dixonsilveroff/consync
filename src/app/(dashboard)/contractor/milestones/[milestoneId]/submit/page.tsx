@@ -8,6 +8,7 @@ import { useAuth } from "@clerk/nextjs";
 import { PhotoUpload } from "@/components/photo-upload";
 import { AiVerdictPanel } from "@/components/ai-verdict-panel";
 import { ArrowLeft, Loader2, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function MilestoneSubmitPage() {
   const params = useParams();
@@ -67,13 +68,14 @@ export default function MilestoneSubmitPage() {
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">
       {/* Back */}
-      <button
+      <Button
+        variant="ghost"
         onClick={handleBack}
-        className="btn-tertiary flex items-center gap-1 mb-6"
+        className="flex items-center gap-1 mb-6 -ml-4 text-on-surface-variant hover:text-on-surface"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Project
-      </button>
+      </Button>
 
       {/* Milestone header */}
       <div className="mb-8">

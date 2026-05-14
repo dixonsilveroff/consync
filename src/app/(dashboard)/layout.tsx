@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface NavItem {
   label: string;
@@ -571,6 +573,7 @@ export default function DashboardLayout({
         bankAccountNumber: accountNumber.trim(),
       });
       setBankModalOpen(false);
+      toast.success("Bank details saved successfully");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to save bank details";
       setBankError(message);
@@ -602,7 +605,7 @@ export default function DashboardLayout({
             Sign in to access your dashboard.
           </p>
           <Link href="/">
-            <button className="btn-primary mt-4">Return Home</button>
+            <Button className="mt-4">Return Home</Button>
           </Link>
         </div>
       </div>
@@ -655,12 +658,14 @@ export default function DashboardLayout({
               elements: { avatarBox: "w-8 h-8" },
             }}
           />
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-text-secondary"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -796,13 +801,13 @@ export default function DashboardLayout({
                 <p className="text-small text-red-500">{bankError}</p>
               )}
               <div className="flex gap-3 pt-2">
-                <button
+                <Button
                   onClick={submitBankDetails}
                   disabled={bankSaving}
-                  className="btn-primary flex-1"
+                  className="flex-1"
                 >
                   {bankSaving ? "Saving..." : "Save details"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { Wallet, TrendingDown, ArrowRight } from "lucide-react";
 import { formatNaira } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface EscrowBalanceProps {
   totalValueKobo: number;
@@ -87,14 +88,14 @@ export function EscrowBalance({
 
       {/* Fund Button */}
       {needsFunding && onFundEscrow && (
-        <button
+        <Button
           onClick={onFundEscrow}
           disabled={isFunding}
-          className="btn-primary w-full flex items-center justify-center gap-2"
+          className="w-full flex items-center justify-center gap-2"
         >
           {isFunding ? "Redirecting..." : "Fund Escrow"}
           <ArrowRight className="w-4 h-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

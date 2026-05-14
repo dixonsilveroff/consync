@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { Upload, X, ImagePlus, Loader2, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PhotoUploadProps {
   milestoneId: Id<"milestones">;
@@ -146,18 +147,20 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
 
       {/* Preview Grid */}
       {previews.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {previews.map((src, i) => (
             <div key={i} className="relative aspect-square rounded-lg overflow-hidden group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
               {!isLoading && (
-                <button
+                <Button
+                  variant="destructive"
+                  size="icon"
                   onClick={() => removeFile(i)}
-                  className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <X className="w-3 h-3 text-white" />
-                </button>
+                  <X className="w-3 h-3" />
+                </Button>
               )}
             </div>
           ))}
@@ -193,10 +196,10 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
       )}
 
       {/* Submit Button */}
-      <button
+      <Button
         onClick={handleSubmit}
         disabled={isLoading || files.length === 0}
-        className="btn-primary w-full flex items-center justify-center gap-2"
+        className="w-full flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>
@@ -209,7 +212,7 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
             Submit {files.length > 0 ? `${files.length} Photo${files.length > 1 ? "s" : ""}` : "Photos"}
           </>
         )}
-      </button>
+      </Button>
     </div>
   );
 }

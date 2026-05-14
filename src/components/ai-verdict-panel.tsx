@@ -4,6 +4,8 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Doc } from "@convex/_generated/dataModel";
 import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   CheckCircle2,
   XCircle,
@@ -32,44 +34,44 @@ const statusConfig = {
   CONFIRMED: {
     label: "Confirmed",
     icon: ShieldCheck,
-    className: "bg-emerald-50 border-emerald-200 text-emerald-700",
-    iconClass: "text-emerald-500",
-    barClass: "bg-emerald-500",
+    className: "bg-primary/10 border-primary/20 text-primary",
+    iconClass: "text-primary",
+    barClass: "bg-primary",
   },
   NEEDS_REVIEW: {
     label: "Needs Review",
     icon: ShieldAlert,
-    className: "bg-amber-50 border-amber-200 text-amber-700",
+    className: "bg-amber-500/10 border-amber-500/20 text-amber-600",
     iconClass: "text-amber-500",
     barClass: "bg-amber-500",
   },
   UNCONFIRMED: {
     label: "Unconfirmed",
     icon: ShieldX,
-    className: "bg-red-50 border-red-200 text-red-700",
-    iconClass: "text-red-500",
-    barClass: "bg-red-500",
+    className: "bg-destructive/10 border-destructive/20 text-destructive",
+    iconClass: "text-destructive",
+    barClass: "bg-destructive",
   },
   RESUBMIT_REQUIRED: {
     label: "Resubmit Required",
     icon: ShieldQuestion,
-    className: "bg-orange-50 border-orange-200 text-orange-700",
+    className: "bg-orange-500/10 border-orange-500/20 text-orange-600",
     iconClass: "text-orange-500",
-    barClass: "bg-orange-400",
+    barClass: "bg-orange-500",
   },
 };
 
 const criterionStatusConfig = {
-  MET: { icon: CheckCircle2, className: "text-emerald-600", label: "Met" },
-  NOT_MET: { icon: XCircle, className: "text-red-500", label: "Not Met" },
+  MET: { icon: CheckCircle2, className: "text-primary", label: "Met" },
+  NOT_MET: { icon: XCircle, className: "text-destructive", label: "Not Met" },
   CANNOT_VERIFY: { icon: AlertTriangle, className: "text-amber-500", label: "Cannot Verify" },
 };
 
 const anomalySeverityConfig = {
-  LOW: "bg-blue-50 text-blue-700 border-blue-200",
-  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
-  HIGH: "bg-orange-50 text-orange-700 border-orange-200",
-  CRITICAL: "bg-red-50 text-red-700 border-red-200",
+  LOW: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  MEDIUM: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  HIGH: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+  CRITICAL: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }: AiVerdictPanelProps) {
@@ -87,6 +89,10 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
     setIsActing(true);
     try {
       await approveMilestone({ milestoneId });
+      toast.success("Milestone approved. Payment released.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to approve milestone";
+      toast.error(message);
     } finally {
       setIsActing(false);
     }
@@ -98,6 +104,10 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
     try {
       await rejectMilestone({ milestoneId, reason: rejectReason.trim() });
       setShowRejectInput(false);
+      toast.success("Milestone rejected.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to reject milestone";
+      toast.error(message);
     } finally {
       setIsActing(false);
     }
@@ -191,10 +201,10 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
 
           {!showRejectInput ? (
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={handleApprove}
                 disabled={isActing}
-                className="btn-primary flex-1 flex items-center justify-center gap-2"
+                className="flex-1 flex items-center justify-center gap-2"
               >
                 {isActing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -202,15 +212,16 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
                   <ThumbsUp className="w-4 h-4" />
                 )}
                 Approve & Release Payment
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => setShowRejectInput(true)}
                 disabled={isActing}
-                className="btn-secondary flex-1 flex items-center justify-center gap-2 border-red-200 text-red-600 hover:bg-red-50"
+                className="flex-1 flex items-center justify-center gap-2"
               >
                 <ThumbsDown className="w-4 h-4" />
                 Reject
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -223,20 +234,21 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
                 className="w-full px-4 py-3 rounded-lg border border-outline/40 bg-surface text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               />
               <div className="flex gap-3">
-                <button
+                <Button
+                  variant="destructive"
                   onClick={handleReject}
                   disabled={!rejectReason.trim() || isActing}
-                  className="btn-primary flex-1 bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2"
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
                   {isActing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />}
                   Confirm Rejection
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => { setShowRejectInput(false); setRejectReason(""); }}
-                  className="btn-secondary"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -245,13 +257,13 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
 
       {/* Completed / Rejected final states */}
       {milestoneStatus === "APPROVED" && (
-        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700">
+        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-primary/10 border border-primary/20 text-primary">
           <CheckCircle2 className="w-5 h-5" />
           <p className="text-body-md font-medium">Milestone approved — payment release initiated.</p>
         </div>
       )}
       {milestoneStatus === "REJECTED" && (
-        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-red-50 border border-red-200 text-red-700">
+        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive">
           <RefreshCw className="w-4 h-4" />
           <p className="text-body-md font-medium">Milestone rejected — awaiting contractor resubmission.</p>
         </div>

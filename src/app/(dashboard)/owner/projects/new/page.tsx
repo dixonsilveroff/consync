@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, ArrowLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface MilestoneInput {
   name: string;
@@ -106,13 +107,14 @@ export default function NewProjectPage() {
   return (
     <div className="animate-fade-in max-w-3xl">
       {/* Back Link */}
-      <button
+      <Button
+        variant="ghost"
         onClick={() => router.push("/owner/projects")}
-        className="btn-tertiary flex items-center gap-1 mb-6"
+        className="flex items-center gap-1 mb-6 -ml-4 text-on-surface-variant hover:text-on-surface"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back
-      </button>
+      </Button>
 
       {/* Page Header */}
       <h1 className="font-heading text-display-sm text-on-surface mb-2">
@@ -222,14 +224,15 @@ export default function NewProjectPage() {
             <h2 className="font-heading text-headline-sm text-on-surface">
               Milestones
             </h2>
-            <button
+            <Button
+              variant="outline"
               type="button"
               onClick={addMilestone}
-              className="btn-tertiary flex items-center gap-1"
+              className="flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Milestone
-            </button>
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -243,13 +246,15 @@ export default function NewProjectPage() {
                     <h3 className="label-blueprint">Milestone {mIndex + 1}</h3>
                   </div>
                   {milestones.length > 1 && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       type="button"
                       onClick={() => removeMilestone(mIndex)}
-                      className="text-critical-red hover:text-critical-red/80 transition-colors"
+                      className="text-destructive hover:text-destructive/80 transition-colors w-8 h-8"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -337,13 +342,15 @@ export default function NewProjectPage() {
                             required
                           />
                           {milestone.acceptanceCriteria.length > 1 && (
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               type="button"
                               onClick={() => removeCriterion(mIndex, cIndex)}
-                              className="text-on-surface-variant hover:text-critical-red transition-colors flex-shrink-0"
+                              className="text-on-surface-variant hover:text-destructive transition-colors flex-shrink-0 w-8 h-8"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            </Button>
                           )}
                         </div>
                       ))}
@@ -357,10 +364,10 @@ export default function NewProjectPage() {
 
         {/* ─── Submit ─── */}
         <div className="flex items-center gap-4">
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary flex items-center gap-2 disabled:opacity-50"
+            className="flex items-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -372,14 +379,14 @@ export default function NewProjectPage() {
                 <ChevronRight className="w-4 h-4" />
               </>
             )}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             type="button"
             onClick={() => router.push("/owner/projects")}
-            className="btn-secondary"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
     </div>

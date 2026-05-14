@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Inter, Geist, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ export default function RootLayout({
     <html lang="en" className={cn(poppins.variable, inter.variable, jetbrainsMono.variable, "font-sans", geist.variable)}>
       <body className="font-body antialiased">
         <ConvexClientProvider>{children}</ConvexClientProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );
