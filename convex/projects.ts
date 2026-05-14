@@ -133,10 +133,6 @@ export const createProject = mutation({
       });
     }
 
-    await ctx.scheduler.runAfter(0, internal.squad.setupVirtualAccount, {
-      projectId,
-    });
-
     return { projectId };
   },
 });

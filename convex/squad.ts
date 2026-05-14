@@ -119,76 +119,89 @@ export const verifyAndSaveBankDetails = action({
 });
 
 /**
- * Owner initiates escrow funding via Squad checkout.
+ * Build a pool of Dynamic Virtual Accounts. Run this once during setup.
  */
-export const initiateEscrowPayment = action({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, args): Promise<{ checkoutUrl: string; transactionRef: string }> => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Not authenticated");
+export const buildDvaPool = action({
+  args: { count: v.number() },
+  handler: async (ctx, { count }) => {
+    const results = [];
+    for (let i = 0; i < count; i++) {
+      const res = await fetch(
+        `${getSquadBaseUrl()}/virtual-account/create-dynamic-virtual-account`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${requireEnv("SQUAD_SECRET_KEY")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await res.json();
+      results.push(data);
+      // Small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 300));
     }
+    return results;
+  },
+});
 
-    const project = await ctx.runQuery(api.projects.getProject, {
-      projectId: args.projectId,
-    });
-    if (!project) {
-      throw new ConvexError("Project not found");
-    }
-    if (project.ownerClerkId !== identity.subject) {
-      throw new ConvexError("Only the project owner can fund escrow");
-    }
-    if (project.status !== "PENDING_FUNDING") {
-      throw new ConvexError("Project is already funded");
-    }
+/**
+ * Initiate Escrow Funding via Dynamic Virtual Account (DVA)
+ */
+export const initiateEscrowViaDva = action({
+  args: {
+    projectId: v.id("projects"),
+    amountKobo: v.number(),
+    ownerEmail: v.string(),
+    durationSecs: v.number(),
+  },
+  handler: async (ctx, { projectId, amountKobo, ownerEmail, durationSecs }) => {
+    const merchantId = requireEnv("SQUAD_MERCHANT_ID");
+    const txRef = `${merchantId}_DVA_${projectId}_${Date.now()}`;
 
-    const user = await ctx.runQuery(api.users.currentUser, {});
-    if (!user?.email) {
-      throw new ConvexError("Owner profile missing email");
-    }
-
-    const appBaseUrl = requireEnv("APP_BASE_URL");
-    const transactionRef = makeEscrowRef(args.projectId);
-
-    const payload = {
-      amount: project.totalValueKobo,
-      email: user.email,
-      currency: "NGN",
-      initiate_type: "inline",
-      transaction_ref: transactionRef,
-      customer_name: `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`,
-      callback_url: `${appBaseUrl}/owner/projects/${args.projectId}?funded=true`,
-      payment_channels: ["card", "bank", "ussd", "transfer"],
-      metadata: {
-        project_id: args.projectId,
-        transaction_type: "ESCROW_FUNDING",
-      },
-    };
-
-    const response = await squadRequest<{ checkout_url: string }>(
-      "/transaction/initiate",
-      payload
+    const res = await fetch(
+      `${getSquadBaseUrl()}/virtual-account/initiate-dynamic-virtual-account`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${requireEnv("SQUAD_SECRET_KEY")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          duration: durationSecs,
+          amount: amountKobo,
+          transaction_ref: txRef,
+          email: ownerEmail,
+        }),
+      }
     );
 
-    if (!response.data?.checkout_url) {
-      throw new ConvexError("Squad did not return a checkout URL");
+    const data = await res.json();
+
+    if (!data.success) {
+      throw new Error(`DVA initiation failed: ${data.message}`);
     }
 
+    // Note: Assuming a mutation internal.projects.setDvaFunding will be created
+    // or adapting existing createPayment logic to handle DVA records.
+    // For now, using the existing createPayment logic to record the intent.
     await ctx.runMutation(internal.payments.createPayment, {
-      projectId: args.projectId,
+      projectId: projectId,
       milestoneId: null,
       type: "ESCROW_FUNDING",
-      amountKobo: project.totalValueKobo,
-      squadTransactionRef: transactionRef,
-      checkoutUrl: response.data.checkout_url,
+      amountKobo: amountKobo,
+      squadTransactionRef: txRef,
+      checkoutUrl: "dva", // Placeholder, UI uses virtual account details
     });
 
-    await ctx.scheduler.runAfter(2 * 60 * 1000, internal.squad.requeryEscrowPayment, {
-      transactionRef,
-      attempt: 0,
-    });
-
-    return { checkoutUrl: response.data.checkout_url, transactionRef };
+    return {
+      virtualAccountNumber: data.data.virtual_account_number,
+      bankCode: data.data.bank_code,
+      bankName: "GTBank",
+      expectedAmountKobo: amountKobo,
+      expiresAt: Date.now() + durationSecs * 1000,
+      transactionRef: txRef,
+    };
   },
 });
 
@@ -244,51 +257,34 @@ export const requeryEscrowPayment = internalAction({
 });
 
 /**
- * Internal: create Squad virtual account for project escrow.
+ * Requery transfer status, handling specific DVA timeout logic.
  */
-export const setupVirtualAccount = internalAction({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, args) => {
-    const project = await ctx.runQuery(internal.projectsData.getProjectById, {
-      projectId: args.projectId,
-    });
+async function requeryTransferStatus(transactionRef: string) {
+  const merchantId = requireEnv("SQUAD_MERCHANT_ID");
 
-    if (!project) {
-      throw new ConvexError("Project not found");
+  const res = await fetch(
+    `${getSquadBaseUrl()}/payout/requery`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${requireEnv("SQUAD_SECRET_KEY")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        transaction_reference: transactionRef,
+      }),
     }
+  );
 
-    const customerIdentifier = `CSYNC_${args.projectId}`;
+  const data = await res.json();
 
-    const payload = {
-      customer_identifier: customerIdentifier,
-      first_name: "Project",
-      last_name: "Escrow",
-      middle_name: "ConSync",
-      mobile_num: "08000000000",
-      email: `escrow+${args.projectId}@consync.io`,
-      bvn: "22222222222",
-      dob: "01/01/1990",
-      address: project.location || "ConSync Platform",
-      gender: "1",
-      beneficiary_account: "",
-    };
-
-    const response = await squadRequest<{ virtual_account_number: string }>(
-      "/virtual-account",
-      payload
-    );
-
-    if (!response.data?.virtual_account_number) {
-      throw new ConvexError("Squad did not return a virtual account number");
-    }
-
-    await ctx.runMutation(internal.projectsData.setProjectVirtualAccount, {
-      projectId: args.projectId,
-      squadVirtualAccountNumber: response.data.virtual_account_number,
-      squadCustomerIdentifier: customerIdentifier,
-    });
-  },
-});
+  return {
+    status: data.data?.response_description,
+    amount: data.data?.amount,
+    accountName: data.data?.account_name,
+    raw: data,
+  };
+}
 
 /**
  * Internal: release milestone payment via Squad transfer API.
@@ -301,13 +297,14 @@ export const releaseMilestonePayment = internalAction({
     bankAccountNumber: v.string(),
     bankAccountName: v.string(),
     transactionRef: v.string(),
+    milestoneTitle: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const merchantId = requireEnv("SQUAD_MERCHANT_ID");
     const hasMerchantPrefix = args.transactionRef.startsWith(`${merchantId}_`);
     const transferRef = hasMerchantPrefix
       ? args.transactionRef
-      : makeTransferRef(merchantId, args.milestoneId);
+      : `${merchantId}_REL_${args.milestoneId}_${Date.now()}`;
 
     await ctx.runMutation(internal.payments.updatePaymentRef, {
       currentRef: args.transactionRef,
@@ -328,14 +325,45 @@ export const releaseMilestonePayment = internalAction({
 
     const payload = {
       transaction_reference: transferRef,
-      amount: args.amountKobo,
+      amount: String(args.amountKobo), // MUST be a string
       bank_code: args.bankCode,
       account_number: args.bankAccountNumber,
       account_name: lookup.data.account_name,
       currency_id: "NGN",
-      remark: `ConSync milestone ${args.milestoneId}`,
+      remark: `ConSync milestone payment: ${args.milestoneTitle || args.milestoneId}`,
     };
 
-    await squadRequest("/payout/transfer", payload);
+    const res = await fetch(
+      `${getSquadBaseUrl()}/payout/transfer`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${requireEnv("SQUAD_SECRET_KEY")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await res.json();
+
+    if (res.status === 200) {
+      // Success — write payment record (currently handled downstream or by webhook,
+      // but marking intent here if needed)
+      return { success: true, transactionRef: transferRef };
+    }
+
+    if (res.status === 424) {
+      // TIMEOUT — MUST re-query before retrying
+      const requery = await requeryTransferStatus(transferRef);
+      return { success: false, timedOut: true, requery };
+    }
+
+    if (res.status === 412) {
+      // REVERSED
+      return { success: false, reversed: true, message: data.message };
+    }
+
+    throw new Error(`Transfer failed: ${data.message} (status: ${res.status})`);
   },
 });

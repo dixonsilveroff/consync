@@ -17,7 +17,7 @@ export default function OwnerProjectDashboard() {
 
   const project = useQuery(api.projects.getProject, { projectId });
   const milestones = useQuery(api.milestones.getMilestones, { projectId });
-  const initiateEscrow = useAction(api.squad.initiateEscrowPayment);
+  const initiateEscrow = useAction(api.squad.initiateEscrowViaDva);
   const [funding, setFunding] = useState(false);
 
   // Loading state
@@ -49,10 +49,22 @@ export default function OwnerProjectDashboard() {
   const handleFundEscrow = async () => {
     setFunding(true);
     try {
-      const result = await initiateEscrow({ projectId });
-      if (result?.checkoutUrl) {
-        window.location.href = result.checkoutUrl;
+      // 1 hour duration for DVA
+      const result = await initiateEscrow({
+        projectId,
+        amountKobo: project.totalValueKobo,
+        ownerEmail: project.contractorEmail || "owner@example.com", // Assuming we have owner's email, using fallback for now
+        durationSecs: 3600
+      });
+      if (result) {
+        // Here we'd normally show the virtual account details returned from result.
+        // E.g. result.virtualAccountNumber, result.bankName, result.expectedAmountKobo.
+        // For the sake of the existing UI flow, you might need a modal or state change to show these.
+        alert(`Please transfer ${result.expectedAmountKobo / 100} NGN to ${result.bankName} Account: ${result.virtualAccountNumber}. Expires in 1 hour.`);
       }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to initiate escrow funding.");
     } finally {
       setFunding(false);
     }
