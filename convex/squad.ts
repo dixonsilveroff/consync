@@ -4,6 +4,7 @@ import { ConvexError } from "convex/values";
 import { api, internal } from "./_generated/api";
 
 const DEFAULT_SQUAD_BASE_URL = "https://sandbox-api-d.squadco.com";
+const DEFAULT_SQUAD_REQUERY_PATH = "/transaction/verify";
 
 type SquadResponse<T> = {
   status?: number;
@@ -14,6 +15,10 @@ type SquadResponse<T> = {
 
 function getSquadBaseUrl(): string {
   return process.env.SQUAD_BASE_URL || DEFAULT_SQUAD_BASE_URL;
+}
+
+function getSquadRequeryPath(): string {
+  return process.env.SQUAD_REQUERY_PATH || DEFAULT_SQUAD_REQUERY_PATH;
 }
 
 function requireEnv(key: string): string {
@@ -49,6 +54,23 @@ function makeEscrowRef(projectId: string): string {
 
 function makeTransferRef(merchantId: string, milestoneId: string): string {
   return `${merchantId}_${milestoneId}_${Date.now()}`;
+}
+
+function extractStatus(response: SquadResponse<Record<string, unknown>>): string | null {
+  const data = response.data ?? {};
+  const statusValue =
+    (data as { transaction_status?: string }).transaction_status ||
+    (data as { status?: string }).status ||
+    (data as { transactionStatus?: string }).transactionStatus;
+  return statusValue ? String(statusValue) : null;
+}
+
+function extractGatewayRef(response: SquadResponse<Record<string, unknown>>): string | undefined {
+  const data = response.data ?? {};
+  const gatewayRef =
+    (data as { gateway_ref?: string }).gateway_ref ||
+    (data as { gatewayRef?: string }).gatewayRef;
+  return gatewayRef ? String(gatewayRef) : undefined;
 }
 
 /**
@@ -161,7 +183,63 @@ export const initiateEscrowPayment = action({
       checkoutUrl: response.data.checkout_url,
     });
 
+    await ctx.scheduler.runAfter(2 * 60 * 1000, internal.squad.requeryEscrowPayment, {
+      transactionRef,
+      attempt: 0,
+    });
+
     return { checkoutUrl: response.data.checkout_url, transactionRef };
+  },
+});
+
+/**
+ * Internal: fallback requery in case webhook is delayed.
+ */
+export const requeryEscrowPayment = internalAction({
+  args: {
+    transactionRef: v.string(),
+    attempt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const payment = await ctx.runQuery(internal.payments.getPaymentByTransactionRef, {
+      transactionRef: args.transactionRef,
+    });
+
+    if (!payment || payment.type !== "ESCROW_FUNDING") {
+      return;
+    }
+
+    if (payment.status !== "INITIATED") {
+      return;
+    }
+
+    const response = await squadRequest<Record<string, unknown>>(
+      getSquadRequeryPath(),
+      {
+        transaction_ref: args.transactionRef,
+      }
+    );
+
+    const status = extractStatus(response);
+    if (status) {
+      await ctx.runMutation(api.webhooks.handleSquadWebhook, {
+        event: "requery",
+        transactionRef: args.transactionRef,
+        gatewayRef: extractGatewayRef(response),
+        amountKobo: payment.amountKobo,
+        status,
+      });
+      return;
+    }
+
+    const retryDelaysMs = [5 * 60 * 1000, 15 * 60 * 1000, 30 * 60 * 1000];
+    const nextDelay = retryDelaysMs[args.attempt];
+    if (nextDelay) {
+      await ctx.scheduler.runAfter(nextDelay, internal.squad.requeryEscrowPayment, {
+        transactionRef: args.transactionRef,
+        attempt: args.attempt + 1,
+      });
+    }
   },
 });
 

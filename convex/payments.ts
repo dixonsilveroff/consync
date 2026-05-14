@@ -1,4 +1,4 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 export const createPayment = internalMutation({
@@ -22,6 +22,20 @@ export const createPayment = internalMutation({
       checkoutUrl: args.checkoutUrl,
       createdAt: Date.now(),
     });
+  },
+});
+
+export const getPaymentByTransactionRef = internalQuery({
+  args: {
+    transactionRef: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("payments")
+      .withIndex("by_transaction_ref", (q) =>
+        q.eq("squadTransactionRef", args.transactionRef)
+      )
+      .first();
   },
 });
 
