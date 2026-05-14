@@ -6,9 +6,16 @@ import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { EscrowBalance } from "@/components/escrow-balance";
-import { ArrowLeft, MapPin, Building2, Calendar, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Building2, Calendar, Loader2, Copy, CheckCircle2, X } from "lucide-react";
 import { useState } from "react";
-import { getStatusConfig, formatDate } from "@/lib/utils";
+import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
+
+type DvaDetails = {
+  virtualAccountNumber: string;
+  bankName: string;
+  expectedAmountKobo: number;
+  expiresAt: number;
+};
 
 export default function OwnerProjectDashboard() {
   const params = useParams();
@@ -18,7 +25,10 @@ export default function OwnerProjectDashboard() {
   const project = useQuery(api.projects.getProject, { projectId });
   const milestones = useQuery(api.milestones.getMilestones, { projectId });
   const initiateEscrow = useAction(api.squad.initiateEscrowViaDva);
+
   const [funding, setFunding] = useState(false);
+  const [dvaDetails, setDvaDetails] = useState<DvaDetails | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Loading state
   if (project === undefined || milestones === undefined) {
@@ -57,10 +67,12 @@ export default function OwnerProjectDashboard() {
         durationSecs: 3600
       });
       if (result) {
-        // Here we'd normally show the virtual account details returned from result.
-        // E.g. result.virtualAccountNumber, result.bankName, result.expectedAmountKobo.
-        // For the sake of the existing UI flow, you might need a modal or state change to show these.
-        alert(`Please transfer ${result.expectedAmountKobo / 100} NGN to ${result.bankName} Account: ${result.virtualAccountNumber}. Expires in 1 hour.`);
+        setDvaDetails({
+          virtualAccountNumber: result.virtualAccountNumber,
+          bankName: result.bankName,
+          expectedAmountKobo: result.expectedAmountKobo,
+          expiresAt: result.expiresAt
+        });
       }
     } catch (e) {
       console.error(e);
@@ -70,8 +82,78 @@ export default function OwnerProjectDashboard() {
     }
   };
 
+  const handleCopy = () => {
+    if (dvaDetails) {
+      navigator.clipboard.writeText(dvaDetails.virtualAccountNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in relative">
+      {/* DVA Modal */}
+      {dvaDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-surface border border-border w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-5 border-b border-border bg-surface-container-low">
+              <h3 className="font-heading text-headline-sm text-on-surface">Fund Escrow</h3>
+              <button
+                onClick={() => setDvaDetails(null)}
+                className="p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant hover:text-on-surface"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
+                <p className="text-body-sm text-on-surface-variant mb-1">Transfer Exactly</p>
+                <p className="font-heading text-display-sm text-primary">
+                  {formatNaira(dvaDetails.expectedAmountKobo)}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="label-blueprint mb-1">Bank Name</p>
+                  <p className="font-medium text-on-surface">{dvaDetails.bankName}</p>
+                </div>
+
+                <div>
+                  <p className="label-blueprint mb-1">Account Number</p>
+                  <div className="flex items-center justify-between bg-surface-container-low p-3 rounded-lg border border-border">
+                    <span className="font-mono text-lg text-on-surface tracking-wider">
+                      {dvaDetails.virtualAccountNumber}
+                    </span>
+                    <button
+                      onClick={handleCopy}
+                      className="p-2 bg-surface hover:bg-surface-container border border-border rounded-md transition-colors"
+                      title="Copy to clipboard"
+                    >
+                      {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-on-surface-variant" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="label-blueprint mb-1">Expires In</p>
+                  <p className="text-body-md text-on-surface flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-on-surface-variant" />
+                    {new Date(dvaDetails.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-amber-500/10 text-amber-600 p-4 rounded-lg text-sm leading-relaxed border border-amber-500/20">
+                <strong className="font-semibold block mb-1">⚠️ Important:</strong>
+                Send the <b>exact amount</b> shown above in a single transaction. Any other amount will be automatically refunded by Squad.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back Link */}
       <button
         onClick={() => router.push("/owner/projects")}
