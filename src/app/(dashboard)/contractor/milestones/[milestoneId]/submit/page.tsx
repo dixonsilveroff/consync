@@ -56,7 +56,13 @@ export default function MilestoneSubmitPage() {
 
   const { milestone, submission, analysis } = detail;
 
-  const handleBack = () => router.back();
+  const handleBack = () => {
+    if (milestone?.projectId) {
+      router.push(`/contractor/projects/${milestone.projectId}`);
+    } else {
+      router.push("/contractor/projects");
+    }
+  };
 
   return (
     <div className="animate-fade-in max-w-2xl mx-auto">

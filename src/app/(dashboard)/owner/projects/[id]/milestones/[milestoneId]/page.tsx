@@ -39,7 +39,7 @@ export default function MilestoneDetailPage() {
     <div className="animate-fade-in max-w-3xl mx-auto">
       {/* Back */}
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push(`/owner/projects/${params.id}`)}
         className="btn-tertiary flex items-center gap-1 mb-6"
       >
         <ArrowLeft className="w-3.5 h-3.5" />

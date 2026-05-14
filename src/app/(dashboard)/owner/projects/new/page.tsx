@@ -107,7 +107,7 @@ export default function NewProjectPage() {
     <div className="animate-fade-in max-w-3xl">
       {/* Back Link */}
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push("/owner/projects")}
         className="btn-tertiary flex items-center gap-1 mb-6"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
@@ -375,7 +375,7 @@ export default function NewProjectPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => router.push("/owner/projects")}
             className="btn-secondary"
           >
             Cancel
