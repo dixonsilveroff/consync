@@ -513,6 +513,18 @@ export default function DashboardLayout({
   );
 
   useEffect(() => {
+    const trimmedSearch = bankSearch.trim();
+    if (!trimmedSearch) return;
+
+    if (filteredBanks.length === 0) {
+      setBankCode("");
+      return;
+    }
+
+    setBankCode(filteredBanks[0].code);
+  }, [bankSearch, filteredBanks]);
+
+  useEffect(() => {
     if (user === undefined) return;
 
     if (user === null) {
