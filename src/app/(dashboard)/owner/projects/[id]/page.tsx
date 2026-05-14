@@ -17,6 +17,8 @@ export default function OwnerProjectDashboard() {
 
   const project = useQuery(api.projects.getProject, { projectId });
   const milestones = useQuery(api.milestones.getMilestones, { projectId });
+  const initiateEscrow = useAction(api.squad.initiateEscrowPayment);
+  const [funding, setFunding] = useState(false);
 
   // Loading state
   if (project === undefined || milestones === undefined) {
@@ -43,9 +45,6 @@ export default function OwnerProjectDashboard() {
   }
 
   const statusConfig = getStatusConfig(project.status);
-
-  const initiateEscrow = useAction(api.squad.initiateEscrowPayment);
-  const [funding, setFunding] = useState(false);
 
   const handleFundEscrow = async () => {
     setFunding(true);

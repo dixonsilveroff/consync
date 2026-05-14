@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -488,15 +488,23 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoaded, isSignedIn } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const user = useQuery(api.users.currentUser);
-  const bankStatus = useQuery(api.users.contractorBankStatus);
+  const user = useQuery(
+    api.users.currentUser,
+    isLoaded && isSignedIn ? {} : "skip"
+  );
+  const bankStatus = useQuery(
+    api.users.contractorBankStatus,
+    isLoaded && isSignedIn ? {} : "skip"
+  );
   const verifyBankDetails = useAction(api.squad.verifyAndSaveBankDetails);
 
   const isOwnerPath = pathname.startsWith("/owner");
   const isContractorPath = pathname.startsWith("/contractor");
   const shouldPromptBankDetails =
+    isSignedIn &&
     user?.role === "contractor" &&
     bankStatus?.hasBankDetails === false &&
     isContractorPath;
@@ -571,6 +579,36 @@ export default function DashboardLayout({
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-on-surface-variant font-medium animate-pulse">
+            Loading session...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-8 text-center">
+        <div className="max-w-md space-y-4">
+          <ShieldAlert className="w-12 h-12 text-critical-red mx-auto" />
+          <h2 className="text-h2 text-text-primary">Please sign in</h2>
+          <p className="text-body text-text-secondary">
+            Sign in to access your dashboard.
+          </p>
+          <Link href="/">
+            <button className="btn-primary mt-4">Return Home</button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   // Loading state
   if (user === undefined) {
     return (
@@ -585,20 +623,16 @@ export default function DashboardLayout({
     );
   }
 
-  // Not synced state
+  // Syncing profile
   if (user === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-8 text-center">
         <div className="max-w-md space-y-4">
-          <ShieldAlert className="w-12 h-12 text-critical-red mx-auto" />
-          <h2 className="text-h2 text-text-primary">Account Not Found</h2>
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
+          <h2 className="text-h2 text-text-primary">Setting up your account</h2>
           <p className="text-body text-text-secondary">
-            We couldn't find your profile in our system. If you just signed up, 
-            it might take a moment to synchronize.
+            Loading Details...
           </p>
-          <Link href="/">
-            <button className="btn-primary mt-4">Return Home</button>
-          </Link>
         </div>
       </div>
     );
@@ -724,14 +758,11 @@ export default function DashboardLayout({
             <div className="space-y-4">
               <div>
                 <label className="text-small font-medium text-text-primary">Bank</label>
-                <p className="text-micro text-text-secondary mt-1">
-                  Select your bank to auto-fill the bank code.
-                </p>
                 <input
                   value={bankSearch}
                   onChange={(event) => setBankSearch(event.target.value)}
                   placeholder="Search banks"
-                  className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-3 text-body text-text-primary"
+                  className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-3 text-body text-text-primary h-8"
                 />
                 <select
                   value={bankCode}
