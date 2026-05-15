@@ -9,6 +9,7 @@ import { EscrowBalance } from "@/components/escrow-balance";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2, Copy, CheckCircle2, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
+import { toast } from "sonner";
 
 type DvaDetails = {
   virtualAccountNumber: string;
@@ -53,6 +54,14 @@ export default function OwnerProjectDashboard() {
 
     return () => clearInterval(intervalId);
   }, [dvaDetails]);
+
+  // Watch for successful funding to close modal and show toast
+  useEffect(() => {
+    if (dvaDetails && project?.status === "ACTIVE") {
+      setDvaDetails(null);
+      toast.success("Project funding was successful!");
+    }
+  }, [project?.status, dvaDetails]);
 
   // Loading state
   if (project === undefined || milestones === undefined) {
