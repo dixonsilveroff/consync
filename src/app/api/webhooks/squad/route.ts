@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac, createHash } from "crypto";
+import { createHmac } from "crypto";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
 
@@ -10,18 +10,22 @@ function verifyPaymentWebhook(rawBody: string, header: string | null, secret: st
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function verifyDvaWebhook(payload: any, header: string | null) {
+function verifyDvaWebhook(payload: any, header: string | null, secret: string) {
   if (!header) return false;
-  const str = [
-    payload.transaction_ref ?? payload.txn_ref,
-    payload.virtual_account_number,
-    payload.currency,
-    payload.principal_amount,
-    payload.settled_amount,
-    payload.customer_id,
-  ].join("|");
-  const expected = createHash("sha512").update(str).digest("hex");
-  return expected.toLowerCase() === header.toLowerCase();
+
+  // V3 Webhook requires hashing 6 specific fields separated by a pipe (|)
+  const txRef = payload.transaction_reference ?? payload.transaction_ref ?? payload.txn_ref ?? "";
+  const vaNum = payload.virtual_account_number ?? "";
+  const currency = payload.currency ?? "";
+  const principalAmount = payload.principal_amount ?? "";
+  const settledAmount = payload.settled_amount ?? "";
+  const customerId = payload.customer_identifier ?? payload.customer_id ?? "";
+
+  const str = `${txRef}|${vaNum}|${currency}|${principalAmount}|${settledAmount}|${customerId}`;
+
+  // It MUST be HMAC-SHA512 using the secret key, not a plain hash
+  const expected = createHmac("sha512", secret).update(str).digest("hex").toUpperCase();
+  return expected === header.toUpperCase();
 }
 
 export async function POST(req: NextRequest) {
@@ -39,8 +43,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
   }
 
-  const paymentSig = req.headers.get("x-squad-signature");
-  const dvaSig = req.headers.get("x-squad-encrypted-body");
+  // The documentation explicitly states the header is always x-squad-signature
+  const signature = req.headers.get("x-squad-signature");
+  if (!signature) {
+    return NextResponse.json({ error: "No valid signature header found" }, { status: 400 });
+  }
+
+  // Since Sandbox might use V1 (entire body HMAC) or V3 (6-field HMAC), we try both
+  const isRawBodyValid = verifyPaymentWebhook(body, signature, secret);
+  const isDvaHashValid = verifyDvaWebhook(payload, signature, secret);
+
+  if (!isRawBodyValid && !isDvaHashValid) {
+    console.error("Squad Webhook Signature mismatch!", { signature, payload });
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   if (!convexUrl) {
@@ -48,18 +64,19 @@ export async function POST(req: NextRequest) {
   }
   const convex = new ConvexHttpClient(convexUrl);
 
-  if (dvaSig) {
-    // DVA webhook processing
-    if (!verifyDvaWebhook(payload, dvaSig)) {
-      return NextResponse.json({ error: "Invalid DVA signature" }, { status: 401 });
-    }
+  const eventName = payload.event || payload.Event || "";
+  const isDvaFlow = eventName.startsWith("VIRTUAL_ACCOUNT_TRANSFER") || !!payload.virtual_account_number;
 
-    switch (payload.event) {
+  if (isDvaFlow) {
+    // DVA webhook processing
+    const txRef = payload.transaction_reference ?? payload.transaction_ref ?? payload.txn_ref;
+
+    switch (eventName) {
       case "VIRTUAL_ACCOUNT_TRANSFER":
         // Process successful DVA funding
         await convex.mutation(api.webhooks.handleSquadWebhook, {
           event: "DVA_FUNDING_SUCCESS",
-          transactionRef: payload.transaction_ref ?? payload.txn_ref,
+          transactionRef: txRef,
           gatewayRef: payload.virtual_account_number, // Using VA as gateway ref for tracing
           amountKobo: (payload.principal_amount || 0) * 100, // Convert from Naira to Kobo
           status: "SUCCESS",
@@ -70,36 +87,29 @@ export async function POST(req: NextRequest) {
         // Squad handles refunds, just log or update status to failed
         await convex.mutation(api.webhooks.handleSquadWebhook, {
           event: "DVA_FUNDING_FAILED",
-          transactionRef: payload.transaction_ref ?? payload.txn_ref,
+          transactionRef: txRef,
           gatewayRef: payload.virtual_account_number,
           amountKobo: (payload.principal_amount || 0) * 100,
           status: "FAILED",
         });
         break;
     }
-  } else if (paymentSig) {
+  } else {
     // Standard Payment Gateway webhook processing
-    if (!verifyPaymentWebhook(body, paymentSig, secret)) {
-      return NextResponse.json({ error: "Invalid payment signature" }, { status: 401 });
-    }
-
-    const event = payload.Event || "";
-    const bodyData = payload.Body || {};
-    const transactionRef = bodyData.transaction_ref || payload.TransactionRef;
+    const bodyData = payload.Body || payload;
+    const transactionRef = bodyData.transaction_ref || payload.TransactionRef || payload.transaction_reference;
 
     if (!transactionRef || typeof bodyData.amount !== "number") {
       return NextResponse.json({ error: "Missing transaction data" }, { status: 400 });
     }
 
     await convex.mutation(api.webhooks.handleSquadWebhook, {
-      event,
+      event: eventName,
       transactionRef,
       gatewayRef: bodyData.gateway_ref,
       amountKobo: bodyData.amount,
       status: bodyData.transaction_status || "",
     });
-  } else {
-    return NextResponse.json({ error: "No valid signature header found" }, { status: 400 });
   }
 
   // Always return 200 to acknowledge receipt to Squad
