@@ -186,6 +186,13 @@ export const initiateEscrowViaDva = action({
 
     if (!data.data?.account_number) {
        console.error("Missing account_number in Squad response:", data);
+    } else {
+       // Schedule simulated payment for 35 seconds (35000 ms) in the future
+       // to automatically fund the escrow during the pitch demonstration
+       await ctx.scheduler.runAfter(35000, internal.squad.simulateDvaPayment, {
+         virtualAccountNumber: data.data.account_number,
+         amountKobo: amountKobo,
+       });
     }
 
     // Note: Assuming a mutation internal.projects.setDvaFunding will be created
@@ -371,5 +378,42 @@ export const releaseMilestonePayment = internalAction({
     }
 
     throw new Error(`Transfer failed: ${data.message} (status: ${res.status})`);
+  },
+});
+
+/**
+ * Internal: Simulate a successful DVA payment (for pitch demonstration purposes)
+ */
+export const simulateDvaPayment = internalAction({
+  args: {
+    virtualAccountNumber: v.string(),
+    amountKobo: v.number(),
+  },
+  handler: async (ctx, { virtualAccountNumber, amountKobo }) => {
+    // The Squad simulate payment API requires the amount to be in Naira.
+    const amountNaira = String(amountKobo / 100);
+
+    const res = await fetch(
+      `${getSquadBaseUrl()}/virtual-account/simulate/payment`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${requireEnv("SQUAD_SECRET_KEY")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          virtual_account_number: virtualAccountNumber,
+          amount: amountNaira,
+          dva: true, // Specifically flagging as DVA
+        }),
+      }
+    );
+
+    const data = await res.json();
+    console.log("DVA Simulation Response:", JSON.stringify(data, null, 2));
+
+    if (!res.ok || !data.success) {
+      console.error(`Failed to simulate DVA payment: ${data.message || res.statusText}`);
+    }
   },
 });
