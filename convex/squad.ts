@@ -405,7 +405,6 @@ export const simulateDvaPayment = internalAction({
         body: JSON.stringify({
           virtual_account_number: virtualAccountNumber,
           amount: amountNaira,
-          dva: true, // Specifically flagging as DVA
         }),
       }
     );

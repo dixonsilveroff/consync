@@ -21,6 +21,17 @@ export const handleSquadWebhook = mutation({
           q.eq("dvaAccountNumber", args.gatewayRef)
         )
         .first();
+
+      // Fallback: The Squad simulation webhook doesn't include the virtual_account_number in the payload,
+      // so we must look it up by the transactionRef instead.
+      if (!payment) {
+        payment = await ctx.db
+          .query("payments")
+          .withIndex("by_transaction_ref", (q) =>
+            q.eq("squadTransactionRef", args.transactionRef)
+          )
+          .first();
+      }
     } else {
       // Standard payment gateway lookup
       payment = await ctx.db
