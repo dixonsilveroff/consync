@@ -74,6 +74,36 @@ function extractGatewayRef(response: SquadResponse<Record<string, unknown>>): st
 }
 
 /**
+ * Contractor bank onboarding: lookup account name only
+ */
+export const lookupBankDetails = action({
+  args: {
+    bankCode: v.string(),
+    bankAccountNumber: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const lookup = await squadRequest<{ account_name: string; account_number: string }>(
+      "/payout/account/lookup",
+      {
+        bank_code: args.bankCode,
+        account_number: args.bankAccountNumber,
+      }
+    );
+
+    if (!lookup.success || !lookup.data?.account_name) {
+      throw new ConvexError("Unable to verify bank account details");
+    }
+
+    return { accountName: lookup.data.account_name };
+  },
+});
+
+/**
  * Contractor bank onboarding: verify account and store details.
  */
 export const verifyAndSaveBankDetails = action({

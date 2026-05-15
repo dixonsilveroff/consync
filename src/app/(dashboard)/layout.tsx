@@ -501,6 +501,7 @@ export default function DashboardLayout({
     api.users.contractorBankStatus,
     isLoaded && isSignedIn ? {} : "skip"
   );
+  const lookupBank = useAction(api.squad.lookupBankDetails);
   const verifyBankDetails = useAction(api.squad.verifyAndSaveBankDetails);
 
   const isOwnerPath = pathname.startsWith("/owner");
@@ -515,8 +516,10 @@ export default function DashboardLayout({
   const [bankCode, setBankCode] = useState("");
   const [bankSearch, setBankSearch] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [fetchedAccountName, setFetchedAccountName] = useState<string | null>(null);
   const [bankError, setBankError] = useState<string | null>(null);
   const [bankSaving, setBankSaving] = useState(false);
+  const [bankVerifying, setBankVerifying] = useState(false);
 
   const filteredBanks = BANK_OPTIONS.filter((bank) =>
     bank.name.toLowerCase().includes(bankSearch.trim().toLowerCase())
@@ -528,11 +531,18 @@ export default function DashboardLayout({
 
     if (filteredBanks.length === 0) {
       setBankCode("");
+      setFetchedAccountName(null);
       return;
     }
 
     setBankCode(filteredBanks[0].code);
+    setFetchedAccountName(null);
   }, [bankSearch, filteredBanks]);
+
+  // Reset verification if user modifies inputs
+  useEffect(() => {
+    setFetchedAccountName(null);
+  }, [bankCode, accountNumber]);
 
   useEffect(() => {
     if (user === undefined) return;
@@ -559,14 +569,34 @@ export default function DashboardLayout({
     }
   }, [shouldPromptBankDetails]);
 
-  const submitBankDetails = async () => {
+  const handleBankAction = async () => {
     if (!bankCode.trim() || !accountNumber.trim()) {
       setBankError("Bank code and account number are required");
       return;
     }
 
-    setBankSaving(true);
     setBankError(null);
+
+    // Phase 1: Verify Account
+    if (!fetchedAccountName) {
+      setBankVerifying(true);
+      try {
+        const result = await lookupBank({
+          bankCode: bankCode.trim(),
+          bankAccountNumber: accountNumber.trim(),
+        });
+        setFetchedAccountName(result.accountName);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unable to verify bank account details";
+        setBankError(message);
+      } finally {
+        setBankVerifying(false);
+      }
+      return;
+    }
+
+    // Phase 2: Save Details
+    setBankSaving(true);
     try {
       await verifyBankDetails({
         bankCode: bankCode.trim(),
@@ -802,16 +832,32 @@ export default function DashboardLayout({
                   className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-3 text-body text-text-primary"
                 />
               </div>
+
+              {/* Verified Account Name (Read-only) */}
+              {fetchedAccountName && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="text-small font-medium text-text-primary">Account name</label>
+                  <div className="mt-2 w-full rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-body font-medium text-primary shadow-sm flex items-center justify-between">
+                    <span>{fetchedAccountName}</span>
+                    <span className="text-micro font-bold uppercase tracking-wider bg-primary/10 px-2 py-1 rounded text-primary">
+                      Verified
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {bankError && (
                 <p className="text-small text-red-500">{bankError}</p>
               )}
               <div className="flex gap-3 pt-2">
                 <Button
-                  onClick={submitBankDetails}
-                  disabled={bankSaving}
+                  onClick={handleBankAction}
+                  disabled={bankSaving || bankVerifying}
                   className="flex-1"
                 >
-                  {bankSaving ? "Saving..." : "Save details"}
+                  {!fetchedAccountName
+                    ? (bankVerifying ? "Verifying..." : "Verify Account")
+                    : (bankSaving ? "Saving..." : "Confirm & Save")}
                 </Button>
               </div>
             </div>
