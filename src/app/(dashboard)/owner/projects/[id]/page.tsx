@@ -7,7 +7,7 @@ import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { EscrowBalance } from "@/components/escrow-balance";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2, Copy, CheckCircle2, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
 
 type DvaDetails = {
@@ -29,6 +29,30 @@ export default function OwnerProjectDashboard() {
   const [funding, setFunding] = useState(false);
   const [dvaDetails, setDvaDetails] = useState<DvaDetails | null>(null);
   const [copied, setCopied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<string>("");
+
+  useEffect(() => {
+    if (!dvaDetails) return;
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const difference = dvaDetails.expiresAt - now;
+
+      if (difference <= 0) {
+        setTimeLeft("Expired");
+        return;
+      }
+
+      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer(); // Initial call
+    const intervalId = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [dvaDetails]);
 
   // Loading state
   if (project === undefined || milestones === undefined) {
@@ -138,9 +162,9 @@ export default function OwnerProjectDashboard() {
 
                 <div>
                   <p className="label-blueprint mb-1">Expires In</p>
-                  <p className="text-body-md text-on-surface flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-on-surface-variant" />
-                    {new Date(dvaDetails.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <p className={`text-body-md flex items-center gap-2 ${timeLeft === "Expired" ? "text-red-500 font-bold" : "text-on-surface"}`}>
+                    <Calendar className={`w-4 h-4 ${timeLeft === "Expired" ? "text-red-500" : "text-on-surface-variant"}`} />
+                    {timeLeft === "Expired" ? "Expired" : `${timeLeft} minutes`}
                   </p>
                 </div>
               </div>
