@@ -204,6 +204,7 @@ export const initiateEscrowViaDva = action({
       type: "ESCROW_FUNDING",
       amountKobo: amountKobo,
       squadTransactionRef: txRef,
+      dvaAccountNumber: data.data?.account_number, // Link DVA number to payment
       checkoutUrl: "dva", // Placeholder, UI uses virtual account details
     });
 

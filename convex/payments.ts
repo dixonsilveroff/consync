@@ -9,6 +9,7 @@ export const createPayment = internalMutation({
     amountKobo: v.number(),
     squadTransactionRef: v.string(),
     checkoutUrl: v.optional(v.string()),
+    dvaAccountNumber: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("payments", {
@@ -20,6 +21,7 @@ export const createPayment = internalMutation({
       squadTransactionRef: args.squadTransactionRef,
       squadGatewayRef: undefined,
       checkoutUrl: args.checkoutUrl,
+      dvaAccountNumber: args.dvaAccountNumber,
       createdAt: Date.now(),
     });
   },

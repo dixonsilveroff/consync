@@ -149,10 +149,12 @@ export default defineSchema({
     squadTransactionRef: v.string(),
     squadGatewayRef: v.optional(v.string()),
     checkoutUrl: v.optional(v.string()),
+    dvaAccountNumber: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_project", ["projectId"])
-    .index("by_transaction_ref", ["squadTransactionRef"]),
+    .index("by_transaction_ref", ["squadTransactionRef"])
+    .index("by_dva_account", ["dvaAccountNumber"]),
 
   // ─── INVITATIONS ───────────────────────────────────────────
   invitations: defineTable({

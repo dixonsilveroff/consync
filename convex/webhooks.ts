@@ -11,15 +11,28 @@ export const handleSquadWebhook = mutation({
     status: v.string(),
   },
   handler: async (ctx, args) => {
-    const payment = await ctx.db
-      .query("payments")
-      .withIndex("by_transaction_ref", (q) =>
-        q.eq("squadTransactionRef", args.transactionRef)
-      )
-      .first();
+    let payment;
+
+    if (args.event === "DVA_FUNDING_SUCCESS" || args.event === "DVA_FUNDING_FAILED") {
+      // For DVA events, args.gatewayRef contains the virtual_account_number
+      payment = await ctx.db
+        .query("payments")
+        .withIndex("by_dva_account", (q) =>
+          q.eq("dvaAccountNumber", args.gatewayRef)
+        )
+        .first();
+    } else {
+      // Standard payment gateway lookup
+      payment = await ctx.db
+        .query("payments")
+        .withIndex("by_transaction_ref", (q) =>
+          q.eq("squadTransactionRef", args.transactionRef)
+        )
+        .first();
+    }
 
     if (!payment) {
-      throw new ConvexError("Payment not found for transaction ref");
+      throw new ConvexError(`Payment not found for transaction ref or DVA account: ${args.transactionRef} / ${args.gatewayRef}`);
     }
 
     // Idempotency: Ignore if the payment has already reached a terminal state
