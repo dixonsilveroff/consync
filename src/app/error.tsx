@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
 
@@ -11,6 +12,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
+
   useEffect(() => {
     // Optionally log the error to an error reporting service like Sentry
     console.error("Global Error Boundary caught:", error);
@@ -43,7 +46,7 @@ export default function GlobalError({
           </Button>
           <Button
             variant="outline"
-            onClick={() => window.location.href = '/'}
+            onClick={() => router.push('/')}
             className="min-w-[140px]"
           >
             Go Home

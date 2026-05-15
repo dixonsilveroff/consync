@@ -105,10 +105,10 @@ export default function NewProjectPage() {
         })),
       });
 
+      setIsSubmitting(false); // Reset before routing to fix bfcache issue
       router.push(`/owner/projects/${result.projectId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create project");
-    } finally {
       setIsSubmitting(false);
     }
   };
