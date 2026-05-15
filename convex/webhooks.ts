@@ -22,7 +22,9 @@ export const handleSquadWebhook = mutation({
       throw new ConvexError("Payment not found for transaction ref");
     }
 
-    if (payment.status === "SUCCESS") {
+    // Idempotency: Ignore if the payment has already reached a terminal state
+    if (payment.status === "SUCCESS" || payment.status === "FAILED") {
+      console.log(`Webhook ignored: Payment ${payment._id} is already ${payment.status}`);
       return;
     }
 

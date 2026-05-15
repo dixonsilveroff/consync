@@ -77,12 +77,10 @@ export const getMilestoneDetail = query({
       )
       .first();
 
-    // Get photo URLs
-    const photoUrls: (string | null)[] = [];
-    for (const storageId of latestSubmission.photoStorageIds) {
-      const url = await ctx.storage.getUrl(storageId);
-      photoUrls.push(url);
-    }
+    // Get photo URLs concurrently
+    const photoUrls = await Promise.all(
+      latestSubmission.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+    );
 
     return {
       milestone,

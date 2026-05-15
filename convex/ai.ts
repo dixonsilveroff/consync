@@ -178,26 +178,32 @@ export const runMilestoneAnalysis = internalAction({
       }
 
       // 2. Fetch photos from Convex storage as base64
-      const photoParts: { inlineData: { mimeType: string; data: string } }[] =
-        [];
+      const storageUrls = await Promise.all(
+        data.photoStorageIds.map(async (id: string) => {
+          const url = await ctx.storage.getUrl(id as import("./_generated/dataModel").Id<"_storage">);
+          return url ? { id, url } : null;
+        })
+      );
 
-      for (const storageId of data.photoStorageIds) {
-        const url = await ctx.storage.getUrl(storageId);
-        if (!url) continue;
+      const validUrls = storageUrls.filter((item): item is { id: string; url: string } => item !== null);
 
+      const fetchPromises = validUrls.map(async ({ id, url }) => {
         try {
           const response = await fetch(url);
           const arrayBuffer = await response.arrayBuffer();
           const base64 = Buffer.from(arrayBuffer).toString("base64");
-          const contentType =
-            response.headers.get("content-type") || "image/jpeg";
-          photoParts.push({
+          const contentType = response.headers.get("content-type") || "image/jpeg";
+          return {
             inlineData: { mimeType: contentType, data: base64 },
-          });
+          };
         } catch (err) {
-          console.warn("[AI] Failed to fetch photo:", storageId, err);
+          console.warn("[AI] Failed to fetch photo:", id, err);
+          return null;
         }
-      }
+      });
+
+      const photoResults = await Promise.all(fetchPromises);
+      const photoParts = photoResults.filter((part): part is { inlineData: { mimeType: string; data: string } } => part !== null);
 
       if (photoParts.length === 0) {
         console.error("[AI] No photos could be fetched:", args.submissionId);

@@ -31,7 +31,13 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.text();
-  const payload = JSON.parse(body);
+  let payload;
+  try {
+    payload = JSON.parse(body);
+  } catch (e) {
+    console.error("Failed to parse webhook JSON:", e);
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
 
   const paymentSig = req.headers.get("x-squad-signature");
   const dvaSig = req.headers.get("x-squad-encrypted-body");
