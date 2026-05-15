@@ -582,14 +582,22 @@ export default function DashboardLayout({
     }
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || user === undefined || user === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-on-surface-variant font-medium animate-pulse">
-            Loading session...
-          </p>
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <div className="relative flex items-center justify-center w-16 h-16 bg-surface-container-high rounded-2xl border border-border shadow-sm">
+            <Building2 className="w-8 h-8 text-primary absolute" />
+            <Loader2 className="w-16 h-16 animate-spin text-primary/30" strokeWidth={1} />
+          </div>
+          <div className="text-center space-y-1">
+            <h2 className="text-xl font-heading font-semibold text-on-surface tracking-tight">
+              Loading ConSync
+            </h2>
+            <p className="text-sm text-on-surface-variant animate-pulse-subtle">
+              Preparing your workspace...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -607,35 +615,6 @@ export default function DashboardLayout({
           <Link href="/">
             <Button className="mt-4">Return Home</Button>
           </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading state
-  if (user === undefined) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-on-surface-variant font-medium animate-pulse">
-            Loading profile...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Syncing profile
-  if (user === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-8 text-center">
-        <div className="max-w-md space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-          <h2 className="text-h2 text-text-primary">Setting up your account</h2>
-          <p className="text-body text-text-secondary">
-            Loading Details...
-          </p>
         </div>
       </div>
     );
