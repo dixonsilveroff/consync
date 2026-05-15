@@ -178,8 +178,14 @@ export const initiateEscrowViaDva = action({
 
     const data = await res.json();
 
+    console.log("Squad DVA Initiation Response:", JSON.stringify(data, null, 2));
+
     if (!data.success) {
       throw new Error(`DVA initiation failed: ${data.message}`);
+    }
+
+    if (!data.data?.virtual_account_number) {
+       console.error("Missing virtual_account_number in Squad response:", data);
     }
 
     // Note: Assuming a mutation internal.projects.setDvaFunding will be created
@@ -195,8 +201,8 @@ export const initiateEscrowViaDva = action({
     });
 
     return {
-      virtualAccountNumber: data.data.virtual_account_number,
-      bankCode: data.data.bank_code,
+      virtualAccountNumber: data.data?.virtual_account_number,
+      bankCode: data.data?.bank_code,
       bankName: "GTBank",
       expectedAmountKobo: amountKobo,
       expiresAt: Date.now() + durationSecs * 1000,
