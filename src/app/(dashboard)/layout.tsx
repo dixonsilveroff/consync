@@ -655,7 +655,20 @@ export default function DashboardLayout({
         <div className="flex items-center gap-4">
           <UserButton
             appearance={{
-              elements: { avatarBox: "w-8 h-8" },
+              elements: {
+                avatarBox: "w-8 h-8 ring-2 ring-primary/15",
+                userButtonBox: "rounded-full border border-border bg-surface",
+                userButtonTrigger: "rounded-full border border-border bg-surface hover:bg-primary-faint",
+                userButtonPopoverCard:
+                  "bg-surface border border-border shadow-md rounded-xl text-text-primary",
+                userButtonPopoverMain: "px-2 py-2",
+                userButtonPopoverFooter: "border-t border-border bg-background/60",
+                userButtonPopoverActions: "gap-1",
+                userButtonPopoverActionButton:
+                  "rounded-md px-3 py-2 text-small text-text-primary hover:bg-primary-faint",
+                userButtonPopoverActionButtonText: "text-text-primary",
+                userButtonPopoverActionButtonIcon: "text-text-muted",
+              },
             }}
           />
           <Button
@@ -732,7 +745,20 @@ export default function DashboardLayout({
             </div>
             <UserButton
               appearance={{
-                elements: { avatarBox: "w-9 h-9" },
+                elements: {
+                  avatarBox: "w-9 h-9 ring-2 ring-primary/15",
+                  userButtonBox: "rounded-full border border-border bg-surface",
+                  userButtonTrigger: "rounded-full border border-border bg-surface hover:bg-primary-faint",
+                  userButtonPopoverCard:
+                    "bg-surface border border-border shadow-md rounded-xl text-text-primary",
+                  userButtonPopoverMain: "px-2 py-2",
+                  userButtonPopoverFooter: "border-t border-border bg-background/60",
+                  userButtonPopoverActions: "gap-1",
+                  userButtonPopoverActionButton:
+                    "rounded-md px-3 py-2 text-small text-text-primary hover:bg-primary-faint",
+                  userButtonPopoverActionButtonText: "text-text-primary",
+                  userButtonPopoverActionButtonIcon: "text-text-muted",
+                },
               }}
             />
           </div>
