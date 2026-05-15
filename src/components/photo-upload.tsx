@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { Upload, X, ImagePlus, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, X, ImagePlus, Loader2, CheckCircle2, MapPin, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import exifr from "exifr";
 
 interface PhotoUploadProps {
   milestoneId: Id<"milestones">;
@@ -15,9 +16,14 @@ interface PhotoUploadProps {
 
 type UploadState = "idle" | "uploading" | "submitting" | "done";
 
+interface PhotoItem {
+  file: File;
+  preview: string;
+  gps: { lat: number; lng: number } | null;
+}
+
 export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUploadProps) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [note, setNote] = useState("");
   const [state, setState] = useState<UploadState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -26,24 +32,43 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
   const generateUploadUrl = useMutation(api.submissions.generateUploadUrl);
   const createSubmission = useMutation(api.submissions.createSubmission);
 
-  const handleFiles = (newFiles: FileList | null) => {
+  const handleFiles = async (newFiles: FileList | null) => {
     if (!newFiles) return;
     const accepted = Array.from(newFiles).filter((f) =>
       ["image/jpeg", "image/png", "image/heic", "image/webp"].includes(f.type)
     );
-    const combined = [...files, ...accepted].slice(0, 5);
-    setFiles(combined);
-    setPreviews(combined.map((f) => URL.createObjectURL(f)));
+
+    const newPhotoItems: PhotoItem[] = [];
+
+    for (const file of accepted) {
+      let gps = null;
+      try {
+        const gpsData = await exifr.gps(file);
+        if (gpsData && gpsData.latitude != null && gpsData.longitude != null) {
+          gps = { lat: gpsData.latitude, lng: gpsData.longitude };
+        }
+      } catch (e) {
+        console.warn(`Could not extract GPS data from ${file.name}`, e);
+      }
+
+      newPhotoItems.push({
+        file,
+        preview: URL.createObjectURL(file),
+        gps,
+      });
+    }
+
+    const combined = [...photos, ...newPhotoItems].slice(0, 5);
+    setPhotos(combined);
   };
 
   const removeFile = (index: number) => {
-    const next = files.filter((_, i) => i !== index);
-    setFiles(next);
-    setPreviews(next.map((f) => URL.createObjectURL(f)));
+    const next = photos.filter((_, i) => i !== index);
+    setPhotos(next);
   };
 
   const handleSubmit = async () => {
-    if (files.length === 0) {
+    if (photos.length === 0) {
       setError("Please add at least one photo.");
       return;
     }
@@ -51,37 +76,42 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
     setState("uploading");
 
     try {
+      // Extract GPS from the first photo that has it
+      const firstWithGps = photos.find(p => p.gps !== null);
+      const submissionLat = firstWithGps?.gps?.lat;
+      const submissionLng = firstWithGps?.gps?.lng;
+
       // Upload each file to Convex storage
       const storageIds: Id<"_storage">[] = [];
-      for (const file of files) {
+      for (const photo of photos) {
         const uploadUrl = await generateUploadUrl();
         if (!uploadUrl) {
           throw new Error("Could not generate upload URL. Please try again.");
         }
 
-        console.log(`[PhotoUpload] Uploading ${file.name} to:`, uploadUrl);
-
         const res = await fetch(uploadUrl, {
           method: "POST",
-          headers: { "Content-Type": file.type || "image/jpeg" },
-          body: file,
+          headers: { "Content-Type": photo.file.type || "image/jpeg" },
+          body: photo.file,
         });
 
         if (!res.ok) {
           const errorText = await res.text();
-          throw new Error(`Upload failed for ${file.name}: ${res.status} ${errorText}`);
+          throw new Error(`Upload failed for ${photo.file.name}: ${res.status} ${errorText}`);
         }
 
         const { storageId } = await res.json();
         storageIds.push(storageId as Id<"_storage">);
       }
 
-      // Create the submission record (triggers AI analysis automatically)
+      // Create the submission record
       setState("submitting");
       await createSubmission({
         milestoneId,
         photoStorageIds: storageIds,
         contractorNote: note.trim() || undefined,
+        gpsLatitude: submissionLat,
+        gpsLongitude: submissionLng,
       });
 
       setState("done");
@@ -146,25 +176,42 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
       </div>
 
       {/* Preview Grid */}
-      {previews.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {previews.map((src, i) => (
-            <div key={i} className="relative aspect-square rounded-lg overflow-hidden group">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-              {!isLoading && (
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => removeFile(i)}
-                  className="absolute top-1 right-1 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              )}
+      {photos.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {photos.map((photo, i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <div className="relative aspect-square rounded-lg overflow-hidden group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                {!isLoading && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => removeFile(i)}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
+              <div className="text-xs text-center px-1">
+                {photo.gps ? (
+                  <div className="flex items-center justify-center gap-1 text-on-surface-variant">
+                    <MapPin className="w-3 h-3 text-primary" />
+                    <span className="truncate" title={`${photo.gps.lat}, ${photo.gps.lng}`}>
+                      {photo.gps.lat.toFixed(4)}, {photo.gps.lng.toFixed(4)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-1 text-destructive/80" title="No location data found">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>No GPS</span>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
-          {previews.length < 5 && !isLoading && (
+          {photos.length < 5 && !isLoading && (
             <button
               onClick={() => inputRef.current?.click()}
               className="aspect-square rounded-lg border-2 border-dashed border-outline/40 flex items-center justify-center hover:border-primary hover:bg-primary/5 transition-colors"
@@ -198,18 +245,18 @@ export function PhotoUpload({ milestoneId, milestoneName, onSuccess }: PhotoUplo
       {/* Submit Button */}
       <Button
         onClick={handleSubmit}
-        disabled={isLoading || files.length === 0}
+        disabled={isLoading || photos.length === 0}
         className="w-full flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            {state === "uploading" ? `Uploading ${files.length} photo${files.length > 1 ? "s" : ""}…` : "Submitting…"}
+            {state === "uploading" ? `Uploading ${photos.length} photo${photos.length > 1 ? "s" : ""}…` : "Submitting…"}
           </>
         ) : (
           <>
             <Upload className="w-4 h-4" />
-            Submit {files.length > 0 ? `${files.length} Photo${files.length > 1 ? "s" : ""}` : "Photos"}
+            Submit {photos.length > 0 ? `${photos.length} Photo${photos.length > 1 ? "s" : ""}` : "Photos"}
           </>
         )}
       </Button>
