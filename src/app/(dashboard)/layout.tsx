@@ -597,12 +597,15 @@ export default function DashboardLayout({
     if (!fetchedAccountName) {
       setBankVerifying(true);
       try {
+        console.log("Calling lookupBank with:", { bankCode: bankCode.trim(), bankAccountNumber: accountNumber.trim() });
         const result = await lookupBank({
           bankCode: bankCode.trim(),
           bankAccountNumber: accountNumber.trim(),
         });
+        console.log("lookupBank result:", result);
         setFetchedAccountName(result.accountName);
       } catch (error) {
+        console.error("lookupBank failed:", error);
         const message = error instanceof Error ? error.message : "Unable to verify bank account details";
         setBankError(message);
       } finally {
@@ -612,15 +615,18 @@ export default function DashboardLayout({
     }
 
     // Phase 2: Save Details
+    console.log("Calling verifyBankDetails...");
     setBankSaving(true);
     try {
       await verifyBankDetails({
         bankCode: bankCode.trim(),
         bankAccountNumber: accountNumber.trim(),
       });
+      console.log("verifyBankDetails succeeded. Closing modal.");
       setBankModalOpen(false);
       toast.success("Bank details saved successfully");
     } catch (error) {
+      console.error("verifyBankDetails failed:", error);
       const message = error instanceof Error ? error.message : "Unable to save bank details";
       setBankError(message);
     } finally {
