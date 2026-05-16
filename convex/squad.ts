@@ -217,9 +217,9 @@ export const initiateEscrowViaDva = action({
     if (!data.data?.account_number) {
        console.error("Missing account_number in Squad response:", data);
     } else {
-       // Schedule simulated payment for 35 seconds (35000 ms) in the future
+       // Schedule simulated payment for 7 seconds (7000 ms) in the future
        // to automatically fund the escrow during the pitch demonstration
-       await ctx.scheduler.runAfter(35000, internal.squad.simulateDvaPayment, {
+       await ctx.scheduler.runAfter(7000, internal.squad.simulateDvaPayment, {
          virtualAccountNumber: data.data.account_number,
          amountKobo: amountKobo,
        });
