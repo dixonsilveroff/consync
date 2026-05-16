@@ -19,6 +19,7 @@ import {
   ShieldX,
   ShieldAlert,
   ShieldQuestion,
+  Brain,
 } from "lucide-react";
 
 type AnalysisResult = Doc<"analysisResults">;
@@ -32,32 +33,32 @@ interface AiVerdictPanelProps {
 
 const statusConfig = {
   CONFIRMED: {
-    label: "Confirmed",
+    label: "AI Verdict: Confirmed",
     icon: ShieldCheck,
-    className: "bg-primary/10 border-primary/20 text-primary",
-    iconClass: "text-primary",
-    barClass: "bg-primary",
+    className: "bg-success-bg border-success-border text-success",
+    iconClass: "text-success",
+    barClass: "bg-success",
   },
   NEEDS_REVIEW: {
-    label: "Needs Review",
+    label: "AI Verdict: Needs Review",
     icon: ShieldAlert,
-    className: "bg-amber-500/10 border-amber-500/20 text-amber-600",
-    iconClass: "text-amber-500",
-    barClass: "bg-amber-500",
+    className: "bg-warning-bg border-warning-border text-warning",
+    iconClass: "text-warning",
+    barClass: "bg-warning",
   },
   UNCONFIRMED: {
-    label: "Unconfirmed",
+    label: "AI Verdict: Unconfirmed",
     icon: ShieldX,
-    className: "bg-destructive/10 border-destructive/20 text-destructive",
-    iconClass: "text-destructive",
-    barClass: "bg-destructive",
+    className: "bg-danger-bg border-danger-border text-danger",
+    iconClass: "text-danger",
+    barClass: "bg-danger",
   },
   RESUBMIT_REQUIRED: {
-    label: "Resubmit Required",
+    label: "AI Verdict: Resubmit Required",
     icon: ShieldQuestion,
-    className: "bg-orange-500/10 border-orange-500/20 text-orange-600",
-    iconClass: "text-orange-500",
-    barClass: "bg-orange-500",
+    className: "bg-danger-bg border-danger-border text-danger",
+    iconClass: "text-danger",
+    barClass: "bg-danger",
   },
 };
 
@@ -127,16 +128,18 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
       </div>
 
       {/* Confidence Score */}
-      <div className="card-enforcer">
+      <div className="card-enforcer bg-background border-none shadow-none p-0 mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="label-blueprint">AI Confidence Score</h3>
-          <span className="font-mono text-headline-sm text-on-surface font-semibold">
+          <h3 className="label-blueprint flex items-center gap-1.5 text-primary">
+             <Brain className="w-4 h-4" /> AI Confidence Score
+          </h3>
+          <span className="font-mono text-headline-sm text-text-primary font-semibold">
             {analysis.confidenceScore}%
           </span>
         </div>
-        <div className="h-3 bg-surface-container-high rounded-full overflow-hidden">
+        <div className="h-2 bg-surface-container-high border border-border rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-700 ${statusCfg.barClass}`}
+            className={`h-full rounded-full transition-all duration-1000 ease-out ${statusCfg.barClass}`}
             style={{ width: `${analysis.confidenceScore}%` }}
           />
         </div>
@@ -144,7 +147,7 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
 
       {/* Criterion Assessments */}
       <div className="card-enforcer">
-        <h3 className="label-blueprint mb-4">Acceptance Criteria Review</h3>
+        <h3 className="label-blueprint mb-4 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" /> Acceptance Criteria Review</h3>
         <div className="space-y-3">
           {analysis.criterionAssessments.map((c, i) => {
             const cfg = criterionStatusConfig[c.status];

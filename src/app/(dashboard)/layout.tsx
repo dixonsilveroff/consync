@@ -2,13 +2,13 @@
 
 import { UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useRouter, usePathname } from "next/navigation";
 import {
   FolderPlus,
   HardHat,
-  Building2,
   Menu,
   X,
   ShieldAlert,
@@ -616,9 +616,9 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <div className="relative flex items-center justify-center w-16 h-16 bg-surface-container-high rounded-2xl border border-border shadow-sm">
-            <Building2 className="w-8 h-8 text-primary absolute" />
-            <Loader2 className="w-16 h-16 animate-spin text-primary/30" strokeWidth={1} />
+          <div className="relative flex items-center justify-center w-16 h-16 bg-surface-container-high rounded-2xl border border-border shadow-sm overflow-hidden">
+            <Image src="/logo.png" alt="ConSync Logo" width={40} height={40} className="rounded-lg absolute z-10" />
+            <Loader2 className="w-16 h-16 animate-spin text-primary/20 absolute" strokeWidth={2} />
           </div>
           <div className="text-center space-y-1">
             <h2 className="text-xl font-heading font-semibold text-on-surface tracking-tight">
@@ -657,10 +657,10 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* ─── Mobile Header ─── */}
       <div className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-border">
-        <div className="flex items-center gap-2">
-          <Building2 className="w-6 h-6 text-primary" />
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo.png" alt="ConSync Logo" width={24} height={24} className="rounded-sm" />
           <span className="font-display text-h4 text-text-primary">ConSync</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-4">
           <UserButton
             appearance={{
@@ -699,8 +699,10 @@ export default function DashboardLayout({
         )}
       >
         <div className="p-6 items-center gap-3 border-b border-border hidden md:flex">
-          <Building2 className="w-6 h-6 text-primary" />
-          <span className="font-display text-h3 text-text-primary">ConSync</span>
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full">
+            <Image src="/logo.png" alt="ConSync Logo" width={28} height={28} className="rounded-md" />
+            <span className="font-display text-h3 text-text-primary">ConSync</span>
+          </Link>
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

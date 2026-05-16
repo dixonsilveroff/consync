@@ -23,7 +23,7 @@ export default function OwnerProjectsPage() {
           </p>
         </div>
         <Link href="/owner/projects/new">
-          <Button variant="default" className="gap-2">
+          <Button size="lg" className="gap-2 bg-cta-gradient hover:bg-cta-gradient-hover text-white shadow-sm hover:shadow-md transition-shadow">
             <FolderPlus className="w-4 h-4" />
             New Project
           </Button>
@@ -50,19 +50,20 @@ export default function OwnerProjectsPage() {
 
       {/* Empty State */}
       {projects !== undefined && projects.length === 0 && (
-        <div className="bg-surface rounded-xl border border-border text-center py-16 px-6">
-          <Building2 className="w-12 h-12 text-text-muted mx-auto mb-4" />
-          <h2 className="font-display text-h2 text-text-primary mb-2">
+        <div className="bg-background rounded-xl border border-border text-center py-20 px-6 shadow-sm">
+          <div className="w-16 h-16 bg-surface border border-border shadow-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Building2 className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="font-display text-h3 text-text-primary mb-3">
             No projects yet
           </h2>
-          <p className="text-body text-text-secondary mb-6 max-w-md mx-auto">
-            Create your first construction project to start tracking milestones
-            and managing payments.
+          <p className="text-body text-text-secondary mb-8 max-w-md mx-auto leading-relaxed">
+            Create your first construction project to start tracking milestones, generating escrow accounts, and releasing payments securely.
           </p>
           <Link href="/owner/projects/new">
-            <Button variant="default" className="gap-2">
+            <Button size="lg" className="gap-2 bg-cta-gradient hover:bg-cta-gradient-hover text-white shadow-sm hover:shadow-md transition-shadow">
               <FolderPlus className="w-4 h-4" />
-              Create Project
+              Start First Project
             </Button>
           </Link>
         </div>
