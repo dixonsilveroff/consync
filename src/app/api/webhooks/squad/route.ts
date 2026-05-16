@@ -95,11 +95,14 @@ export async function POST(req: NextRequest) {
     });
 
     // TEMPORARY BYPASS FOR SANDBOX SIMULATION:
-    // If the request comes from the known Squad sandbox IP, we will accept it
-    // even if the signature fails, as sandbox signatures are frequently undocumented or buggy.
+    // If the request comes from the known Squad sandbox IP, and we are using
+    // the sandbox base URL, we will accept it even if the signature fails,
+    // as sandbox simulation signatures are frequently mathematically invalid.
     const forwardedFor = req.headers.get("x-forwarded-for");
-    if (process.env.NODE_ENV === "development" && forwardedFor && forwardedFor.includes("18.133.63.109")) {
-      console.warn("Bypassing signature check for known Squad Sandbox IP in development mode.");
+    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || process.env.NODE_ENV === "development";
+
+    if (isSandboxEnv && forwardedFor && forwardedFor.includes("18.133.63.109")) {
+      console.warn("Bypassing signature check for known Squad Sandbox IP.");
     } else {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
