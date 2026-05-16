@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+import { formatNairaShort } from "@/lib/utils";
+
 interface NavItem {
   label: string;
   href: string;
@@ -502,6 +504,19 @@ export default function DashboardLayout({
     api.users.contractorBankStatus,
     isLoaded && isSignedIn ? {} : "skip"
   );
+
+  const isOwner = user?.role === "owner";
+
+  // Fetch owner projects to calculate total escrow balance
+  const ownerProjects = useQuery(
+    api.projects.getOwnerProjects,
+    isOwner ? {} : "skip"
+  );
+
+  const totalEscrowKobo = ownerProjects
+    ? ownerProjects.reduce((sum, project) => sum + (project.escrowBalanceKobo || 0), 0)
+    : 0;
+
   const lookupBank = useAction(api.squad.lookupBankDetails);
   const verifyBankDetails = useAction(api.squad.verifyAndSaveBankDetails);
 
@@ -651,7 +666,6 @@ export default function DashboardLayout({
     );
   }
 
-  const isOwner = user.role === "owner";
   const navItems = isOwner ? ownerNav : contractorNav;
 
   return (
@@ -734,7 +748,9 @@ export default function DashboardLayout({
             <p className="text-micro font-medium text-text-muted uppercase tracking-wide mb-1">
               Total Escrow
             </p>
-            <p className="font-mono text-h4 text-escrow">₦0.00</p>
+            <p className="font-mono text-h4 text-escrow">
+              {ownerProjects === undefined ? "..." : formatNairaShort(totalEscrowKobo)}
+            </p>
           </div>
         )}
       </aside>
