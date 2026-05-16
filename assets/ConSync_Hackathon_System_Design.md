@@ -32,8 +32,8 @@ This directly addresses Challenge 01 ("Proof of Life"): it uses AI computer visi
 
 | Role | Description | Primary Actions |
 | :---- | :---- | :---- |
-| \*\*Project Owner\*\* | Diaspora/local client funding the project | Create project, fund escrow, review AI verdict, approve/reject milestone, release payment |
-| \*\*Contractor\*\* | Site-based builder claiming milestone | Submit milestone photos, view analysis results, receive payment |
+| \*\*Project Owner\*\* | Diaspora/local client funding the project | Create project, fund escrow via DVA, review AI verdict, approve/reject milestone, release payment |
+| \*\*Contractor\*\* | Site-based builder claiming milestone | Complete 2-step bank detail verification, submit milestone photos, view analysis results, receive payment |
 
 ### **1.4 Hackathon Scoring Alignment**
 
@@ -263,7 +263,7 @@ Convex schema changes are handled with the convex dev push workflow. For the hac
 
 * Commitment: We will implement an automated Convex action to delete photo blobs for submissions older than 48 hours to ensure the free tier storage is sufficient for the demo.
 
-* Assumption: Contractor bank details (account number \+ bank code) will be collected during Contractor onboarding via a profile form, not verified against BVN for the hackathon demo.
+* Assumption: Contractor bank details will be verified via a 2-step process (lookup API call followed by user confirmation) rather than full BVN validation for the hackathon.
 
 ## **Phase 3 — API & Interface Contracts**
 
@@ -609,7 +609,7 @@ Tasks:
 
 46. Add real-time status polling — contractor sees "Analysis in progress..." then live verdict when ready.
 
-47. Onboarding: contractor bank details form (bank code \+ account number) for payment release.
+47. Onboarding: contractor 2-step bank verification flow (lookup name → confirm → save).
 
 48. Build the demo scenario end-to-end (full rehearsal run):
 
