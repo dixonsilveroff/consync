@@ -9,6 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import {
   FolderPlus,
   HardHat,
+  Building2,
   Menu,
   X,
   ShieldAlert,
