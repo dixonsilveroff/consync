@@ -87,19 +87,33 @@ export const lookupBankDetails = action({
       throw new ConvexError("Not authenticated");
     }
 
-    const lookup = await squadRequest<{ account_name: string; account_number: string }>(
-      "/payout/account/lookup",
-      {
-        bank_code: args.bankCode,
-        account_number: args.bankAccountNumber,
-      }
-    );
+    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || !process.env.NODE_ENV;
 
-    if (!lookup.success || !lookup.data?.account_name) {
-      throw new ConvexError("Unable to verify bank account details");
+    let accountName = "";
+
+    if (isSandboxEnv) {
+      // Sandbox bypass: Squad's sandbox lookup endpoint often fails with Authentication/NIBSS errors.
+      // We mock a successful lookup for the hackathon demo.
+      console.log("Mocking bank lookup for Sandbox environment.");
+      accountName = `TEST ACCOUNT - ${args.bankAccountNumber.slice(-4)}`;
+      // Small delay to simulate network request
+      await new Promise(r => setTimeout(r, 800));
+    } else {
+      const lookup = await squadRequest<{ account_name: string; account_number: string }>(
+        "/payout/account/lookup",
+        {
+          bank_code: args.bankCode,
+          account_number: args.bankAccountNumber,
+        }
+      );
+
+      if (!lookup.success || !lookup.data?.account_name) {
+        throw new ConvexError(`Unable to verify bank account: ${lookup.message || "Invalid details"}`);
+      }
+      accountName = lookup.data.account_name;
     }
 
-    return { accountName: lookup.data.account_name };
+    return { accountName };
   },
 });
 
@@ -125,26 +139,37 @@ export const verifyAndSaveBankDetails = action({
       throw new ConvexError("Only contractors can add bank details");
     }
 
-    const lookup = await squadRequest<{ account_name: string; account_number: string }>(
-      "/payout/account/lookup",
-      {
-        bank_code: args.bankCode,
-        account_number: args.bankAccountNumber,
-      }
-    );
+    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || !process.env.NODE_ENV;
 
-    if (!lookup.success || !lookup.data?.account_name) {
-      throw new ConvexError("Unable to verify bank account details");
+    let accountName = "";
+
+    if (isSandboxEnv) {
+      accountName = `TEST ACCOUNT - ${args.bankAccountNumber.slice(-4)}`;
+      // Small delay to simulate network request
+      await new Promise(r => setTimeout(r, 800));
+    } else {
+      const lookup = await squadRequest<{ account_name: string; account_number: string }>(
+        "/payout/account/lookup",
+        {
+          bank_code: args.bankCode,
+          account_number: args.bankAccountNumber,
+        }
+      );
+
+      if (!lookup.success || !lookup.data?.account_name) {
+        throw new ConvexError("Unable to verify bank account details");
+      }
+      accountName = lookup.data.account_name;
     }
 
     await ctx.runMutation(internal.users.saveContractorBankDetails, {
       userId: user._id,
       bankCode: args.bankCode,
       bankAccountNumber: args.bankAccountNumber,
-      bankAccountName: lookup.data.account_name,
+      bankAccountName: accountName,
     });
 
-    return { accountName: lookup.data.account_name };
+    return { accountName };
   },
 });
 
@@ -355,16 +380,25 @@ export const releaseMilestonePayment = internalAction({
       newRef: transferRef,
     });
 
-    const lookup = await squadRequest<{ account_name: string }>(
-      "/payout/account/lookup",
-      {
-        bank_code: args.bankCode,
-        account_number: args.bankAccountNumber,
-      }
-    );
+    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || !process.env.NODE_ENV;
 
-    if (!lookup.data?.account_name) {
-      throw new ConvexError("Unable to verify contractor bank account");
+    let accountName = "";
+
+    if (isSandboxEnv) {
+      accountName = `TEST ACCOUNT - ${args.bankAccountNumber.slice(-4)}`;
+    } else {
+      const lookup = await squadRequest<{ account_name: string }>(
+        "/payout/account/lookup",
+        {
+          bank_code: args.bankCode,
+          account_number: args.bankAccountNumber,
+        }
+      );
+
+      if (!lookup.success || !lookup.data?.account_name) {
+        throw new ConvexError("Unable to verify contractor bank account");
+      }
+      accountName = lookup.data.account_name;
     }
 
     const payload = {
@@ -372,7 +406,7 @@ export const releaseMilestonePayment = internalAction({
       amount: String(args.amountKobo), // MUST be a string
       bank_code: args.bankCode,
       account_number: args.bankAccountNumber,
-      account_name: lookup.data.account_name,
+      account_name: accountName,
       currency_id: "NGN",
       remark: `ConSync milestone payment: ${args.milestoneTitle || args.milestoneId}`,
     };
