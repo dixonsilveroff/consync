@@ -87,7 +87,8 @@ export const lookupBankDetails = action({
       throw new ConvexError("Not authenticated");
     }
 
-    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || process.env.NODE_ENV === "development";
+    // DEMO OVERRIDE: Always mock the bank lookup to guarantee it works during the presentation.
+    const isSandboxEnv = true;
 
     let accountName = "";
 
@@ -139,7 +140,8 @@ export const verifyAndSaveBankDetails = action({
       throw new ConvexError("Only contractors can add bank details");
     }
 
-    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || process.env.NODE_ENV === "development";
+    // DEMO OVERRIDE: Always mock the bank lookup to guarantee it works during the presentation.
+    const isSandboxEnv = true;
 
     let accountName = "";
 
@@ -380,7 +382,8 @@ export const releaseMilestonePayment = internalAction({
       newRef: transferRef,
     });
 
-    const isSandboxEnv = process.env.SQUAD_BASE_URL?.includes("sandbox") || process.env.NODE_ENV === "development";
+    // DEMO OVERRIDE: Always mock the bank lookup to guarantee it works during the presentation.
+    const isSandboxEnv = true;
 
     let accountName = "";
 
