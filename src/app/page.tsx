@@ -15,7 +15,7 @@ export default function HomePage() {
         <section className="pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
           <FadeIn>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-surface text-xs font-semibold uppercase tracking-widest mb-8">
-              <span className="w-2 h-2 rounded-full bg-text-primary animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(76,175,80,0.6)]" />
               Construction Verification Protocol
             </div>
             <h1 className="text-6xl sm:text-7xl lg:text-[7rem] font-display font-semibold tracking-tighter leading-[0.95] mb-8 max-w-5xl">
@@ -52,12 +52,12 @@ export default function HomePage() {
               <div className="z-10 bg-background border border-border-strong p-8 max-w-md w-full shadow-2xl transition-transform duration-700 group-hover:scale-105">
                 <div className="flex justify-between items-center mb-6 border-b border-border pb-4">
                   <span className="font-mono text-sm font-semibold tracking-wider">MILESTONE 04</span>
-                  <span className="text-xs bg-text-primary text-text-inverse px-2 py-1">VERIFIED</span>
+                  <span className="text-xs bg-success text-white px-2 py-1 font-semibold">VERIFIED</span>
                 </div>
                 <div className="space-y-4 font-mono text-sm">
-                  <div className="flex justify-between"><span className="text-text-secondary">Analysis:</span><span className="font-bold">Pass</span></div>
+                  <div className="flex justify-between"><span className="text-text-secondary">Analysis:</span><span className="font-bold text-success">Pass</span></div>
                   <div className="flex justify-between"><span className="text-text-secondary">Confidence:</span><span>99.2%</span></div>
-                  <div className="flex justify-between"><span className="text-text-secondary">Escrow Release:</span><span className="font-semibold">₦12,500,000</span></div>
+                  <div className="flex justify-between"><span className="text-text-secondary">Escrow Release:</span><span className="font-mono font-semibold text-success text-base">₦12,500,000</span></div>
                 </div>
               </div>
             </div>
@@ -82,7 +82,7 @@ export default function HomePage() {
                     Our proprietary models analyze site imagery against structural blueprints, flagging discrepancies down to the millimeter before authorizing payouts.
                   </p>
                 </div>
-                <ArrowUpRight className="w-8 h-8 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
+                <ArrowUpRight className="w-8 h-8 text-primary-faint opacity-50 group-hover:opacity-100 group-hover:text-success transition-all duration-300 mt-8" />
               </FadeIn>
 
               {/* Small Card 1 */}
@@ -94,7 +94,7 @@ export default function HomePage() {
                     Funds are locked in secure digital vaults, releasing instantly only upon proof of milestone completion.
                   </p>
                 </div>
-                <ArrowUpRight className="w-6 h-6 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
+                <ArrowUpRight className="w-6 h-6 text-primary-faint opacity-50 group-hover:opacity-100 group-hover:text-success transition-all duration-300 mt-8" />
               </FadeIn>
 
               {/* Small Card 2 */}
@@ -106,7 +106,7 @@ export default function HomePage() {
                     Every image upload, AI verdict, and capital transfer is permanently logged.
                   </p>
                 </div>
-                <ArrowUpRight className="w-6 h-6 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
+                <ArrowUpRight className="w-6 h-6 text-primary-faint opacity-50 group-hover:opacity-100 group-hover:text-success transition-all duration-300 mt-8" />
               </FadeIn>
 
               {/* Large Card 2 */}
@@ -118,7 +118,7 @@ export default function HomePage() {
                     With over 88% of projects facing delays globally, subjective reporting is obsolete. Switch to deterministic, visual-proof-based project management.
                   </p>
                 </div>
-                <ArrowUpRight className="w-8 h-8 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
+                <ArrowUpRight className="w-8 h-8 text-primary-faint opacity-50 group-hover:opacity-100 group-hover:text-success transition-all duration-300 mt-8" />
               </FadeIn>
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function HomePage() {
                 <ul className="space-y-6 mb-14">
                   {["Unlimited active projects", "Full AI verification engine access", "Automated escrow management", "Real-time immutable audit logs"].map((item, i) => (
                     <li key={i} className="flex items-center gap-4 text-text-primary text-lg">
-                      <div className="w-2 h-2 bg-text-primary rounded-none" />
+                      <div className="w-2 h-2 bg-success rounded-none" />
                       {item}
                     </li>
                   ))}

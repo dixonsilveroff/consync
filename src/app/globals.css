@@ -131,7 +131,7 @@
   }
   .link-hover-fx::after {
     content: '';
-    @apply absolute -bottom-1 left-0 h-[2px] w-full origin-bottom-right scale-x-0 bg-current transition-transform duration-base ease-out;
+    @apply absolute -bottom-1 left-0 h-[2px] w-full origin-bottom-right scale-x-0 bg-success transition-transform duration-base ease-out;
   }
   .link-hover-fx:hover::after {
     @apply origin-bottom-left scale-x-100;
