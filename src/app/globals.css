@@ -7,46 +7,46 @@
 
 @layer base {
   :root {
-    /* Core Brand */
-    --color-primary:          #1E4E8C;
-    --color-primary-dark:     #163A6B;
-    --color-primary-light:    #2F6FD6;
-    --color-primary-faint:    #EFF6FF;
+    /* Stark Minimalist Brand */
+    --color-primary:          #000000;
+    --color-primary-dark:     #111111;
+    --color-primary-light:    #333333;
+    --color-primary-faint:    #F5F5F5;
 
     /* Backgrounds */
-    --color-bg:               #F5F6F7;
-    --color-surface:          #FFFFFF;
+    --color-bg:               #FFFFFF;
+    --color-surface:          #FAFAFA;
     --color-surface-raised:   #FFFFFF;
 
     /* Text */
-    --color-text-primary:     #1A1C1E;
-    --color-text-secondary:   #2C2F33;
-    --color-text-muted:       #94A3B8;
+    --color-text-primary:     #000000;
+    --color-text-secondary:   #666666;
+    --color-text-muted:       #A3A3A3;
     --color-text-inverse:     #FFFFFF;
 
     /* Borders */
-    --color-border:           #E2E8F0;
-    --color-border-strong:    #CBD5E1;
+    --color-border:           #EAEAEA;
+    --color-border-strong:    #000000;
 
     /* Status: Positive */
-    --color-success:          #4CAF50;
-    --color-success-bg:       #F0FDF4;
-    --color-success-border:   #BBF7D0;
+    --color-success:          #000000;
+    --color-success-bg:       #F5F5F5;
+    --color-success-border:   #EAEAEA;
 
     /* Status: Pending */
-    --color-warning:          #F9C74F;
-    --color-warning-bg:       #FEFCE8;
-    --color-warning-border:   #FDE68A;
+    --color-warning:          #000000;
+    --color-warning-bg:       #FAFAFA;
+    --color-warning-border:   #EAEAEA;
 
-    /* Status: Escrow */
-    --color-escrow:           #3B82F6;
-    --color-escrow-bg:        #EFF6FF;
-    --color-escrow-border:    #BFDBFE;
+    /* Status: Escrow / Money */
+    --color-escrow:           #000000;
+    --color-escrow-bg:        #F5F5F5;
+    --color-escrow-border:    #EAEAEA;
 
     /* Status: Alert */
-    --color-danger:           #E63946;
-    --color-danger-bg:        #FFF1F2;
-    --color-danger-border:    #FECDD3;
+    --color-danger:           #EF4444;
+    --color-danger-bg:        #FEF2F2;
+    --color-danger-border:    #FCA5A5;
 
     /* Spacing */
     --space-1:    4px;
@@ -89,13 +89,13 @@
   body {
     background-color: var(--color-bg);
     color: var(--color-text-primary);
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-sans), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   html {
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-sans), system-ui, sans-serif;
   }
 
   /* ─── Scrollbar Styling ─── */

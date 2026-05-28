@@ -3,61 +3,60 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="bg-surface border-t border-border pt-16 pb-8">
+    <footer className="bg-background border-t border-border-strong pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
-          <div className="md:col-span-1 space-y-4">
+          <div className="md:col-span-1 space-y-6">
             <Link href="/" className="flex items-center gap-3">
-              <Image src="/logo.png" alt="ConSync Logo" width={28} height={28} className="rounded-md" />
-              <span className="font-display text-h4 text-text-primary">
-                ConSync
+              <span className="w-6 h-6 bg-text-primary"></span>
+              <span className="font-display text-2xl font-bold tracking-tighter text-text-primary">
+                CONSYNC
               </span>
             </Link>
-            <p className="text-small text-text-secondary leading-relaxed">
-              AI-powered construction verification and conditional escrow releases for a trustless building environment.
+            <p className="text-base text-text-secondary leading-relaxed">
+              Construction payments, automated via deterministic AI verification.
             </p>
           </div>
 
           {/* Links 1 */}
           <div>
-            <h4 className="font-display font-semibold text-text-primary mb-4">Product</h4>
-            <ul className="space-y-3">
-              <li><Link href="#features" className="text-small text-text-secondary hover:text-primary transition-colors">AI Vision</Link></li>
-              <li><Link href="#features" className="text-small text-text-secondary hover:text-primary transition-colors">Squad Escrow</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">For Owners</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">For Contractors</Link></li>
+            <h4 className="font-mono text-sm tracking-widest text-text-muted mb-6">PROTOCOL</h4>
+            <ul className="space-y-4">
+              <li><Link href="#features" className="text-base text-text-secondary hover:text-text-primary transition-colors">Visual AI</Link></li>
+              <li><Link href="#features" className="text-base text-text-secondary hover:text-text-primary transition-colors">Digital Escrow</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Owner Portal</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Contractor Portal</Link></li>
             </ul>
           </div>
 
           {/* Links 2 */}
           <div>
-            <h4 className="font-display font-semibold text-text-primary mb-4">Resources</h4>
-            <ul className="space-y-3">
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">Documentation</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">Hackathon Pitch</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">API Reference</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">Help Center</Link></li>
+            <h4 className="font-mono text-sm tracking-widest text-text-muted mb-6">RESOURCES</h4>
+            <ul className="space-y-4">
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Documentation</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Case Studies</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">API Reference</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Help Center</Link></li>
             </ul>
           </div>
 
           {/* Links 3 */}
           <div>
-            <h4 className="font-display font-semibold text-text-primary mb-4">Legal</h4>
-            <ul className="space-y-3">
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link href="#" className="text-small text-text-secondary hover:text-primary transition-colors">Cookie Policy</Link></li>
+            <h4 className="font-mono text-sm tracking-widest text-text-muted mb-6">LEGAL</h4>
+            <ul className="space-y-4">
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-micro text-text-muted">
-            © 2026 ConSync — Built for Squad Hackathon 3.0
+          <p className="font-mono text-xs tracking-widest text-text-muted">
+            © 2026 CONSYNC. ALL RIGHTS RESERVED.
           </p>
-          <p className="text-micro text-text-muted">
-            Powered by Google Gemini 2.0 & Squad API
+          <p className="font-mono text-xs tracking-widest text-text-muted">
+            SECURE INFRASTRUCTURE
           </p>
         </div>
       </div>

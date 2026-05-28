@@ -34,7 +34,7 @@ export function EscrowBalance({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-white/80" />
             <h3 className="font-display font-medium text-white/90 uppercase tracking-wider text-small">
-              Squad Escrow
+              Secure Escrow
             </h3>
           </div>
           <span className={`text-micro font-bold uppercase tracking-wider px-2.5 py-1 rounded ${needsFunding ? 'bg-white/20 text-white' : 'bg-success text-white'}`}>

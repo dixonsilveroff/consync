@@ -109,9 +109,9 @@ export default function MilestoneSubmitPage() {
           <div className="card-enforcer flex flex-col items-center justify-center py-8 gap-4 border-primary/20 bg-primary/5">
             <Loader2 className="w-12 h-12 animate-spin text-primary" />
             <div className="text-center space-y-1">
-              <p className="font-heading text-xl text-primary font-medium">Gemini Vision Analysis in Progress</p>
+              <p className="font-heading text-xl text-primary font-medium">AI Verification in Progress</p>
               <p className="text-sm text-muted-foreground">
-                ConSync AI is reviewing your photos. This usually takes 15–30 seconds.
+                Our AI engine is reviewing your photos. This usually takes 15–30 seconds.
               </p>
             </div>
           </div>

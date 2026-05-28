@@ -191,7 +191,7 @@ export default function OwnerProjectDashboard() {
 
               <div className="bg-warning/10 text-warning p-4 rounded-xl text-sm leading-relaxed border border-warning/20">
                 <strong className="font-semibold block mb-1">⚠️ Important:</strong>
-                Send the <b>exact amount</b> shown above in a single transaction. Any other amount will be automatically refunded by Squad.
+                Send the <b>exact amount</b> shown above in a single transaction. Any other amount will be automatically refunded.
               </div>
 
               {timeLeft !== "Expired" && (
