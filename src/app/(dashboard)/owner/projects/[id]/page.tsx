@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { EscrowBalance } from "@/components/escrow-balance";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2, Copy, CheckCircle2, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
@@ -127,22 +128,22 @@ export default function OwnerProjectDashboard() {
     <div className="animate-fade-in relative">
       {/* DVA Modal */}
       {dvaDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-surface border border-border w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center p-5 border-b border-border bg-surface-container-low">
-              <h3 className="font-heading text-headline-sm text-on-surface">Fund Escrow</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="glassmorphic-widget w-full max-w-md rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
+            <div className="flex justify-between items-center p-5 border-b border-border/50 bg-background/50">
+              <h3 className="font-heading text-headline-sm text-foreground">Fund Escrow</h3>
               <button
                 onClick={() => setDvaDetails(null)}
-                className="p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant hover:text-on-surface"
+                className="p-2 hover:bg-surface-raised rounded-full transition-colors text-muted-foreground hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
-                <p className="text-body-sm text-on-surface-variant mb-1">Transfer Exactly</p>
-                <p className="font-heading text-display-sm text-primary">
+            <div className="p-6 space-y-6">
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 text-center">
+                <p className="text-body-sm text-muted-foreground mb-1 uppercase tracking-wider font-medium">Transfer Exactly</p>
+                <p className="font-mono text-4xl font-bold tracking-tight text-primary">
                   {formatNaira(dvaDetails.expectedAmountKobo)}
                 </p>
               </div>
@@ -150,51 +151,70 @@ export default function OwnerProjectDashboard() {
               <div className="space-y-4">
                 <div>
                   <p className="label-blueprint mb-1">Bank Name</p>
-                  <p className="font-medium text-on-surface">{dvaDetails.bankName}</p>
+                  <p className="font-medium text-foreground text-lg">{dvaDetails.bankName}</p>
                 </div>
 
                 <div>
-                  <p className="label-blueprint mb-1">Account Number</p>
-                  <div className="flex items-center justify-between bg-surface-container-low p-3 rounded-lg border border-border">
-                    <span className="font-mono text-lg text-on-surface tracking-wider">
+                  <p className="label-blueprint mb-1">Virtual Account Number</p>
+                  <div className="flex items-center justify-between bg-primary/10 p-4 rounded-xl border border-primary/20 group hover:border-primary/40 transition-colors">
+                    <span className="font-mono text-2xl font-bold tracking-widest text-primary">
                       {dvaDetails.virtualAccountNumber}
                     </span>
                     <button
                       onClick={handleCopy}
-                      className="p-2 bg-surface hover:bg-surface-container border border-border rounded-md transition-colors"
+                      className={`p-3 rounded-lg flex items-center gap-2 transition-all duration-300 ${copied ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground hover:bg-primary-dark shadow-md hover:shadow-lg'}`}
                       title="Copy to clipboard"
                     >
-                      {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-on-surface-variant" />}
+                      {copied ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span className="text-sm font-medium">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          <span className="text-sm font-medium">Copy</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <p className="label-blueprint mb-1">Expires In</p>
-                  <p className={`text-body-md flex items-center gap-2 ${timeLeft === "Expired" ? "text-red-500 font-bold" : "text-on-surface"}`}>
-                    <Calendar className={`w-4 h-4 ${timeLeft === "Expired" ? "text-red-500" : "text-on-surface-variant"}`} />
+                  <p className={`text-body-md font-medium flex items-center gap-2 ${timeLeft === "Expired" ? "text-destructive font-bold" : "text-foreground"}`}>
+                    <Calendar className={`w-4 h-4 ${timeLeft === "Expired" ? "text-destructive" : "text-muted-foreground"}`} />
                     {timeLeft === "Expired" ? "Expired" : `${timeLeft} minutes`}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-amber-500/10 text-amber-600 p-4 rounded-lg text-sm leading-relaxed border border-amber-500/20">
+              <div className="bg-warning/10 text-warning p-4 rounded-xl text-sm leading-relaxed border border-warning/20">
                 <strong className="font-semibold block mb-1">⚠️ Important:</strong>
                 Send the <b>exact amount</b> shown above in a single transaction. Any other amount will be automatically refunded by Squad.
               </div>
+
+              {timeLeft !== "Expired" && (
+                <div className="flex items-center justify-center gap-2 text-primary text-sm font-medium pt-2">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                  <span className="animate-pulse-subtle">Listening for secure transfer...</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* Back Link */}
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.push("/owner/projects")}
-        className="btn-tertiary flex items-center gap-1 mb-6"
+        className="flex items-center gap-1 mb-6"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         All Projects
-      </button>
+      </Button>
 
       {/* Money Bar */}
       {project.status === "ACTIVE" && (

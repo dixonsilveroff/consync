@@ -43,15 +43,19 @@ export default function ContractorProjectsPage() {
 
       {/* Empty State */}
       {projects !== undefined && projects.length === 0 && (
-        <div className="bg-surface rounded-xl border border-border text-center py-16 px-6">
-          <Building2 className="w-12 h-12 text-text-muted mx-auto mb-4" />
-          <h2 className="font-display text-h2 text-text-primary mb-2">
-            No projects assigned
+        <div className="bg-background rounded-xl border border-border text-center py-20 px-6 shadow-sm">
+          <div className="w-16 h-16 bg-surface border border-border shadow-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <ClipboardList className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="font-display text-h3 text-text-primary mb-3">
+            Waiting for Assignments
           </h2>
-          <p className="text-body text-text-secondary mb-6 max-w-md mx-auto">
-            You haven't been assigned to any construction projects yet. 
-            Once an owner invites you via email, projects will appear here.
+          <p className="text-body text-text-secondary mb-8 max-w-md mx-auto leading-relaxed">
+            You haven't been assigned to any construction projects yet. Once a project owner adds your email to their project, it will automatically appear here for you to submit progress photos.
           </p>
+          <Button variant="outline" size="lg" className="gap-2 shadow-sm" onClick={() => window.location.reload()}>
+            Refresh Dashboard
+          </Button>
         </div>
       )}
 

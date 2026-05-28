@@ -43,6 +43,10 @@ const config: Config = {
           DEFAULT: "var(--color-surface-raised)",
           foreground: "var(--color-text-primary)",
         },
+        secondary: {
+          DEFAULT: "var(--color-bg)",
+          foreground: "var(--color-text-secondary)",
+        },
         muted: {
           DEFAULT: "var(--color-bg)",
           foreground: "var(--color-text-muted)",
@@ -95,6 +99,7 @@ const config: Config = {
         "body": ["1rem", { lineHeight: "1.6", fontWeight: "400" }],
         "small": ["0.875rem", { lineHeight: "1.5", fontWeight: "400" }],
         "micro": ["0.75rem", { lineHeight: "1.4", fontWeight: "400" }],
+        "label-lg": ["0.875rem", { lineHeight: "1.5", fontWeight: "500" }],
       },
       borderRadius: {
         none: "0px",

@@ -128,16 +128,7 @@
 }
 
 @layer components {
-  /* Buttons */
-  .btn-primary {
-    @apply px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-secondary {
-    @apply px-4 py-2 bg-surface border border-border text-text-primary font-medium rounded-md hover:bg-background transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-tertiary {
-    @apply px-3 py-1.5 text-text-secondary hover:text-text-primary text-small font-medium transition-colors disabled:opacity-50;
-  }
+  /* Buttons - Removed legacy btn-* classes in favor of Shadcn Button */
 
   /* Cards */
   .card-enforcer {
@@ -145,6 +136,11 @@
   }
   .bg-surface-container-high {
     @apply bg-background border border-border rounded-lg;
+  }
+
+  /* Trust / Fintech Widgets */
+  .glassmorphic-widget {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-md;
   }
 
   /* Typography */

@@ -5,6 +5,7 @@ import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { AiVerdictPanel } from "@/components/ai-verdict-panel";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, Clock } from "lucide-react";
 import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
 
@@ -38,13 +39,15 @@ export default function MilestoneDetailPage() {
   return (
     <div className="animate-fade-in max-w-3xl mx-auto">
       {/* Back */}
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.push(`/owner/projects/${params.id}`)}
-        className="btn-tertiary flex items-center gap-1 mb-6"
+        className="flex items-center gap-1 mb-6"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Project
-      </button>
+      </Button>
 
       {/* Milestone Header */}
       <div className="flex items-start justify-between mb-6">
@@ -112,12 +115,29 @@ export default function MilestoneDetailPage() {
 
       {/* Analysis in progress */}
       {milestone.status === "SUBMITTED" && (
-        <div className="card-enforcer flex flex-col items-center justify-center py-12 gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="font-heading text-headline-sm text-on-surface">Loading analysis…</p>
-          <p className="text-body-md text-on-surface-variant text-center">
-            Gemini Vision is verifying the site photos against your acceptance criteria.
-          </p>
+        <div className="space-y-6 animate-pulse-subtle">
+          <div className="card-enforcer flex flex-col items-center justify-center py-8 gap-4 border-primary/20 bg-primary/5">
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <div className="text-center space-y-1">
+              <p className="font-heading text-xl text-primary font-medium">Gemini Vision Analysis in Progress</p>
+              <p className="text-sm text-muted-foreground">
+                Verifying site photos against acceptance criteria...
+              </p>
+            </div>
+          </div>
+
+          {/* Skeleton mimicking the AI Verdict Panel */}
+          <div className="card-enforcer bg-background border-none shadow-none p-0 mb-6 space-y-4 opacity-60">
+            <div className="h-6 bg-secondary rounded w-1/3 mb-2"></div>
+            <div className="h-4 bg-secondary rounded-full w-full"></div>
+          </div>
+
+          <div className="card-enforcer opacity-60 space-y-4">
+             <div className="h-5 bg-secondary rounded w-1/4 mb-4"></div>
+             <div className="h-12 bg-secondary/50 rounded-lg w-full"></div>
+             <div className="h-12 bg-secondary/50 rounded-lg w-full"></div>
+             <div className="h-12 bg-secondary/50 rounded-lg w-full"></div>
+          </div>
         </div>
       )}
 

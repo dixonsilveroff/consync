@@ -5,6 +5,7 @@ import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2 } from "lucide-react";
 import { getStatusConfig, formatDate } from "@/lib/utils";
 
@@ -45,13 +46,15 @@ export default function ContractorProjectDashboard() {
   return (
     <div className="animate-fade-in">
       {/* Back Link */}
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.push("/contractor/projects")}
-        className="btn-tertiary flex items-center gap-1 mb-6"
+        className="flex items-center gap-1 mb-6"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         All Projects
-      </button>
+      </Button>
 
       {/* Project Header */}
       <div className="flex items-start justify-between mb-8">
@@ -106,19 +109,15 @@ export default function ContractorProjectDashboard() {
           {/* Project Info */}
           <div className="card-enforcer">
             <h3 className="label-blueprint mb-4">Project Details</h3>
-            {project.description && (
+            {project.description ? (
               <p className="text-body-md text-on-surface-variant mb-4">
                 {project.description}
               </p>
+            ) : (
+              <p className="text-body-md text-text-muted italic mb-4">
+                No additional description provided for this project.
+              </p>
             )}
-            <div className="space-y-3">
-              <div>
-                <p className="label-blueprint">Owner Clerk ID</p>
-                <p className="text-body-md text-on-surface mt-1 truncate">
-                  {project.ownerClerkId}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

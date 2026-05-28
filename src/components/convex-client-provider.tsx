@@ -39,7 +39,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
           formFieldLabel: "text-small font-medium text-text-primary",
           formFieldInput:
             "h-11 rounded-md border border-border bg-background text-text-primary focus:ring-2 focus:ring-primary/20",
-          formButtonPrimary: "btn-primary h-11 w-full rounded-md text-body font-medium",
+          formButtonPrimary: "bg-primary text-primary-foreground hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 h-11 w-full rounded-md text-body font-medium",
           footerActionLink: "text-primary hover:text-primary-dark",
           dividerLine: "bg-border",
           dividerText: "text-text-muted",

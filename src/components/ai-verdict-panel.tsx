@@ -131,15 +131,19 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
       <div className="card-enforcer bg-background border-none shadow-none p-0 mb-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="label-blueprint flex items-center gap-1.5 text-primary">
-             <Brain className="w-4 h-4" /> AI Confidence Score
+             <Brain className="w-5 h-5 text-primary animate-pulse-subtle" /> AI Confidence Score
           </h3>
-          <span className="font-mono text-headline-sm text-text-primary font-semibold">
+          <span className="font-mono text-3xl font-bold tracking-tight text-foreground">
             {analysis.confidenceScore}%
           </span>
         </div>
-        <div className="h-2 bg-surface-container-high border border-border rounded-full overflow-hidden">
+        <div className="relative h-3 bg-secondary rounded-full overflow-hidden shadow-inner">
           <div
-            className={`h-full rounded-full transition-all duration-1000 ease-out ${statusCfg.barClass}`}
+            className={`absolute inset-0 opacity-50 animate-pulse-subtle blur-sm ${statusCfg.barClass}`}
+            style={{ width: `${analysis.confidenceScore}%` }}
+          />
+          <div
+            className={`h-full rounded-full transition-all duration-1000 ease-out relative z-10 shadow-[0_0_15px_rgba(var(--color-primary),0.5)] ${statusCfg.barClass}`}
             style={{ width: `${analysis.confidenceScore}%` }}
           />
         </div>
