@@ -235,45 +235,44 @@ export default function OwnerProjectDashboard() {
       )}
 
       {/* Project Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-start justify-between mb-12 border-b border-border-strong pb-8">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Building2 className="w-6 h-6 text-primary" />
-            <h1 className="font-heading text-display-sm text-on-surface">
+          <div className="flex items-center gap-3 mb-4">
+            <h1 className="font-display text-5xl font-bold tracking-tighter text-text-primary uppercase">
               {project.name}
             </h1>
           </div>
-          <div className="flex items-center gap-4 text-body-md text-on-surface-variant">
-            <span className="label-blueprint">{project.projectType}</span>
+          <div className="flex items-center gap-6 font-mono text-xs tracking-widest text-text-secondary uppercase">
+            <span className="bg-primary/10 text-primary px-3 py-1 font-bold">{project.projectType}</span>
             {project.location && (
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" />
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
                 {project.location}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
               {formatDate(project.createdAt)}
             </span>
           </div>
         </div>
-        <span className={statusConfig.className}>{statusConfig.label}</span>
+        <span className={cn(statusConfig.className, "rounded-none border border-border-strong text-sm px-4 py-2")}>{statusConfig.label}</span>
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Milestone List */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-headline-sm text-on-surface">
-              Milestones
+          <div className="flex items-center justify-between mb-6 pb-2 border-b border-border-strong">
+            <h2 className="font-display text-2xl font-bold tracking-tight text-text-primary">
+              VERIFICATION PROTOCOL
             </h2>
-            <p className="text-label-sm text-on-surface-variant">
+            <p className="font-mono text-xs font-bold tracking-widest text-success">
               {milestones.filter((m: { status: string }) => m.status === "APPROVED").length}/
-              {milestones.length} completed
+              {milestones.length} COMPLETED
             </p>
           </div>
-          <div className="bg-surface-container-high">
+          <div className="bg-background">
             <MilestoneList
               milestones={milestones}
               projectId={projectId}
@@ -283,7 +282,7 @@ export default function OwnerProjectDashboard() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-10">
           <EscrowBalance
             totalValueKobo={project.totalValueKobo}
             escrowBalanceKobo={project.escrowBalanceKobo}
@@ -293,28 +292,30 @@ export default function OwnerProjectDashboard() {
           />
 
           {/* Project Info */}
-          <div className="card-enforcer">
-            <h3 className="label-blueprint mb-4">Project Details</h3>
+          <div className="bg-surface border border-border-strong p-8 rounded-none">
+            <h3 className="font-mono text-xs font-bold tracking-widest text-text-muted mb-6 uppercase border-b border-border-strong pb-2">Technical Specs</h3>
             {project.description && (
-              <p className="text-body-md text-on-surface-variant mb-4">
+              <p className="text-base text-text-secondary mb-8 leading-relaxed">
                 {project.description}
               </p>
             )}
-            <div className="space-y-3">
+            <div className="space-y-6">
               {project.contractorEmail && (
                 <div>
-                  <p className="label-blueprint">Contractor</p>
-                  <p className="text-body-md text-on-surface mt-1">
+                  <p className="font-mono text-xs tracking-widest text-text-muted mb-2">CONTRACTOR IDENTITY</p>
+                  <p className="font-mono text-sm text-text-primary font-bold">
                     {project.contractorEmail}
                   </p>
                 </div>
               )}
               {project.squadVirtualAccountNumber && (
                 <div>
-                  <p className="label-blueprint">Virtual Account</p>
-                  <p className="text-body-md text-primary font-mono mt-1">
-                    {project.squadVirtualAccountNumber}
-                  </p>
+                  <p className="font-mono text-xs tracking-widest text-text-muted mb-2">ESCROW VAULT ID</p>
+                  <div className="bg-primary/5 border border-primary/20 p-3 flex justify-between items-center group">
+                    <p className="text-base text-primary font-mono font-bold tracking-widest">
+                      {project.squadVirtualAccountNumber}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

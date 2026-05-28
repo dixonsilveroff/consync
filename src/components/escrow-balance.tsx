@@ -2,6 +2,7 @@
 
 import { Wallet, TrendingDown, ArrowRight, ShieldCheck } from "lucide-react";
 import { formatNaira } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface EscrowBalanceProps {
@@ -27,61 +28,61 @@ export function EscrowBalance({
   const needsFunding = projectStatus === "PENDING_FUNDING";
 
   return (
-    <div className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-surface border border-border-strong shadow-none overflow-hidden rounded-none">
       {/* High-contrast Header */}
-      <div className="bg-cta-gradient p-6 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-white/80" />
-            <h3 className="font-display font-medium text-white/90 uppercase tracking-wider text-small">
+      <div className="bg-text-primary p-8 text-text-inverse border-b border-border-strong">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="w-6 h-6 text-primary-light" />
+            <h3 className="font-mono font-bold tracking-widest text-sm uppercase">
               Secure Escrow
             </h3>
           </div>
-          <span className={`text-micro font-bold uppercase tracking-wider px-2.5 py-1 rounded ${needsFunding ? 'bg-white/20 text-white' : 'bg-success text-white'}`}>
+          <span className={cn("font-mono text-xs font-bold uppercase tracking-widest px-3 py-1 border", needsFunding ? 'bg-transparent text-text-inverse border-border' : 'bg-success text-white border-success')}>
             {needsFunding ? "AWAITING FUNDS" : "ACTIVE"}
           </span>
         </div>
 
         <div className="mb-2">
-          <p className="text-white/70 text-small mb-1">Current Balance</p>
-          <p className="font-mono text-display-sm font-semibold tracking-tight">
+          <p className="font-mono text-xs text-text-muted tracking-widest uppercase mb-2">CURRENT VAULT BALANCE</p>
+          <p className="font-display text-5xl font-semibold tracking-tighter">
             {formatNaira(escrowBalanceKobo)}
           </p>
         </div>
       </div>
 
       {/* Details Body */}
-      <div className="p-6">
+      <div className="p-8 bg-background">
         {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-micro font-medium text-text-secondary uppercase tracking-wider">Funded</p>
-            <p className="text-small font-medium text-primary">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-mono text-xs font-bold text-text-secondary uppercase tracking-widest">LIQUIDITY RATIO</p>
+            <p className="font-mono text-sm font-bold text-primary">
               {fundedPercentage}%
             </p>
           </div>
-          <div className="h-2 bg-background border border-border rounded-full w-full overflow-hidden">
+          <div className="h-3 bg-surface border border-border-strong w-full overflow-hidden">
             <div
-              className="h-full bg-cta-gradient transition-all duration-release"
+              className="h-full bg-primary transition-all duration-release"
               style={{ width: `${Math.min(fundedPercentage, 100)}%` }}
             />
           </div>
         </div>
 
         {/* Financial Details */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-background p-3 rounded-lg border border-border">
-            <p className="text-micro font-medium text-text-secondary uppercase tracking-wider">Total Value</p>
-            <p className="font-mono text-small text-text-primary font-medium mt-1">
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="bg-surface p-4 border border-border-strong">
+            <p className="font-mono text-xs font-bold text-text-muted uppercase tracking-widest border-b border-border pb-2 mb-3">TOTAL VALUE</p>
+            <p className="font-mono text-lg text-text-primary font-bold">
               {formatNaira(totalValueKobo)}
             </p>
           </div>
-          <div className="bg-background p-3 rounded-lg border border-border">
-            <p className="text-micro font-medium text-text-secondary uppercase tracking-wider flex items-center gap-1">
+          <div className="bg-surface p-4 border border-border-strong">
+            <p className="font-mono text-xs font-bold text-text-muted uppercase tracking-widest border-b border-border pb-2 mb-3 flex items-center gap-2">
               <TrendingDown className="w-3 h-3 text-danger" />
-              Disbursed
+              DISBURSED
             </p>
-            <p className="font-mono text-small text-text-primary font-medium mt-1">
+            <p className="font-mono text-lg text-text-primary font-bold">
               {formatNaira(disbursed > 0 ? disbursed : 0)}
             </p>
           </div>
@@ -93,11 +94,11 @@ export function EscrowBalance({
             onClick={onFundEscrow}
             disabled={isFunding}
             size="lg"
-            className="w-full flex items-center justify-center gap-2 bg-cta-gradient hover:bg-cta-gradient-hover border-0 shadow-md text-white"
+            className="w-full flex items-center justify-center gap-3 bg-text-primary hover:bg-text-primary/90 rounded-none h-14 text-text-inverse font-mono text-sm tracking-widest font-bold"
           >
-            <Wallet className="w-4 h-4" />
-            {isFunding ? "Generating Account..." : "Fund Project Escrow"}
-            <ArrowRight className="w-4 h-4" />
+            <Wallet className="w-5 h-5" />
+            {isFunding ? "GENERATING ACCOUNT..." : "ALLOCATE CAPITAL"}
+            <ArrowRight className="w-5 h-5" />
           </Button>
         )}
       </div>

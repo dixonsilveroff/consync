@@ -78,12 +78,12 @@ export default function MilestoneSubmitPage() {
       </Button>
 
       {/* Milestone header */}
-      <div className="mb-8">
-        <h1 className="font-heading text-display-sm text-on-surface">{milestone.name}</h1>
-        <p className="text-body-md text-on-surface-variant mt-1">{milestone.description}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mb-10 pb-6 border-b border-border-strong">
+        <h1 className="font-display text-4xl font-bold tracking-tighter text-text-primary uppercase mb-2">{milestone.name}</h1>
+        <p className="font-mono text-sm text-text-secondary">{milestone.description}</p>
+        <div className="mt-6 flex flex-wrap gap-2">
           {milestone.acceptanceCriteria.map((c: string, i: number) => (
-            <span key={i} className="label-blueprint text-xs px-2 py-1 bg-primary/8 rounded-md">
+            <span key={i} className="font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 bg-background border border-border-strong text-text-secondary">
               {c}
             </span>
           ))}
@@ -94,7 +94,7 @@ export default function MilestoneSubmitPage() {
 
       {/* Pending: show upload form */}
       {(milestone.status === "PENDING" || milestone.status === "REJECTED") && (
-        <div className="card-enforcer">
+        <div className="bg-surface border border-border-strong p-6 rounded-none">
           <PhotoUpload
             milestoneId={milestoneId}
             milestoneName={milestone.name}
@@ -106,12 +106,12 @@ export default function MilestoneSubmitPage() {
       {/* Analysis in progress */}
       {milestone.status === "SUBMITTED" && (
         <div className="space-y-6 animate-pulse-subtle">
-          <div className="card-enforcer flex flex-col items-center justify-center py-8 gap-4 border-primary/20 bg-primary/5">
+          <div className="bg-surface border border-border-strong flex flex-col items-center justify-center py-12 gap-6 rounded-none">
             <Loader2 className="w-12 h-12 animate-spin text-primary" />
-            <div className="text-center space-y-1">
-              <p className="font-heading text-xl text-primary font-medium">AI Verification in Progress</p>
-              <p className="text-sm text-muted-foreground">
-                Our AI engine is reviewing your photos. This usually takes 15–30 seconds.
+            <div className="text-center space-y-2">
+              <p className="font-display text-xl text-primary font-bold uppercase tracking-tight">AI Verification in Progress</p>
+              <p className="font-mono text-xs tracking-widest text-text-muted uppercase">
+                ANALYZING EVIDENCE...
               </p>
             </div>
           </div>
@@ -153,20 +153,24 @@ export default function MilestoneSubmitPage() {
 
       {/* Submission history */}
       {submission && milestone.status !== "PENDING" && (
-        <div className="mt-6 card-enforcer">
-          <h3 className="label-blueprint mb-3">Submitted Photos</h3>
-          <p className="text-body-sm text-on-surface-variant">
-            {submission.photoCount} photo{submission.photoCount !== 1 ? "s" : ""} submitted on{" "}
+        <div className="mt-8 bg-background border border-border-strong p-6 rounded-none">
+          <h3 className="font-mono text-xs font-bold tracking-widest text-text-muted mb-4 uppercase border-b border-border-strong pb-2">Submission Log</h3>
+          <p className="font-mono text-sm text-text-secondary">
+            {submission.photoCount} PHOTO{submission.photoCount !== 1 ? "S" : ""} | TIMESTAMP:{" "}
             {new Date(submission.submittedAt).toLocaleDateString("en-NG", {
-              day: "numeric",
-              month: "long",
+              day: "2-digit",
+              month: "short",
               year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit"
             })}
           </p>
           {submission.contractorNote && (
-            <p className="text-body-sm text-on-surface mt-2 italic">
-              &ldquo;{submission.contractorNote}&rdquo;
-            </p>
+            <div className="mt-4 p-3 bg-surface border-l-2 border-primary">
+              <p className="font-mono text-xs text-text-primary">
+                "{submission.contractorNote}"
+              </p>
+            </div>
           )}
         </div>
       )}

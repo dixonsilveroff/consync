@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { CheckCircle2, Circle, Clock, XCircle, AlertTriangle } from "lucide-react";
-import { formatNaira, getStatusConfig } from "@/lib/utils";
+import { formatNaira, getStatusConfig, cn } from "@/lib/utils";
 import { Doc } from "@convex/_generated/dataModel";
 
 interface MilestoneListProps {
@@ -26,16 +26,16 @@ export function MilestoneList({
 }: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
-      <div className="card-enforcer text-center py-12">
-        <p className="text-on-surface-variant text-body-lg">
-          No milestones defined yet.
+      <div className="border border-border-strong bg-surface text-center py-16">
+        <p className="font-mono text-sm tracking-widest text-text-muted uppercase">
+          NO MILESTONES ALLOCATED
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-0">
+    <div className="border-t border-border-strong">
       {milestones.map((milestone, index) => {
         const statusConfig = getStatusConfig(milestone.status);
         const href =
@@ -44,43 +44,36 @@ export function MilestoneList({
             : `/contractor/milestones/${milestone._id}/submit`;
 
         return (
-          <Link key={milestone._id} href={href} className="block group">
-            <div className="flex items-center gap-4 px-6 py-5 transition-all duration-200 hover:bg-surface-container-high">
+          <Link key={milestone._id} href={href} className="block group border-b border-border-strong bg-background hover:bg-surface transition-colors">
+            <div className="flex items-center gap-6 px-8 py-6">
               {/* Order Index */}
-              <div className="w-8 h-8 flex items-center justify-center bg-surface-container-low text-on-surface-variant text-label-lg font-heading font-semibold flex-shrink-0">
-                {milestone.orderIndex}
-              </div>
-
-              {/* Status Icon */}
-              <div className="flex-shrink-0">
-                {statusIcons[milestone.status] || statusIcons.PENDING}
+              <div className="font-mono text-xs font-bold text-text-muted tracking-widest uppercase flex-shrink-0 w-8">
+                {String(milestone.orderIndex).padStart(2, '0')}
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-label-lg text-on-surface font-body font-medium group-hover:text-primary transition-colors truncate">
-                  {milestone.name}
-                </h4>
-                <p className="text-body-sm text-on-surface-variant mt-0.5 truncate">
+                <div className="flex items-center gap-3 mb-1">
+                  <h4 className="font-display text-lg font-bold text-text-primary group-hover:text-primary transition-colors truncate uppercase tracking-tight">
+                    {milestone.name}
+                  </h4>
+                  {statusIcons[milestone.status] || statusIcons.PENDING}
+                </div>
+                <p className="font-mono text-xs text-text-secondary truncate">
                   {milestone.description}
                 </p>
               </div>
 
-              {/* Value */}
-              <div className="text-right flex-shrink-0">
-                <p className="font-heading text-label-lg text-on-surface">
+              {/* Value & Status */}
+              <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
+                <p className="font-mono text-lg font-bold text-text-primary">
                   {formatNaira(milestone.valueKobo)}
                 </p>
-                <span className={statusConfig.className}>
+                <span className={cn(statusConfig.className, "rounded-none border border-border-strong px-2 py-0.5 text-[10px]")}>
                   {statusConfig.label}
                 </span>
               </div>
             </div>
-
-            {/* Separator — tonal shift, not a border */}
-            {index < milestones.length - 1 && (
-              <div className="h-px bg-surface-container-low mx-6" />
-            )}
           </Link>
         );
       })}

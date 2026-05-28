@@ -185,29 +185,20 @@ export default function DashboardLayout({
   const navItems = isOwner ? ownerNav : contractorNav;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row selection:bg-text-primary selection:text-bg">
       {/* ─── Mobile Header ─── */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-border">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="ConSync Logo" width={24} height={24} className="rounded-sm" />
-          <span className="font-display text-h4 text-text-primary">ConSync</span>
+      <div className="md:hidden flex items-center justify-between p-4 bg-background border-b border-border-strong">
+        <Link href="/" className="flex items-center gap-3">
+          <span className="w-5 h-5 bg-text-primary"></span>
+          <span className="font-display text-lg font-bold tracking-tighter text-text-primary">
+            CONSYNC
+          </span>
         </Link>
         <div className="flex items-center gap-4">
           <UserButton
             appearance={{
               elements: {
-                avatarBox: "w-8 h-8 ring-2 ring-primary/15",
-                userButtonBox: "rounded-full border border-border bg-surface",
-                userButtonTrigger: "rounded-full border border-border bg-surface hover:bg-primary-faint",
-                userButtonPopoverCard:
-                  "bg-surface border border-border shadow-md rounded-xl text-text-primary",
-                userButtonPopoverMain: "px-2 py-2",
-                userButtonPopoverFooter: "border-t border-border bg-background/60",
-                userButtonPopoverActions: "gap-1",
-                userButtonPopoverActionButton:
-                  "rounded-md px-3 py-2 text-small text-text-primary hover:bg-primary-faint",
-                userButtonPopoverActionButtonText: "text-text-primary",
-                userButtonPopoverActionButtonIcon: "text-text-muted",
+                avatarBox: "w-8 h-8 rounded-none border border-border-strong",
               },
             }}
           />
@@ -215,7 +206,7 @@ export default function DashboardLayout({
             variant="ghost"
             size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="text-text-secondary"
+            className="text-text-primary rounded-none"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </Button>
@@ -225,18 +216,23 @@ export default function DashboardLayout({
       {/* ─── Sidebar ─── */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-surface border-r border-border transform transition-transform duration-base ease-in-out md:relative md:translate-x-0 flex flex-col",
+          "fixed inset-y-0 left-0 z-40 w-64 bg-background border-r border-border-strong transform transition-transform duration-base ease-in-out md:relative md:translate-x-0 flex flex-col",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-6 items-center gap-3 border-b border-border hidden md:flex">
+        <div className="p-6 items-center gap-3 border-b border-border-strong hidden md:flex h-20">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full">
-            <Image src="/logo.png" alt="ConSync Logo" width={28} height={28} className="rounded-md" />
-            <span className="font-display text-h3 text-text-primary">ConSync</span>
+            <span className="w-6 h-6 bg-text-primary"></span>
+            <span className="font-display text-2xl font-bold tracking-tighter text-text-primary">
+              CONSYNC
+            </span>
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 py-8 px-6 space-y-6 overflow-y-auto">
+          <span className="font-mono text-xs font-semibold tracking-widest text-text-muted mb-2 block uppercase">
+            {isOwner ? "OWNER DIRECTORY" : "CONTRACTOR DIRECTORY"}
+          </span>
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
@@ -245,14 +241,14 @@ export default function DashboardLayout({
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-md text-small font-medium transition-colors",
+                  "flex items-center gap-3 font-mono text-sm tracking-wider transition-all group",
                   isActive
-                    ? "bg-primary-faint text-primary"
-                    : "text-text-secondary hover:bg-background hover:text-text-primary"
+                    ? "text-primary font-bold"
+                    : "text-text-secondary hover:text-text-primary"
                 )}
               >
-                {item.icon}
-                {item.label}
+                <div className={cn("w-1.5 h-1.5", isActive ? "bg-success" : "bg-transparent group-hover:bg-border-strong")} />
+                {item.label.toUpperCase()}
               </Link>
             );
           })}
@@ -260,11 +256,11 @@ export default function DashboardLayout({
 
         {/* Sidebar Footer Widget (e.g. Escrow Summary) */}
         {isOwner && (
-          <div className="p-4 m-4 bg-background border border-border rounded-lg shadow-sm">
-            <p className="text-micro font-medium text-text-muted uppercase tracking-wide mb-1">
-              Total Escrow
+          <div className="p-6 border-t border-border-strong bg-surface">
+            <p className="font-mono text-xs font-semibold tracking-widest text-text-muted mb-2">
+              ESCROW VAULT
             </p>
-            <p className="font-mono text-h4 text-escrow">
+            <p className="font-mono text-2xl text-success font-semibold tracking-tight">
               {ownerProjects === undefined ? "..." : formatNairaShort(totalEscrowKobo)}
             </p>
           </div>
@@ -274,41 +270,28 @@ export default function DashboardLayout({
       {/* ─── Main Content ─── */}
       <div className="flex-1 flex flex-col min-h-screen w-full overflow-hidden">
         {/* Desktop Top Bar */}
-        <header className="hidden md:flex items-center justify-between px-8 py-4 bg-surface border-b border-border sticky top-0 z-30">
-          <h2 className="font-display text-h4 text-text-primary">
-            {isOwner ? "Owner Portal" : "Contractor Portal"}
+        <header className="hidden md:flex items-center justify-between px-10 py-0 h-20 bg-background border-b border-border-strong sticky top-0 z-30">
+          <h2 className="font-mono text-sm font-semibold tracking-widest text-text-secondary uppercase">
+            {isOwner ? "Owner Portal" : "Contractor Portal"} / {pathname.split('/').pop()?.toUpperCase()}
           </h2>
-          <div className="flex items-center gap-4">
-            <div className="text-right mr-2">
-              <p className="text-small font-medium text-text-primary">
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <p className="font-mono text-sm font-bold text-text-primary uppercase tracking-wide">
                 {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-micro text-text-muted">
-                {user?.email}
               </p>
             </div>
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: "w-9 h-9 ring-2 ring-primary/15",
-                  userButtonBox: "rounded-full border border-border bg-surface",
-                  userButtonTrigger: "rounded-full border border-border bg-surface hover:bg-primary-faint",
-                  userButtonPopoverCard:
-                    "bg-surface border border-border shadow-md rounded-xl text-text-primary",
-                  userButtonPopoverMain: "px-2 py-2",
-                  userButtonPopoverFooter: "border-t border-border bg-background/60",
-                  userButtonPopoverActions: "gap-1",
-                  userButtonPopoverActionButton:
-                    "rounded-md px-3 py-2 text-small text-text-primary hover:bg-primary-faint",
-                  userButtonPopoverActionButtonText: "text-text-primary",
-                  userButtonPopoverActionButtonIcon: "text-text-muted",
+                  avatarBox: "w-10 h-10 rounded-none border-2 border-text-primary",
+                  userButtonPopoverCard: "rounded-none border border-border-strong shadow-none",
                 },
               }}
             />
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-6 md:p-12 overflow-y-auto">
           <div className="max-w-6xl mx-auto w-full">{children}</div>
         </main>
       </div>
