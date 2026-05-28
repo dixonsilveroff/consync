@@ -7,46 +7,46 @@
 
 @layer base {
   :root {
-    /* Stark Minimalist Brand */
-    --color-primary:          #000000;
-    --color-primary-dark:     #111111;
-    --color-primary-light:    #333333;
-    --color-primary-faint:    #F5F5F5;
+    /* Core Brand - ConSync DESIGN.md */
+    --color-primary:          #1E4E8C;
+    --color-primary-dark:     #163A6B;
+    --color-primary-light:    #2F6FD6;
+    --color-primary-faint:    #EFF6FF;
 
     /* Backgrounds */
-    --color-bg:               #FFFFFF;
-    --color-surface:          #FAFAFA;
+    --color-bg:               #F5F6F7;
+    --color-surface:          #FFFFFF;
     --color-surface-raised:   #FFFFFF;
 
     /* Text */
-    --color-text-primary:     #000000;
-    --color-text-secondary:   #666666;
-    --color-text-muted:       #A3A3A3;
+    --color-text-primary:     #1A1C1E;
+    --color-text-secondary:   #2C2F33;
+    --color-text-muted:       #94A3B8;
     --color-text-inverse:     #FFFFFF;
 
     /* Borders */
-    --color-border:           #EAEAEA;
-    --color-border-strong:    #000000;
+    --color-border:           #E2E8F0;
+    --color-border-strong:    #CBD5E1;
 
     /* Status: Positive */
-    --color-success:          #000000;
-    --color-success-bg:       #F5F5F5;
-    --color-success-border:   #EAEAEA;
+    --color-success:          #4CAF50;
+    --color-success-bg:       #F0FDF4;
+    --color-success-border:   #BBF7D0;
 
     /* Status: Pending */
-    --color-warning:          #000000;
-    --color-warning-bg:       #FAFAFA;
-    --color-warning-border:   #EAEAEA;
+    --color-warning:          #F9C74F;
+    --color-warning-bg:       #FEFCE8;
+    --color-warning-border:   #FDE68A;
 
     /* Status: Escrow / Money */
-    --color-escrow:           #000000;
-    --color-escrow-bg:        #F5F5F5;
-    --color-escrow-border:    #EAEAEA;
+    --color-escrow:           #3B82F6;
+    --color-escrow-bg:        #EFF6FF;
+    --color-escrow-border:    #BFDBFE;
 
     /* Status: Alert */
-    --color-danger:           #EF4444;
-    --color-danger-bg:        #FEF2F2;
-    --color-danger-border:    #FCA5A5;
+    --color-danger:           #E63946;
+    --color-danger-bg:        #FFF1F2;
+    --color-danger-border:    #FECDD3;
 
     /* Spacing */
     --space-1:    4px;

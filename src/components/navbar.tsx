@@ -31,12 +31,7 @@ export function Navbar() {
             <SignInButton mode="modal">
               <Button variant="ghost" className="font-mono text-xs font-semibold tracking-widest rounded-none">SIGN IN</Button>
             </SignInButton>
-            <SignUpButton mode="modal">
-              <Button variant="default" className="gap-2 bg-text-primary hover:bg-text-primary/90 text-text-inverse rounded-none h-10 px-6 font-mono text-xs tracking-widest">
-                INITIALIZE
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </SignUpButton>
+            <SignUpButton mode="modal"><Button variant="default" className="gap-2 bg-text-primary hover:bg-text-primary/90 text-text-inverse rounded-none h-10 px-6 font-mono text-xs tracking-widest">INITIALIZE<ArrowRight className="w-4 h-4" /></Button></SignUpButton>
           </Show>
           <Show when="signed-in">
             <Link href="/dashboard">

@@ -27,12 +27,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Show when="signed-out">
-                <SignUpButton mode="modal">
-                  <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg bg-text-primary text-text-inverse hover:bg-text-primary/90 rounded-none">
-                    Start Building
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </SignUpButton>
+                <SignUpButton mode="modal"><Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg bg-text-primary text-text-inverse hover:bg-text-primary/90 rounded-none">Start Building<ArrowRight className="w-5 h-5 ml-2" /></Button></SignUpButton>
               </Show>
               <Show when="signed-in">
                 <Link href="/dashboard" className="w-full sm:w-auto">
@@ -70,7 +65,7 @@ export default function HomePage() {
         </section>
 
         {/* BENTO GRID FEATURES */}
-        <section className="py-32 bg-text-primary text-text-inverse">
+        <section className="py-32 bg-primary-dark text-text-inverse">
           <div className="max-w-7xl mx-auto px-6">
             <FadeIn>
               <h2 className="text-5xl md:text-7xl font-display font-semibold tracking-tighter mb-16 leading-[1]">
@@ -79,51 +74,51 @@ export default function HomePage() {
             </FadeIn>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Large Card */}
-              <FadeIn delay={100} className="md:col-span-2 bg-[#111] p-10 lg:p-14 border border-[#333] flex flex-col justify-between min-h-[400px] group hover:border-[#666] transition-colors">
+              <FadeIn delay={100} className="md:col-span-2 bg-primary p-10 lg:p-14 border border-primary-light/30 flex flex-col justify-between min-h-[400px] group hover:border-primary-light transition-colors">
                 <div>
-                  <Activity className="w-10 h-10 mb-8 text-[#A3A3A3]" />
+                  <Activity className="w-10 h-10 mb-8 text-primary-faint opacity-80" />
                   <h3 className="text-3xl lg:text-4xl font-display font-medium mb-4 tracking-tight">Computer Vision Validation</h3>
-                  <p className="text-[#A3A3A3] text-lg lg:text-xl max-w-lg leading-relaxed">
+                  <p className="text-primary-faint opacity-80 text-lg lg:text-xl max-w-lg leading-relaxed">
                     Our proprietary models analyze site imagery against structural blueprints, flagging discrepancies down to the millimeter before authorizing payouts.
                   </p>
                 </div>
-                <ArrowUpRight className="w-8 h-8 text-[#A3A3A3] group-hover:text-white transition-colors mt-8" />
+                <ArrowUpRight className="w-8 h-8 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
               </FadeIn>
 
               {/* Small Card 1 */}
-              <FadeIn delay={200} className="bg-[#111] p-10 border border-[#333] flex flex-col justify-between min-h-[400px] group hover:border-[#666] transition-colors">
+              <FadeIn delay={200} className="bg-primary p-10 border border-primary-light/30 flex flex-col justify-between min-h-[400px] group hover:border-primary-light transition-colors">
                 <div>
-                  <Lock className="w-10 h-10 mb-8 text-[#A3A3A3]" />
+                  <Lock className="w-10 h-10 mb-8 text-primary-faint opacity-80" />
                   <h3 className="text-2xl font-display font-medium mb-4 tracking-tight">Programmatic Escrow</h3>
-                  <p className="text-[#A3A3A3] leading-relaxed">
+                  <p className="text-primary-faint opacity-80 leading-relaxed">
                     Funds are locked in secure digital vaults, releasing instantly only upon proof of milestone completion.
                   </p>
                 </div>
-                <ArrowUpRight className="w-6 h-6 text-[#A3A3A3] group-hover:text-white transition-colors mt-8" />
+                <ArrowUpRight className="w-6 h-6 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
               </FadeIn>
 
               {/* Small Card 2 */}
-              <FadeIn delay={300} className="bg-[#111] p-10 border border-[#333] flex flex-col justify-between min-h-[400px] group hover:border-[#666] transition-colors">
+              <FadeIn delay={300} className="bg-primary p-10 border border-primary-light/30 flex flex-col justify-between min-h-[400px] group hover:border-primary-light transition-colors">
                 <div>
-                  <Layers className="w-10 h-10 mb-8 text-[#A3A3A3]" />
+                  <Layers className="w-10 h-10 mb-8 text-primary-faint opacity-80" />
                   <h3 className="text-2xl font-display font-medium mb-4 tracking-tight">Immutable Audit Trail</h3>
-                  <p className="text-[#A3A3A3] leading-relaxed">
+                  <p className="text-primary-faint opacity-80 leading-relaxed">
                     Every image upload, AI verdict, and capital transfer is permanently logged.
                   </p>
                 </div>
-                <ArrowUpRight className="w-6 h-6 text-[#A3A3A3] group-hover:text-white transition-colors mt-8" />
+                <ArrowUpRight className="w-6 h-6 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
               </FadeIn>
 
               {/* Large Card 2 */}
-              <FadeIn delay={400} className="md:col-span-2 bg-[#111] p-10 lg:p-14 border border-[#333] flex flex-col justify-between min-h-[400px] group hover:border-[#666] transition-colors">
+              <FadeIn delay={400} className="md:col-span-2 bg-primary p-10 lg:p-14 border border-primary-light/30 flex flex-col justify-between min-h-[400px] group hover:border-primary-light transition-colors">
                 <div>
-                  <ShieldCheck className="w-10 h-10 mb-8 text-[#A3A3A3]" />
+                  <ShieldCheck className="w-10 h-10 mb-8 text-primary-faint opacity-80" />
                   <h3 className="text-3xl lg:text-4xl font-display font-medium mb-4 tracking-tight">Eliminate the Trust Deficit</h3>
-                  <p className="text-[#A3A3A3] text-lg lg:text-xl max-w-lg leading-relaxed">
+                  <p className="text-primary-faint opacity-80 text-lg lg:text-xl max-w-lg leading-relaxed">
                     With over 88% of projects facing delays globally, subjective reporting is obsolete. Switch to deterministic, visual-proof-based project management.
                   </p>
                 </div>
-                <ArrowUpRight className="w-8 h-8 text-[#A3A3A3] group-hover:text-white transition-colors mt-8" />
+                <ArrowUpRight className="w-8 h-8 text-primary-faint opacity-50 group-hover:opacity-100 transition-opacity mt-8" />
               </FadeIn>
             </div>
           </div>
