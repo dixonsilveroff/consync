@@ -41,8 +41,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn(geistSans.variable, geistMono.variable, "font-sans")}>
-      <body className="font-sans antialiased bg-background text-text-primary">
+    <html lang="en" className={cn(geistSans.variable, geistMono.variable, "font-body")}>
+      <body className="font-body antialiased bg-background text-text-primary">
         <ConvexClientProvider>{children}</ConvexClientProvider>
         <Toaster richColors position="top-right" />
       </body>

@@ -8,7 +8,7 @@ import { FadeIn } from "@/components/fade-in";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-text-primary selection:text-bg">
+    <div className="min-h-screen bg-background flex flex-col font-body selection:bg-text-primary selection:text-bg">
       <Navbar />
       <main className="flex-1">
         {/* HERO - Stark, Centered, High Contrast */}

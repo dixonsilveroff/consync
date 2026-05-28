@@ -9,7 +9,7 @@ import { EscrowBalance } from "@/components/escrow-balance";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2, Copy, CheckCircle2, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getStatusConfig, formatDate, formatNaira } from "@/lib/utils";
+import { getStatusConfig, formatDate, formatNaira, cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 type DvaDetails = {
