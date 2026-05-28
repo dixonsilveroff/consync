@@ -15,13 +15,13 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="#problem" className="font-mono text-xs font-semibold tracking-widest text-text-secondary hover:text-text-primary transition-colors">
+          <Link href="#problem" className="font-mono text-xs font-semibold tracking-widest text-text-secondary hover:text-primary-light link-hover-fx">
             PROTOCOL
           </Link>
-          <Link href="#features" className="font-mono text-xs font-semibold tracking-widest text-text-secondary hover:text-text-primary transition-colors">
+          <Link href="#features" className="font-mono text-xs font-semibold tracking-widest text-text-secondary hover:text-primary-light link-hover-fx">
             INFRASTRUCTURE
           </Link>
-          <Link href="#how-it-works" className="font-mono text-xs font-semibold tracking-widest text-text-secondary hover:text-text-primary transition-colors">
+          <Link href="#how-it-works" className="font-mono text-xs font-semibold tracking-widest text-text-secondary hover:text-primary-light link-hover-fx">
             ECONOMICS
           </Link>
         </nav>

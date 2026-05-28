@@ -23,10 +23,10 @@ export function Footer() {
           <div>
             <h4 className="font-mono text-sm tracking-widest text-text-muted mb-6">PROTOCOL</h4>
             <ul className="space-y-4">
-              <li><Link href="#features" className="text-base text-text-secondary hover:text-text-primary transition-colors">Visual AI</Link></li>
-              <li><Link href="#features" className="text-base text-text-secondary hover:text-text-primary transition-colors">Digital Escrow</Link></li>
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Owner Portal</Link></li>
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Contractor Portal</Link></li>
+              <li><Link href="#features" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Visual AI</Link></li>
+              <li><Link href="#features" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Digital Escrow</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Owner Portal</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Contractor Portal</Link></li>
             </ul>
           </div>
 
@@ -34,10 +34,10 @@ export function Footer() {
           <div>
             <h4 className="font-mono text-sm tracking-widest text-text-muted mb-6">RESOURCES</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Documentation</Link></li>
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Case Studies</Link></li>
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">API Reference</Link></li>
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Help Center</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Documentation</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Case Studies</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">API Reference</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Help Center</Link></li>
             </ul>
           </div>
 
@@ -45,8 +45,8 @@ export function Footer() {
           <div>
             <h4 className="font-mono text-sm tracking-widest text-text-muted mb-6">LEGAL</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Privacy Policy</Link></li>
+              <li><Link href="#" className="text-base text-text-secondary hover:text-primary-light link-hover-fx">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
