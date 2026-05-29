@@ -26,12 +26,12 @@ export function Navbar() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <Button variant="ghost" className="font-mono text-xs font-semibold tracking-widest rounded-none">SIGN IN</Button>
+              <Button variant="ghost" className="font-mono text-xs font-semibold tracking-widest rounded-none px-2 sm:px-4">SIGN IN</Button>
             </SignInButton>
-            <SignUpButton mode="modal"><Button variant="default" className="gap-2 bg-text-primary hover:bg-text-primary/90 text-text-inverse rounded-none h-10 px-6 font-mono text-xs tracking-widest">INITIALIZE<ArrowRight className="w-4 h-4" /></Button></SignUpButton>
+            <SignUpButton mode="modal"><Button variant="default" className="gap-1 sm:gap-2 bg-text-primary hover:bg-text-primary/90 text-text-inverse rounded-none h-10 px-4 sm:px-6 font-mono text-xs tracking-widest">INITIALIZE<ArrowRight className="hidden sm:inline w-4 h-4" /></Button></SignUpButton>
           </Show>
           <Show when="signed-in">
             <Link href="/dashboard">

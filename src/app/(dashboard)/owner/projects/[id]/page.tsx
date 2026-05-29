@@ -235,14 +235,14 @@ export default function OwnerProjectDashboard() {
       )}
 
       {/* Project Header */}
-      <div className="flex items-start justify-between mb-12 border-b border-border-strong pb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12 border-b border-border-strong pb-8">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <h1 className="font-display text-5xl font-bold tracking-tighter text-text-primary uppercase">
+            <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-text-primary uppercase">
               {project.name}
             </h1>
           </div>
-          <div className="flex items-center gap-6 font-mono text-xs tracking-widest text-text-secondary uppercase">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 font-mono text-xs tracking-widest text-text-secondary uppercase">
             <span className="bg-primary/10 text-primary px-3 py-1 font-bold">{project.projectType}</span>
             {project.location && (
               <span className="flex items-center gap-2">

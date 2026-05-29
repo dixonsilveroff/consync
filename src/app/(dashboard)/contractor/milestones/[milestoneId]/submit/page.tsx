@@ -78,10 +78,10 @@ export default function MilestoneSubmitPage() {
       </Button>
 
       {/* Milestone header */}
-      <div className="mb-10 pb-6 border-b border-border-strong">
-        <h1 className="font-display text-4xl font-bold tracking-tighter text-text-primary uppercase mb-2">{milestone.name}</h1>
-        <p className="font-mono text-sm text-text-secondary">{milestone.description}</p>
-        <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mb-8 sm:mb-10 pb-6 border-b border-border-strong">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-text-primary uppercase mb-2">{milestone.name}</h1>
+        <p className="font-mono text-xs sm:text-sm text-text-secondary">{milestone.description}</p>
+        <div className="mt-4 sm:mt-6 flex flex-wrap gap-2">
           {milestone.acceptanceCriteria.map((c: string, i: number) => (
             <span key={i} className="font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 bg-background border border-border-strong text-text-secondary">
               {c}
@@ -106,10 +106,10 @@ export default function MilestoneSubmitPage() {
       {/* Analysis in progress */}
       {milestone.status === "SUBMITTED" && (
         <div className="space-y-6 animate-pulse-subtle">
-          <div className="bg-surface border border-border-strong flex flex-col items-center justify-center py-12 gap-6 rounded-none">
-            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          <div className="bg-surface border border-border-strong flex flex-col items-center justify-center py-12 gap-6 rounded-none px-4 text-center">
+            <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 animate-spin text-primary" />
             <div className="text-center space-y-2">
-              <p className="font-display text-xl text-primary font-bold uppercase tracking-tight">AI Verification in Progress</p>
+              <p className="font-display text-lg sm:text-xl text-primary font-bold uppercase tracking-tight">AI Verification in Progress</p>
               <p className="font-mono text-xs tracking-widest text-text-muted uppercase">
                 ANALYZING EVIDENCE...
               </p>

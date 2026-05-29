@@ -18,7 +18,7 @@ export default function HomePage() {
               <span className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(76,175,80,0.6)]" />
               Construction Verification Protocol
             </div>
-            <h1 className="text-6xl sm:text-7xl lg:text-[7rem] font-display font-semibold tracking-tighter leading-[0.95] mb-8 max-w-5xl">
+            <h1 className="text-5xl sm:text-6xl lg:text-[7rem] font-display font-semibold tracking-tighter leading-[0.95] mb-8 max-w-5xl">
               Automate trust. <br className="hidden sm:block" />
               <span className="text-text-muted">Release capital.</span>
             </h1>
@@ -176,7 +176,7 @@ export default function HomePage() {
                 </div>
                 <span className="font-mono text-sm tracking-widest text-text-muted mb-4 block">STANDARD TIER</span>
                 <div className="flex items-baseline gap-2 mb-10">
-                  <span className="text-7xl lg:text-8xl font-display font-semibold tracking-tighter">1.5%</span>
+                  <span className="text-6xl sm:text-7xl lg:text-8xl font-display font-semibold tracking-tighter">1.5%</span>
                   <span className="text-text-secondary text-lg">/ transaction</span>
                 </div>
                 <ul className="space-y-6 mb-14">
