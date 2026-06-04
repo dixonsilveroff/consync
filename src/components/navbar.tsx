@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveElement = useRef<HTMLElement | null>(null);
   const navLinks = [
     { href: "#problem", label: "PROTOCOL" },
@@ -22,21 +23,18 @@ export function Navbar() {
     }
 
     lastActiveElement.current = document.activeElement as HTMLElement | null;
-    const drawer = drawerRef.current;
-    const focusable = drawer
+    const menu = menuRef.current;
+    const focusable = menu
       ? Array.from(
-          drawer.querySelectorAll<HTMLElement>(
+          menu.querySelectorAll<HTMLElement>(
             'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
           )
         )
       : [];
 
     const focusFirst = () => {
-      if (focusable.length > 0) {
-        focusable[0].focus();
-        return;
-      }
-      drawer?.focus();
+      const focusTarget = closeButtonRef.current ?? focusable[0];
+      focusTarget?.focus();
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -140,6 +138,8 @@ export function Navbar() {
       </div>
       <div
         id="mobile-nav"
+        ref={menuRef}
+        aria-hidden={!isOpen}
         className={`md:hidden fixed inset-0 z-40 transition-opacity duration-base ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
       >
         <button
@@ -149,10 +149,8 @@ export function Navbar() {
           className="absolute inset-0 bg-text-primary/40"
         />
         <div
-          ref={drawerRef}
           role="dialog"
           aria-modal="true"
-          tabIndex={-1}
           className={`absolute right-0 top-0 h-full w-72 bg-background border-l border-border-strong p-6 flex flex-col gap-6 transition-transform duration-base ${isOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           <div className="flex items-center justify-between border-b border-border-strong pb-4">
@@ -162,6 +160,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setIsOpen(false)}
+              ref={closeButtonRef}
               className="border border-border-strong rounded-none p-2 text-text-primary hover:bg-surface"
               aria-label="Close menu"
             >
