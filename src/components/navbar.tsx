@@ -17,17 +17,21 @@ export function Navbar() {
     { href: "#how-it-works", label: "ECONOMICS" },
   ];
 
+  const openMenu = () => {
+    lastActiveElement.current = document.activeElement as HTMLElement | null;
+    setIsOpen(true);
+  };
+
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
-    lastActiveElement.current = document.activeElement as HTMLElement | null;
     const menu = menuRef.current;
     const focusable = menu
       ? Array.from(
           menu.querySelectorAll<HTMLElement>(
-            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            'a[href]:not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])'
           )
         )
       : [];
@@ -125,7 +129,7 @@ export function Navbar() {
           </div>
           <button
             type="button"
-            onClick={() => setIsOpen(true)}
+            onClick={openMenu}
             aria-label="Open navigation menu"
             aria-expanded={isOpen}
             aria-controls="mobile-nav"
@@ -146,6 +150,7 @@ export function Navbar() {
           type="button"
           aria-label="Close navigation"
           onClick={() => setIsOpen(false)}
+          tabIndex={-1}
           className="absolute inset-0 bg-text-primary/40"
         />
         <div
