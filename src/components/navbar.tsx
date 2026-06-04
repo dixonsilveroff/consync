@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
@@ -8,11 +8,69 @@ import { Button } from "@/components/ui/button";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement | null>(null);
+  const lastActiveElement = useRef<HTMLElement | null>(null);
   const navLinks = [
     { href: "#problem", label: "PROTOCOL" },
     { href: "#features", label: "INFRASTRUCTURE" },
     { href: "#how-it-works", label: "ECONOMICS" },
   ];
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    lastActiveElement.current = document.activeElement as HTMLElement | null;
+    const drawer = drawerRef.current;
+    const focusable = drawer
+      ? Array.from(
+          drawer.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        )
+      : [];
+
+    const focusFirst = () => {
+      if (focusable.length > 0) {
+        focusable[0].focus();
+        return;
+      }
+      drawer?.focus();
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") {
+        return;
+      }
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+      if (event.shiftKey && activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    focusFirst();
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      lastActiveElement.current?.focus();
+    };
+  }, [isOpen]);
 
   return (
     <header className="bg-background border-b border-border-strong sticky top-0 z-50">
@@ -70,6 +128,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setIsOpen(true)}
+            aria-label="Open navigation menu"
             aria-expanded={isOpen}
             aria-controls="mobile-nav"
             className="md:hidden inline-flex items-center gap-2 border border-border-strong rounded-none px-3 py-2 font-mono text-xs font-semibold tracking-widest text-text-primary hover:bg-surface"
@@ -90,6 +149,10 @@ export function Navbar() {
           className="absolute inset-0 bg-text-primary/40"
         />
         <div
+          ref={drawerRef}
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
           className={`absolute right-0 top-0 h-full w-72 bg-background border-l border-border-strong p-6 flex flex-col gap-6 transition-transform duration-base ${isOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           <div className="flex items-center justify-between border-b border-border-strong pb-4">
