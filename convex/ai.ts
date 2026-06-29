@@ -157,7 +157,7 @@ export const runMilestoneAnalysis = internalAction({
       // 5. Call AI
       const { object: parsed } = await generateObject({
         model: amazonBedrock(modelName),
-        instructions: buildSystemPrompt(),
+        instructions: buildSystemPrompt(data.projectType),
         messages: [
           {
             role: "user",

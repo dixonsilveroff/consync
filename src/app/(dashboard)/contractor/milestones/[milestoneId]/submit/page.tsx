@@ -92,6 +92,13 @@ export default function MilestoneSubmitPage() {
 
       {/* Main content — depends on current milestone status */}
 
+      {milestone.submissionNote && (milestone.status === "PENDING" || milestone.status === "REJECTED") && (
+        <div className="rounded-lg border border-yellow-400 bg-yellow-50 p-4 mb-6">
+          <p className="text-sm font-semibold text-yellow-800">⚠ Important Notice</p>
+          <p className="text-sm text-yellow-700 mt-1">{milestone.submissionNote}</p>
+        </div>
+      )}
+
       {/* Pending: show upload form */}
       {(milestone.status === "PENDING" || milestone.status === "REJECTED") && (
         <div className="bg-surface border border-border-strong p-6 rounded-none">

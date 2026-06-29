@@ -31,7 +31,21 @@ export default defineSchema({
     ),
     totalValueKobo: v.number(),
     escrowBalanceKobo: v.number(),
-    projectType: v.string(),
+    projectType: v.union(
+      v.literal("RESIDENTIAL_BUILDING"),
+      v.literal("ROAD_CONSTRUCTION")
+    ),
+    geofenceType: v.union(
+      v.literal("POINT_RADIUS"),
+      v.literal("LINEAR_CORRIDOR")
+    ),
+    roadCentrelineCoords: v.optional(
+      v.array(v.object({
+        lat: v.number(),
+        lng: v.number(),
+      }))
+    ),
+    corridorWidthMetres: v.optional(v.number()),
     location: v.optional(v.string()),
     siteLatitude: v.optional(v.number()),
     siteLongitude: v.optional(v.number()),
@@ -63,6 +77,8 @@ export default defineSchema({
       v.literal("REJECTED")
     ),
     acceptanceCriteria: v.array(v.string()),
+    requiresPriorMilestoneId: v.optional(v.id("milestones")),
+    submissionNote: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_project", ["projectId"])

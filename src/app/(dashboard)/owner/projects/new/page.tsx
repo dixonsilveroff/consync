@@ -8,6 +8,7 @@ import { Plus, Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RESIDENTIAL_BUILDING_TEMPLATE, ROAD_CONSTRUCTION_TEMPLATE } from "@/lib/project-templates";
 import {
   Card,
   CardHeader,
@@ -17,10 +18,13 @@ import {
 } from "@/components/ui/card";
 
 interface MilestoneInput {
+  templateMilestoneId?: string;
   name: string;
   description: string;
   valueKobo: number;
   acceptanceCriteria: string[];
+  requiresPriorMilestoneId?: string;
+  submissionNote?: string;
 }
 
 export default function NewProjectPage() {
@@ -32,18 +36,39 @@ export default function NewProjectPage() {
   // Form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [projectType, setProjectType] = useState("");
+  const [projectType, setProjectType] = useState<"RESIDENTIAL_BUILDING" | "ROAD_CONSTRUCTION">("RESIDENTIAL_BUILDING");
   const [location, setLocation] = useState("");
   const [totalValueNaira, setTotalValueNaira] = useState("");
   const [contractorEmail, setContractorEmail] = useState("");
-  const [milestones, setMilestones] = useState<MilestoneInput[]>([
-    {
-      name: "",
-      description: "",
+  
+  const [roadCentrelineCoordsStr, setRoadCentrelineCoordsStr] = useState("");
+  const [corridorWidthMetres, setCorridorWidthMetres] = useState("50");
+
+  const [milestones, setMilestones] = useState<MilestoneInput[]>(() => {
+    return RESIDENTIAL_BUILDING_TEMPLATE.milestones.map(m => ({
+      templateMilestoneId: m.milestoneId,
+      name: m.name,
+      description: m.description,
       valueKobo: 0,
-      acceptanceCriteria: [""],
-    },
-  ]);
+      acceptanceCriteria: [...m.acceptanceCriteria],
+      requiresPriorMilestoneId: m.requiresPriorMilestoneId ?? undefined,
+      submissionNote: m.submissionNote ?? undefined,
+    }));
+  });
+
+  const handleProjectTypeChange = (type: "RESIDENTIAL_BUILDING" | "ROAD_CONSTRUCTION") => {
+    setProjectType(type);
+    const template = type === "RESIDENTIAL_BUILDING" ? RESIDENTIAL_BUILDING_TEMPLATE : ROAD_CONSTRUCTION_TEMPLATE;
+    setMilestones(template.milestones.map(m => ({
+      templateMilestoneId: m.milestoneId,
+      name: m.name,
+      description: m.description,
+      valueKobo: 0,
+      acceptanceCriteria: [...m.acceptanceCriteria],
+      requiresPriorMilestoneId: m.requiresPriorMilestoneId ?? undefined,
+      submissionNote: m.submissionNote ?? undefined,
+    })));
+  };
 
   const addMilestone = () => {
     setMilestones([
@@ -90,18 +115,32 @@ export default function NewProjectPage() {
     try {
       const totalValueKobo = Math.round(parseFloat(totalValueNaira) * 100);
 
+      let roadCentrelineCoords = undefined;
+      if (projectType === "ROAD_CONSTRUCTION" && roadCentrelineCoordsStr) {
+        roadCentrelineCoords = roadCentrelineCoordsStr.split("\n").map(line => {
+          const [lat, lng] = line.split(",").map(s => parseFloat(s.trim()));
+          return { lat, lng };
+        }).filter(coord => !isNaN(coord.lat) && !isNaN(coord.lng));
+      }
+
       const result = await createProject({
         name,
         description: description || undefined,
         projectType,
+        geofenceType: projectType === "ROAD_CONSTRUCTION" ? "LINEAR_CORRIDOR" : "POINT_RADIUS",
+        roadCentrelineCoords,
+        corridorWidthMetres: projectType === "ROAD_CONSTRUCTION" ? parseInt(corridorWidthMetres, 10) : undefined,
         location: location || undefined,
         totalValueKobo,
         contractorEmail: contractorEmail || undefined,
         milestones: milestones.map((m) => ({
+          templateMilestoneId: m.templateMilestoneId,
           name: m.name,
           description: m.description,
           valueKobo: m.valueKobo,
           acceptanceCriteria: m.acceptanceCriteria.filter((c) => c.trim() !== ""),
+          requiresPriorMilestoneId: m.requiresPriorMilestoneId,
+          submissionNote: m.submissionNote,
         })),
       });
 
@@ -166,18 +205,69 @@ export default function NewProjectPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <label className="text-sm font-medium leading-none">
                   Project Type <span className="text-destructive">*</span>
                 </label>
-                <Input
-                  type="text"
-                  value={projectType}
-                  onChange={(e) => setProjectType(e.target.value)}
-                  placeholder="e.g. Residential"
-                  required
-                />
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="projectType"
+                      value="RESIDENTIAL_BUILDING"
+                      checked={projectType === "RESIDENTIAL_BUILDING"}
+                      onChange={() => handleProjectTypeChange("RESIDENTIAL_BUILDING")}
+                      className="accent-primary"
+                    />
+                    <span className="text-sm">Residential Building</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="projectType"
+                      value="ROAD_CONSTRUCTION"
+                      checked={projectType === "ROAD_CONSTRUCTION"}
+                      onChange={() => handleProjectTypeChange("ROAD_CONSTRUCTION")}
+                      className="accent-primary"
+                    />
+                    <span className="text-sm">Road Construction</span>
+                  </label>
+                </div>
               </div>
             </div>
+
+            {projectType === "ROAD_CONSTRUCTION" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Road Centreline Coordinates
+                  </label>
+                  <Textarea
+                    value={roadCentrelineCoordsStr}
+                    onChange={(e) => setRoadCentrelineCoordsStr(e.target.value)}
+                    placeholder="e.g. 6.4385, 3.4880\n6.4390, 3.4890"
+                    className="min-h-[100px] resize-y font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    One lat,lng pair per line.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Corridor Width (Metres)
+                  </label>
+                  <Input
+                    type="number"
+                    value={corridorWidthMetres}
+                    onChange={(e) => setCorridorWidthMetres(e.target.value)}
+                    placeholder="e.g. 50"
+                    min="1"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Submission zone extends half this width on each side.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

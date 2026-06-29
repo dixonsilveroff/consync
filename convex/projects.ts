@@ -70,18 +70,35 @@ export const createProject = mutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
-    projectType: v.string(),
+    projectType: v.union(
+      v.literal("RESIDENTIAL_BUILDING"),
+      v.literal("ROAD_CONSTRUCTION")
+    ),
     location: v.optional(v.string()),
     siteLatitude: v.optional(v.number()),
     siteLongitude: v.optional(v.number()),
+    geofenceType: v.union(
+      v.literal("POINT_RADIUS"),
+      v.literal("LINEAR_CORRIDOR")
+    ),
+    roadCentrelineCoords: v.optional(
+      v.array(v.object({
+        lat: v.number(),
+        lng: v.number(),
+      }))
+    ),
+    corridorWidthMetres: v.optional(v.number()),
     totalValueKobo: v.number(),
     contractorEmail: v.optional(v.string()),
     milestones: v.array(
       v.object({
+        templateMilestoneId: v.optional(v.string()),
         name: v.string(),
         description: v.string(),
         valueKobo: v.number(),
         acceptanceCriteria: v.array(v.string()),
+        requiresPriorMilestoneId: v.optional(v.string()),
+        submissionNote: v.optional(v.string()),
       })
     ),
   },
@@ -101,6 +118,9 @@ export const createProject = mutation({
       totalValueKobo: args.totalValueKobo,
       escrowBalanceKobo: 0,
       projectType: args.projectType,
+      geofenceType: args.geofenceType,
+      roadCentrelineCoords: args.roadCentrelineCoords,
+      corridorWidthMetres: args.corridorWidthMetres,
       location: args.location,
       siteLatitude: args.siteLatitude,
       siteLongitude: args.siteLongitude,
@@ -119,9 +139,17 @@ export const createProject = mutation({
     }
 
     // Create milestones
+    const milestoneMap = new Map<string, import("./_generated/dataModel").Id<"milestones">>();
+
     for (let i = 0; i < args.milestones.length; i++) {
       const milestone = args.milestones[i];
-      await ctx.db.insert("milestones", {
+
+      let requiresId: import("./_generated/dataModel").Id<"milestones"> | undefined = undefined;
+      if (milestone.requiresPriorMilestoneId) {
+        requiresId = milestoneMap.get(milestone.requiresPriorMilestoneId);
+      }
+
+      const insertedId = await ctx.db.insert("milestones", {
         projectId,
         name: milestone.name,
         description: milestone.description,
@@ -129,8 +157,14 @@ export const createProject = mutation({
         orderIndex: i + 1,
         status: "PENDING",
         acceptanceCriteria: milestone.acceptanceCriteria,
+        requiresPriorMilestoneId: requiresId,
+        submissionNote: milestone.submissionNote,
         createdAt: now,
       });
+
+      if (milestone.templateMilestoneId) {
+        milestoneMap.set(milestone.templateMilestoneId, insertedId);
+      }
     }
 
     return { projectId };
