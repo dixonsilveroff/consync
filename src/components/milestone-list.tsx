@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2, Circle, Clock, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, XCircle, AlertTriangle, Lock } from "lucide-react";
 import { formatNaira, getStatusConfig, cn } from "@/lib/utils";
 import { Doc } from "@convex/_generated/dataModel";
+import { toast } from "sonner";
 
 interface MilestoneListProps {
   milestones: Doc<"milestones">[];
   projectId: string;
   role: "owner" | "contractor";
+  demoBypass?: boolean;
 }
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -23,6 +25,7 @@ export function MilestoneList({
   milestones,
   projectId,
   role,
+  demoBypass = false,
 }: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
@@ -38,13 +41,45 @@ export function MilestoneList({
     <div className="border-t border-border-strong">
       {milestones.map((milestone, index) => {
         const statusConfig = getStatusConfig(milestone.status);
+
+        let isLocked = false;
+        if (role === "contractor" && milestone.status === "PENDING") {
+          if (milestone.orderIndex > 1) {
+            const priorByOrder = milestones.find(m => m.orderIndex === milestone.orderIndex - 1);
+            if (priorByOrder && priorByOrder.status !== "APPROVED") {
+              isLocked = true;
+            }
+          }
+          if (milestone.requiresPriorMilestoneId) {
+            const priorById = milestones.find(m => m._id === milestone.requiresPriorMilestoneId);
+            if (priorById && priorById.status !== "APPROVED") {
+              isLocked = true;
+            }
+          }
+        }
+
+        const visuallyLocked = isLocked && !demoBypass;
+
         const href =
           role === "owner"
             ? `/owner/projects/${projectId}/milestones/${milestone._id}`
-            : `/contractor/milestones/${milestone._id}/submit`;
+            : `/contractor/milestones/${milestone._id}/submit${demoBypass ? '?bypass=true' : ''}`;
 
         return (
-          <Link key={milestone._id} href={href} className="block group border-b border-border-strong bg-background hover:bg-surface transition-colors">
+          <Link 
+            key={milestone._id} 
+            href={href} 
+            onClick={(e) => {
+              if (visuallyLocked) {
+                e.preventDefault();
+                toast.error("This milestone is locked pending prior approvals.");
+              }
+            }}
+            className={cn(
+              "block group border-b border-border-strong transition-colors",
+              visuallyLocked ? "bg-background opacity-50 cursor-not-allowed" : "bg-background hover:bg-surface"
+            )}
+          >
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 px-4 sm:px-8 py-5 sm:py-6">
               <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto flex-1 min-w-0">
                 {/* Order Index */}
@@ -58,7 +93,7 @@ export function MilestoneList({
                     <h4 className="font-display text-base sm:text-lg font-bold text-text-primary group-hover:text-primary transition-colors truncate uppercase tracking-tight">
                       {milestone.name}
                     </h4>
-                    {statusIcons[milestone.status] || statusIcons.PENDING}
+                    {isLocked ? <Lock className="w-4 h-4 text-text-muted" /> : statusIcons[milestone.status] || statusIcons.PENDING}
                   </div>
                   <p className="font-mono text-[10px] sm:text-xs text-text-secondary truncate">
                     {milestone.description}

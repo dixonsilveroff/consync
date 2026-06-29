@@ -7,7 +7,9 @@ import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Building2, Calendar, Loader2 } from "lucide-react";
-import { getStatusConfig, formatDate } from "@/lib/utils";
+import { getStatusConfig, formatDate, cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
 
 export default function ContractorProjectDashboard() {
   const params = useParams();
@@ -16,6 +18,17 @@ export default function ContractorProjectDashboard() {
 
   const project = useQuery(api.projects.getProject, { projectId });
   const milestones = useQuery(api.milestones.getMilestones, { projectId });
+
+  const [demoBypass, setDemoBypass] = useState(false);
+  useEffect(() => {
+    const saved = localStorage.getItem("consync_demo_bypass");
+    if (saved === "true") setDemoBypass(true);
+  }, []);
+
+  const handleBypassChange = (val: boolean) => {
+    setDemoBypass(val);
+    localStorage.setItem("consync_demo_bypass", val ? "true" : "false");
+  };
 
   // Loading state
   if (project === undefined || milestones === undefined) {
@@ -100,6 +113,7 @@ export default function ContractorProjectDashboard() {
               milestones={milestones}
               projectId={projectId}
               role="contractor"
+              demoBypass={demoBypass}
             />
           </div>
         </div>
@@ -118,6 +132,16 @@ export default function ContractorProjectDashboard() {
                 No additional description provided for this project.
               </p>
             )}
+          </div>
+
+          <div className={cn("card-enforcer border transition-colors", demoBypass ? "border-primary bg-primary/5" : "")}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="label-blueprint text-text-primary">Demo Bypass</h3>
+              <Switch checked={demoBypass} onCheckedChange={handleBypassChange} />
+            </div>
+            <p className="text-[10px] text-text-muted font-mono leading-tight">
+              Enable Developer Mode to bypass milestone dependency locks and submit to any milestone.
+            </p>
           </div>
         </div>
       </div>

@@ -22,6 +22,51 @@ function getDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 /**
+ * Helper to calculate point-to-polyline minimum distance in meters
+ */
+function distanceToPolylineMetres(
+  point: { lat: number; lng: number },
+  polyline: { lat: number; lng: number }[]
+): number {
+  if (polyline.length === 0) return Infinity;
+  if (polyline.length === 1) return getDistanceMeters(point.lat, point.lng, polyline[0].lat, polyline[0].lng);
+
+  let minDistance = Infinity;
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const a = polyline[i];
+    const b = polyline[i + 1];
+
+    const d13 = getDistanceMeters(a.lat, a.lng, point.lat, point.lng);
+    const d23 = getDistanceMeters(b.lat, b.lng, point.lat, point.lng);
+    const d12 = getDistanceMeters(a.lat, a.lng, b.lat, b.lng);
+
+    if (d12 === 0) {
+      minDistance = Math.min(minDistance, d13);
+      continue;
+    }
+
+    const s = (d12 + d13 + d23) / 2;
+    const area = Math.sqrt(Math.max(0, s * (s - d12) * (s - d13) * (s - d23)));
+    const h = (2 * area) / d12;
+
+    const angle1 = Math.acos(Math.max(-1, Math.min(1, (d12*d12 + d13*d13 - d23*d23) / (2 * d12 * d13))));
+    const angle2 = Math.acos(Math.max(-1, Math.min(1, (d12*d12 + d23*d23 - d13*d13) / (2 * d12 * d23))));
+
+    let distToSegment;
+    if (angle1 >= Math.PI / 2) {
+      distToSegment = d13;
+    } else if (angle2 >= Math.PI / 2) {
+      distToSegment = d23;
+    } else {
+      distToSegment = h;
+    }
+
+    minDistance = Math.min(minDistance, distToSegment);
+  }
+  return minDistance;
+}
+
+/**
  * Generate a short-lived upload URL for a single file.
  */
 export const generateUploadUrl = mutation({
@@ -47,6 +92,7 @@ export const createSubmission = mutation({
     gpsAccuracyMeters: v.optional(v.number()),
     videoDurationSeconds: v.optional(v.number()),
     deviceCaptureTimestamp: v.optional(v.string()),
+    bypassDemoLocks: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -57,6 +103,32 @@ export const createSubmission = mutation({
 
     const project = await ctx.db.get(milestone.projectId);
     if (!project) throw new ConvexError("Project not found");
+
+    if (!args.bypassDemoLocks) {
+      if (milestone.requiresPriorMilestoneId) {
+        const prior = await ctx.db.get(milestone.requiresPriorMilestoneId);
+        if (!prior || prior.status !== "APPROVED") {
+          throw new ConvexError(
+            "This milestone requires the prior milestone to be approved first. Milestone 3B cannot be submitted until Milestone 3A is approved."
+          );
+        }
+      }
+
+      // Preserve sequential orderIndex check
+      if (milestone.orderIndex > 1) {
+        const priorByOrder = await ctx.db
+          .query("milestones")
+          .withIndex("by_project", (q) => q.eq("projectId", project._id))
+          .filter((q) => q.eq(q.field("orderIndex"), milestone.orderIndex - 1))
+          .first();
+        
+        if (priorByOrder && priorByOrder.status !== "APPROVED") {
+          throw new ConvexError(
+            `Milestone ${milestone.orderIndex} cannot be submitted until Milestone ${milestone.orderIndex - 1} is approved.`
+          );
+        }
+      }
+    }
 
     if (args.keyFrameStorageIds.length === 0) {
       throw new ConvexError("At least one key frame is required");
@@ -69,20 +141,26 @@ export const createSubmission = mutation({
     const intakeFlags: string[] = [];
 
     // 1. GPS boundary check (if project has coordinates)
-    if (
-      project.siteLatitude != null &&
-      project.siteLongitude != null &&
-      args.gpsLatitude != null &&
-      args.gpsLongitude != null
-    ) {
-      const dist = getDistanceMeters(
-        project.siteLatitude,
-        project.siteLongitude,
-        args.gpsLatitude,
-        args.gpsLongitude
-      );
-      if (dist > 500) {
-        intakeFlags.push("LOCATION_MISMATCH");
+    if (args.gpsLatitude != null && args.gpsLongitude != null) {
+      if (project.geofenceType === "LINEAR_CORRIDOR" && project.roadCentrelineCoords) {
+        const dist = distanceToPolylineMetres(
+          { lat: args.gpsLatitude, lng: args.gpsLongitude },
+          project.roadCentrelineCoords
+        );
+        const halfWidth = (project.corridorWidthMetres ?? 50) / 2;
+        if (dist > halfWidth) {
+          intakeFlags.push("LOCATION_MISMATCH");
+        }
+      } else if (project.siteLatitude != null && project.siteLongitude != null) {
+        const dist = getDistanceMeters(
+          project.siteLatitude,
+          project.siteLongitude,
+          args.gpsLatitude,
+          args.gpsLongitude
+        );
+        if (dist > 500) {
+          intakeFlags.push("LOCATION_MISMATCH");
+        }
       }
     }
 

@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { useAuth } from "@clerk/nextjs";
 import { VideoUpload } from "@/components/video-upload";
@@ -13,12 +13,19 @@ import { Button } from "@/components/ui/button";
 export default function MilestoneSubmitPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const bypass = searchParams.get("bypass") === "true";
   const { isLoaded, isSignedIn } = useAuth();
   const milestoneId = params.milestoneId as Id<"milestones">;
 
   const detail = useQuery(
     api.milestones.getMilestoneDetail,
     isLoaded && isSignedIn ? { milestoneId } : "skip"
+  );
+  
+  const project = useQuery(
+    api.projects.getProject,
+    detail?.milestone?.projectId ? { projectId: detail.milestone.projectId } : "skip"
   );
 
   if (!isLoaded) {
@@ -56,6 +63,23 @@ export default function MilestoneSubmitPage() {
   }
 
   const { milestone, submission, analysis } = detail;
+
+  if (project === undefined) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-on-surface-variant font-medium animate-pulse">Loading project details...</p>
+      </div>
+    );
+  }
+
+  if (project === null) {
+    return (
+      <div className="p-8 text-center text-on-surface-variant">
+        Project not found.
+      </div>
+    );
+  }
 
   const handleBack = () => {
     if (milestone?.projectId) {
@@ -102,10 +126,17 @@ export default function MilestoneSubmitPage() {
       {/* Pending: show upload form */}
       {(milestone.status === "PENDING" || milestone.status === "REJECTED") && (
         <div className="bg-surface border border-border-strong p-6 rounded-none">
+          {bypass && (
+            <div className="mb-4 text-xs font-mono text-primary bg-primary/10 border border-primary/20 px-3 py-2">
+              [DEMO BYPASS ACTIVE] Backend locks disabled for this submission.
+            </div>
+          )}
           <VideoUpload
             milestoneId={milestoneId}
             milestoneName={milestone.name}
+            project={project}
             onSuccess={handleBack}
+            bypassDemoLocks={bypass}
           />
         </div>
       )}

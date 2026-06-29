@@ -8,7 +8,10 @@ import { Plus, Trash2, ArrowLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import dynamic from "next/dynamic";
 import { RESIDENTIAL_BUILDING_TEMPLATE, ROAD_CONSTRUCTION_TEMPLATE } from "@/lib/project-templates";
+
+const GeofenceMap = dynamic(() => import("@/components/geofence-map"), { ssr: false });
 import {
   Card,
   CardHeader,
@@ -41,7 +44,7 @@ export default function NewProjectPage() {
   const [totalValueNaira, setTotalValueNaira] = useState("");
   const [contractorEmail, setContractorEmail] = useState("");
   
-  const [roadCentrelineCoordsStr, setRoadCentrelineCoordsStr] = useState("");
+  const [roadCentrelineCoords, setRoadCentrelineCoords] = useState<{lat: number, lng: number}[]>([]);
   const [corridorWidthMetres, setCorridorWidthMetres] = useState("50");
 
   const [milestones, setMilestones] = useState<MilestoneInput[]>(() => {
@@ -115,12 +118,9 @@ export default function NewProjectPage() {
     try {
       const totalValueKobo = Math.round(parseFloat(totalValueNaira) * 100);
 
-      let roadCentrelineCoords = undefined;
-      if (projectType === "ROAD_CONSTRUCTION" && roadCentrelineCoordsStr) {
-        roadCentrelineCoords = roadCentrelineCoordsStr.split("\n").map(line => {
-          const [lat, lng] = line.split(",").map(s => parseFloat(s.trim()));
-          return { lat, lng };
-        }).filter(coord => !isNaN(coord.lat) && !isNaN(coord.lng));
+      let processedRoadCoords = undefined;
+      if (projectType === "ROAD_CONSTRUCTION" && roadCentrelineCoords.length > 0) {
+        processedRoadCoords = roadCentrelineCoords;
       }
 
       const result = await createProject({
@@ -128,7 +128,7 @@ export default function NewProjectPage() {
         description: description || undefined,
         projectType,
         geofenceType: projectType === "ROAD_CONSTRUCTION" ? "LINEAR_CORRIDOR" : "POINT_RADIUS",
-        roadCentrelineCoords,
+        roadCentrelineCoords: processedRoadCoords,
         corridorWidthMetres: projectType === "ROAD_CONSTRUCTION" ? parseInt(corridorWidthMetres, 10) : undefined,
         location: location || undefined,
         totalValueKobo,
@@ -236,21 +236,7 @@ export default function NewProjectPage() {
             </div>
 
             {projectType === "ROAD_CONSTRUCTION" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none">
-                    Road Centreline Coordinates
-                  </label>
-                  <Textarea
-                    value={roadCentrelineCoordsStr}
-                    onChange={(e) => setRoadCentrelineCoordsStr(e.target.value)}
-                    placeholder="e.g. 6.4385, 3.4880\n6.4390, 3.4890"
-                    className="min-h-[100px] resize-y font-mono text-sm"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    One lat,lng pair per line.
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 gap-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none">
                     Corridor Width (Metres)
@@ -261,10 +247,21 @@ export default function NewProjectPage() {
                     onChange={(e) => setCorridorWidthMetres(e.target.value)}
                     placeholder="e.g. 50"
                     min="1"
+                    className="max-w-xs"
                   />
                   <p className="text-xs text-muted-foreground">
                     Submission zone extends half this width on each side.
                   </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Road Centreline Coordinates
+                  </label>
+                  <GeofenceMap
+                    corridorWidthMetres={parseInt(corridorWidthMetres) || 50}
+                    initialCoords={roadCentrelineCoords}
+                    onChange={setRoadCentrelineCoords}
+                  />
                 </div>
               </div>
             )}

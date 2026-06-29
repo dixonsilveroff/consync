@@ -3,20 +3,23 @@
 import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
+import { Id, Doc } from "@convex/_generated/dataModel";
 import { Video, Upload, X, Loader2, CheckCircle2, MapPin, AlertTriangle, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { extractKeyFrames, ExtractedFrame, ExtractionProgress } from "@/lib/frame-extractor";
+import { getDistanceMeters, distanceToPolylineMetres } from "@/lib/geo";
 
 interface VideoUploadProps {
   milestoneId: Id<"milestones">;
   milestoneName: string;
+  project: Doc<"projects">;
   onSuccess: () => void;
+  bypassDemoLocks?: boolean;
 }
 
 type UploadState = "idle" | "extracting" | "uploading" | "submitting" | "done";
 
-export function VideoUpload({ milestoneId, milestoneName, onSuccess }: VideoUploadProps) {
+export function VideoUpload({ milestoneId, milestoneName, project, onSuccess, bypassDemoLocks }: VideoUploadProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [frames, setFrames] = useState<ExtractedFrame[]>([]);
   const [note, setNote] = useState("");
@@ -102,6 +105,28 @@ export function VideoUpload({ milestoneId, milestoneName, onSuccess }: VideoUplo
       // 1. Get Location
       const location = await getGpsLocation();
 
+      if (location) {
+        let isOffSite = false;
+        if (project.geofenceType === "LINEAR_CORRIDOR" && project.roadCentrelineCoords) {
+          const dist = distanceToPolylineMetres(location, project.roadCentrelineCoords);
+          const halfWidth = (project.corridorWidthMetres ?? 50) / 2;
+          if (dist > halfWidth) isOffSite = true;
+        } else if (project.siteLatitude != null && project.siteLongitude != null) {
+          const dist = getDistanceMeters(project.siteLatitude, project.siteLongitude, location.lat, location.lng);
+          if (dist > 500) isOffSite = true;
+        }
+
+        if (isOffSite && !bypassDemoLocks) {
+          const proceed = window.confirm(
+            "Warning: You appear to be physically outside the registered project geofence. Do you want to proceed with submission anyway? (This submission will be flagged for review)."
+          );
+          if (!proceed) {
+            setState("idle");
+            return;
+          }
+        }
+      }
+
       // 2. Upload Video File
       setProgressMsg("Uploading raw video...");
       const videoUploadUrl = await generateUploadUrl();
@@ -145,7 +170,8 @@ export function VideoUpload({ milestoneId, milestoneName, onSuccess }: VideoUplo
         gpsLongitude: location?.lng,
         gpsAccuracyMeters: location?.acc,
         videoDurationSeconds: frames.length > 0 ? frames[frames.length - 1].timestamp : undefined,
-        deviceCaptureTimestamp: new Date().toISOString()
+        deviceCaptureTimestamp: new Date().toISOString(),
+        bypassDemoLocks,
       });
 
       setState("done");
