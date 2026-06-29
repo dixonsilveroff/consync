@@ -23,6 +23,19 @@ export default function OwnerProjectDashboard() {
 
   const [funding, setFunding] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("payment") === "success" || url.searchParams.has("trxref")) {
+        toast.success("Payment checkout completed! Escrow balance will update shortly.");
+        url.searchParams.delete("payment");
+        url.searchParams.delete("trxref");
+        url.searchParams.delete("reference");
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+  }, []);
+
   // Loading state
   if (project === undefined || milestones === undefined) {
     return (
@@ -68,18 +81,6 @@ export default function OwnerProjectDashboard() {
     }
   };
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (url.searchParams.get("payment") === "success" || url.searchParams.has("trxref")) {
-        toast.success("Payment checkout completed! Escrow balance will update shortly.");
-        url.searchParams.delete("payment");
-        url.searchParams.delete("trxref");
-        url.searchParams.delete("reference");
-        window.history.replaceState({}, document.title, url.toString());
-      }
-    }
-  }, []);
 
   return (
     <div className="animate-fade-in relative">
