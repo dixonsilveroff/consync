@@ -56,6 +56,7 @@ export default function OwnerProjectDashboard() {
         projectId,
         amountKobo: project.totalValueKobo,
         ownerEmail: project.contractorEmail || "owner@example.com",
+        callbackUrl: window.location.href.split('?')[0] + '?payment=success',
       });
       if (result?.authorizationUrl) {
         window.location.href = result.authorizationUrl;
@@ -66,6 +67,19 @@ export default function OwnerProjectDashboard() {
       setFunding(false);
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("payment") === "success" || url.searchParams.has("trxref")) {
+        toast.success("Payment checkout completed! Escrow balance will update shortly.");
+        url.searchParams.delete("payment");
+        url.searchParams.delete("trxref");
+        url.searchParams.delete("reference");
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+  }, []);
 
   return (
     <div className="animate-fade-in relative">

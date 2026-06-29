@@ -158,15 +158,12 @@ export const initiateEscrowFunding = action({
     projectId: v.id("projects"),
     amountKobo: v.number(),
     ownerEmail: v.string(),
+    callbackUrl: v.optional(v.string()),
   },
-  handler: async (ctx, { projectId, amountKobo, ownerEmail }) => {
+  handler: async (ctx, { projectId, amountKobo, ownerEmail, callbackUrl }) => {
     const txRef = `CSYNC_PAY_${projectId}_${Date.now()}`;
 
-    const res = await paystackRequest<{
-      status: boolean;
-      message: string;
-      data: { authorization_url: string; access_code: string; reference: string };
-    }>("/transaction/initialize", "POST", {
+    const payload: any = {
       email: ownerEmail,
       amount: amountKobo,
       reference: txRef,
@@ -175,7 +172,17 @@ export const initiateEscrowFunding = action({
         projectId,
         type: "ESCROW_FUNDING",
       }
-    });
+    };
+
+    if (callbackUrl) {
+      payload.callback_url = callbackUrl;
+    }
+
+    const res = await paystackRequest<{
+      status: boolean;
+      message: string;
+      data: { authorization_url: string; access_code: string; reference: string };
+    }>("/transaction/initialize", "POST", payload);
 
     if (!res.status) {
       throw new Error(`Transaction initialization failed: ${res.message}`);
