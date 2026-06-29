@@ -79,7 +79,7 @@ export const getMilestoneDetail = query({
 
     // Get photo URLs concurrently
     const photoUrls = await Promise.all(
-      latestSubmission.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+      (latestSubmission.keyFrameStorageIds || []).map((id) => ctx.storage.getUrl(id))
     );
 
     return {
@@ -161,6 +161,22 @@ export const approveMilestone = mutation({
     const latest = submissions.sort((a, b) => b.submittedAt - a.submittedAt)[0];
     if (latest) {
       await ctx.db.patch(latest._id, { status: "APPROVED" });
+      
+      // Log inspector feedback if AI didn't recommend approval
+      const analysis = await ctx.db
+        .query("analysisResults")
+        .withIndex("by_submission", (q) => q.eq("submissionId", latest._id))
+        .first();
+      if (analysis && analysis.verificationStatus !== "CONFIRMED") {
+        await ctx.db.insert("inspectorFeedback", {
+          analysisId: analysis._id,
+          reviewerClerkId: identity.subject,
+          aiStatus: analysis.verificationStatus,
+          humanStatus: "APPROVED",
+          overrideReasonCategory: "FALSE_NEGATIVE",
+          createdAt: Date.now(),
+        });
+      }
     }
 
     await ctx.db.insert("payments", {
@@ -217,6 +233,23 @@ export const rejectMilestone = mutation({
     const latest = submissions.sort((a, b) => b.submittedAt - a.submittedAt)[0];
     if (latest) {
       await ctx.db.patch(latest._id, { status: "REJECTED", rejectionReason: reason });
+
+      // Log inspector feedback if AI recommended approval
+      const analysis = await ctx.db
+        .query("analysisResults")
+        .withIndex("by_submission", (q) => q.eq("submissionId", latest._id))
+        .first();
+      if (analysis && analysis.verificationStatus === "CONFIRMED") {
+        await ctx.db.insert("inspectorFeedback", {
+          analysisId: analysis._id,
+          reviewerClerkId: identity.subject,
+          aiStatus: analysis.verificationStatus,
+          humanStatus: "REJECTED",
+          overrideReasonCategory: "FALSE_POSITIVE",
+          overrideReasonText: reason,
+          createdAt: Date.now(),
+        });
+      }
     }
 
     // Reset milestone so contractor can resubmit

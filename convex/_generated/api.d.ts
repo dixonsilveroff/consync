@@ -10,11 +10,13 @@
 
 import type * as ai from "../ai.js";
 import type * as aiData from "../aiData.js";
+import type * as migrations_migratePhotoSubmissions from "../migrations/migratePhotoSubmissions.js";
 import type * as milestones from "../milestones.js";
 import type * as payments from "../payments.js";
 import type * as paystack from "../paystack.js";
 import type * as projects from "../projects.js";
 import type * as projectsData from "../projectsData.js";
+import type * as prompts from "../prompts.js";
 import type * as submissions from "../submissions.js";
 import type * as users from "../users.js";
 import type * as webhooks from "../webhooks.js";
@@ -28,11 +30,13 @@ import type {
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   aiData: typeof aiData;
+  "migrations/migratePhotoSubmissions": typeof migrations_migratePhotoSubmissions;
   milestones: typeof milestones;
   payments: typeof payments;
   paystack: typeof paystack;
   projects: typeof projects;
   projectsData: typeof projectsData;
+  prompts: typeof prompts;
   submissions: typeof submissions;
   users: typeof users;
   webhooks: typeof webhooks;

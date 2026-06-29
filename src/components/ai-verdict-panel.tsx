@@ -29,6 +29,7 @@ interface AiVerdictPanelProps {
   milestoneId: Doc<"milestones">["_id"];
   milestoneStatus: Doc<"milestones">["status"];
   role: "owner" | "contractor";
+  rejectionReason?: string;
 }
 
 const statusConfig = {
@@ -75,7 +76,7 @@ const anomalySeverityConfig = {
   CRITICAL: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
-export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }: AiVerdictPanelProps) {
+export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role, rejectionReason }: AiVerdictPanelProps) {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [isActing, setIsActing] = useState(false);
@@ -122,7 +123,12 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
       <div className={`flex items-center gap-3 px-5 py-4 rounded-xl border ${statusCfg.className}`}>
         <StatusIcon className={`w-6 h-6 ${statusCfg.iconClass} flex-shrink-0`} />
         <div className="flex-1">
-          <p className="font-heading text-headline-sm">{statusCfg.label}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-heading text-headline-sm">{statusCfg.label}</p>
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full border border-primary/20 bg-primary/10 text-primary uppercase font-bold tracking-widest">
+              {analysis.analysisMode?.replace('_', ' ')}
+            </span>
+          </div>
           <p className="text-body-sm opacity-80 mt-0.5">{analysis.plainSummary}</p>
         </div>
       </div>
@@ -170,7 +176,44 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
         </div>
       </div>
 
-      {/* Anomalies */}
+      {/* Comparative Observations (Delta/Progress modes) */}
+      {analysis.comparativeObservations && (
+        <div className="card-enforcer">
+          <h3 className="label-blueprint mb-4 flex items-center gap-1.5"><RefreshCw className="w-4 h-4" /> Comparative Analysis</h3>
+          <div className="space-y-3">
+            {analysis.comparativeObservations.progressionConsistent !== undefined && (
+              <div className="flex gap-2">
+                <span className="font-medium text-body-sm w-48 shrink-0 text-on-surface">Progression Consistent:</span>
+                <span className={`text-body-sm font-bold ${analysis.comparativeObservations.progressionConsistent ? 'text-emerald-500' : 'text-danger'}`}>
+                  {analysis.comparativeObservations.progressionConsistent ? 'YES' : 'NO'}
+                </span>
+              </div>
+            )}
+            {analysis.comparativeObservations.newSincePrior && (
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-body-sm text-on-surface">New Since Prior Analysis:</span>
+                <span className="text-body-sm text-on-surface-variant">{analysis.comparativeObservations.newSincePrior}</span>
+              </div>
+            )}
+            {analysis.comparativeObservations.priorAnomaliesResolved && analysis.comparativeObservations.priorAnomaliesResolved.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-body-sm text-on-surface">Prior Anomalies Resolved:</span>
+                <ul className="list-disc pl-5 text-body-sm text-emerald-500">
+                  {analysis.comparativeObservations.priorAnomaliesResolved.map((a, i) => <li key={i}>{a}</li>)}
+                </ul>
+              </div>
+            )}
+            {analysis.comparativeObservations.regressionFlags && analysis.comparativeObservations.regressionFlags.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-body-sm text-on-surface">Regression Flags:</span>
+                <ul className="list-disc pl-5 text-body-sm text-danger">
+                  {analysis.comparativeObservations.regressionFlags.map((a, i) => <li key={i}>{a}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       {analysis.anomalies.length > 0 && (
         <div className="card-enforcer">
           <h3 className="label-blueprint mb-4">Anomalies Detected</h3>
@@ -270,9 +313,19 @@ export function AiVerdictPanel({ analysis, milestoneId, milestoneStatus, role }:
         </div>
       )}
       {milestoneStatus === "REJECTED" && (
-        <div className="flex items-center gap-3 px-5 py-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive">
-          <RefreshCw className="w-4 h-4" />
-          <p className="text-body-md font-medium">Milestone rejected — awaiting contractor resubmission.</p>
+        <div className="flex flex-col gap-3 px-5 py-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive">
+          <div className="flex items-center gap-3">
+            <RefreshCw className="w-5 h-5 flex-shrink-0" />
+            <p className="text-body-md font-medium">Milestone rejected — awaiting contractor resubmission.</p>
+          </div>
+          {rejectionReason && (
+            <div className="pl-8">
+              <p className="text-body-sm opacity-90 border-l-2 border-destructive/30 pl-3 py-1">
+                <span className="font-bold block mb-1">Inspector Note:</span>
+                "{rejectionReason}"
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

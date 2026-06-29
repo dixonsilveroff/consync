@@ -17,14 +17,59 @@ export const fetchSubmissionData = internalQuery({
     if (!project) return null;
 
     return {
-      photoStorageIds: submission.photoStorageIds,
+      keyFrameStorageIds: submission.keyFrameStorageIds,
+      frameCount: submission.frameCount,
       contractorNote: submission.contractorNote ?? null,
-      milestoneName: milestone.name,
-      acceptanceCriteria: milestone.acceptanceCriteria,
+      projectName: project.name,
       projectType: project.projectType,
       projectLocation: project.location ?? null,
+      milestoneName: milestone.name,
+      milestoneDescription: milestone.description,
+      boqReference: milestone.boqReference ?? null,
+      acceptanceCriteria: milestone.acceptanceCriteria,
     };
   },
+});
+
+/**
+ * Internal query: get prior analyses to determine the routing mode and context
+ */
+export const getPriorAnalyses = internalQuery({
+  args: { projectId: v.id("projects"), milestoneId: v.id("milestones") },
+  handler: async (ctx, args) => {
+    // Find the most recent CONFIRMED analysis for the SAME milestone
+    const sameMilestonePrior = await ctx.db
+      .query("analysisResults")
+      .withIndex("by_milestone_and_status", q => q.eq("milestoneId", args.milestoneId).eq("verificationStatus", "CONFIRMED"))
+      .order("desc")
+      .first();
+
+    // Find up to 2 most recent CONFIRMED analyses for ANY milestone on this project
+    const recentAnalyses = await ctx.db
+      .query("analysisResults")
+      .withIndex("by_project", q => q.eq("projectId", args.projectId))
+      .order("desc")
+      .take(10); // Take more to filter
+
+    const projectPriors = recentAnalyses
+      .filter(a => a.verificationStatus === "CONFIRMED")
+      .slice(0, 2);
+
+    let mode: "BASELINE" | "MILESTONE_DELTA" | "PROJECT_PROGRESS";
+    if (!sameMilestonePrior && projectPriors.length === 0) {
+      mode = "BASELINE";
+    } else if (sameMilestonePrior) {
+      mode = "MILESTONE_DELTA";
+    } else {
+      mode = "PROJECT_PROGRESS";
+    }
+
+    return {
+      mode,
+      sameMilestonePrior,
+      projectPriors
+    };
+  }
 });
 
 /**
@@ -35,6 +80,11 @@ export const saveAnalysisResult = internalMutation({
     submissionId: v.id("submissions"),
     milestoneId: v.id("milestones"),
     projectId: v.id("projects"),
+    analysisMode: v.union(
+      v.literal("BASELINE"),
+      v.literal("MILESTONE_DELTA"),
+      v.literal("PROJECT_PROGRESS")
+    ),
     verificationStatus: v.union(
       v.literal("CONFIRMED"),
       v.literal("UNCONFIRMED"),
@@ -65,6 +115,12 @@ export const saveAnalysisResult = internalMutation({
         recommendation: v.string(),
       })
     ),
+    comparativeObservations: v.optional(v.object({
+      progressionConsistent: v.optional(v.boolean()),
+      priorAnomaliesResolved: v.optional(v.array(v.string())),
+      regressionFlags: v.optional(v.array(v.string())),
+      newSincePrior: v.optional(v.string()),
+    })),
     visibilityNotes: v.optional(v.string()),
     plainSummary: v.string(),
     routingRecommendation: v.union(
@@ -72,23 +128,31 @@ export const saveAnalysisResult = internalMutation({
       v.literal("REVIEW"),
       v.literal("REJECT")
     ),
+    modelUsed: v.optional(v.string()),
+    priorAnalysisIds: v.optional(v.array(v.id("analysisResults"))),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("analysisResults", {
       submissionId: args.submissionId,
       milestoneId: args.milestoneId,
       projectId: args.projectId,
+      analysisMode: args.analysisMode,
       verificationStatus: args.verificationStatus,
       confidenceScore: args.confidenceScore,
       criterionAssessments: args.criterionAssessments,
       anomalies: args.anomalies,
+      comparativeObservations: args.comparativeObservations,
       visibilityNotes: args.visibilityNotes,
       plainSummary: args.plainSummary,
       routingRecommendation: args.routingRecommendation,
+      modelUsed: args.modelUsed,
+      priorAnalysisIds: args.priorAnalysisIds,
       analyzedAt: Date.now(),
     });
 
     await ctx.db.patch(args.submissionId, { status: "ANALYSIS_COMPLETE" });
+    
+    // For now, regardless of the AI's routing recommendation, all analyses route to owner review.
     await ctx.db.patch(args.milestoneId, { status: "ANALYSIS_DONE" });
   },
 });

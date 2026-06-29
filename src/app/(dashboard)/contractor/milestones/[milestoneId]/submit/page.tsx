@@ -5,7 +5,7 @@ import { api } from "@convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
 import { Id } from "@convex/_generated/dataModel";
 import { useAuth } from "@clerk/nextjs";
-import { PhotoUpload } from "@/components/photo-upload";
+import { VideoUpload } from "@/components/video-upload";
 import { AiVerdictPanel } from "@/components/ai-verdict-panel";
 import { ArrowLeft, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ export default function MilestoneSubmitPage() {
       {/* Pending: show upload form */}
       {(milestone.status === "PENDING" || milestone.status === "REJECTED") && (
         <div className="bg-surface border border-border-strong p-6 rounded-none">
-          <PhotoUpload
+          <VideoUpload
             milestoneId={milestoneId}
             milestoneName={milestone.name}
             onSuccess={handleBack}
@@ -140,6 +140,7 @@ export default function MilestoneSubmitPage() {
           milestoneId={milestoneId}
           milestoneStatus={milestone.status}
           role="contractor"
+          rejectionReason={submission?.rejectionReason}
         />
       )}
 
@@ -156,7 +157,9 @@ export default function MilestoneSubmitPage() {
         <div className="mt-8 bg-background border border-border-strong p-6 rounded-none">
           <h3 className="font-mono text-xs font-bold tracking-widest text-text-muted mb-4 uppercase border-b border-border-strong pb-2">Submission Log</h3>
           <p className="font-mono text-sm text-text-secondary">
-            {submission.photoCount} PHOTO{submission.photoCount !== 1 ? "S" : ""} | TIMESTAMP:{" "}
+            {submission.frameCount || 0} KEY FRAME{submission.frameCount !== 1 ? "S" : ""} 
+            {submission.videoDurationSeconds ? ` | DURATION: ${Math.floor(submission.videoDurationSeconds / 60)}:${(Math.floor(submission.videoDurationSeconds) % 60).toString().padStart(2, '0')}` : ''}
+            {' '} | TIMESTAMP:{" "}
             {new Date(submission.submittedAt).toLocaleDateString("en-NG", {
               day: "2-digit",
               month: "short",
