@@ -9,7 +9,8 @@
     "target": "ESNext",
     "paths": {
       "convex/_generated/*": ["./_generated/*"]
-    }
+    },
+    "types": ["node"]
   },
   "include": ["./**/*.ts", "./**/*.tsx", "../node_modules/convex/src/server/index.d.ts"],
   "exclude": ["node_modules", "./_generated"]

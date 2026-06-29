@@ -78,8 +78,9 @@ Set these variables using the Convex CLI or dashboard:
 npx convex env set SQUAD_SECRET_KEY "sandbox_sk_..."
 npx convex env set SQUAD_BASE_URL "https://sandbox-api-d.squadco.com"
 npx convex env set SQUAD_MERCHANT_ID "YOUR_MERCHANT_ID"
-npx convex env set GOOGLE_CLOUD_PROJECT_ID "your-gcp-project-id"
-npx convex env set GOOGLE_APPLICATION_CREDENTIALS_JSON '{...}'
+npx convex env set AWS_ACCESS_KEY_ID "your-aws-access-key-id"
+npx convex env set AWS_SECRET_ACCESS_KEY "your-aws-secret-access-key"
+npx convex env set AWS_REGION "us-east-1"
 ```
 
 ### 4. Run the Development Servers
