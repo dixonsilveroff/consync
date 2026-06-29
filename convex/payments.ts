@@ -7,7 +7,7 @@ export const createPayment = internalMutation({
     milestoneId: v.union(v.id("milestones"), v.null()),
     type: v.union(v.literal("ESCROW_FUNDING"), v.literal("MILESTONE_RELEASE")),
     amountKobo: v.number(),
-    squadTransactionRef: v.string(),
+    paystackTransactionRef: v.string(),
     checkoutUrl: v.optional(v.string()),
     dvaAccountNumber: v.optional(v.string()),
   },
@@ -18,30 +18,30 @@ export const createPayment = internalMutation({
       type: args.type,
       amountKobo: args.amountKobo,
       status: "INITIATED",
-      squadTransactionRef: args.squadTransactionRef,
-      squadGatewayRef: undefined,
+      paystackTransactionRef: args.paystackTransactionRef,
       checkoutUrl: args.checkoutUrl,
       dvaAccountNumber: args.dvaAccountNumber,
+      paymentProvider: "paystack",
       createdAt: Date.now(),
     });
   },
 });
 
-export const getPaymentByTransactionRef = internalQuery({
+export const getPaymentByPaystackRef = internalQuery({
   args: {
     transactionRef: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("payments")
-      .withIndex("by_transaction_ref", (q) =>
-        q.eq("squadTransactionRef", args.transactionRef)
+      .withIndex("by_paystack_ref", (q) =>
+        q.eq("paystackTransactionRef", args.transactionRef)
       )
       .first();
   },
 });
 
-export const updatePaymentRef = internalMutation({
+export const updatePaymentRefPaystack = internalMutation({
   args: {
     currentRef: v.string(),
     newRef: v.string(),
@@ -53,8 +53,8 @@ export const updatePaymentRef = internalMutation({
 
     const payment = await ctx.db
       .query("payments")
-      .withIndex("by_transaction_ref", (q) =>
-        q.eq("squadTransactionRef", args.currentRef)
+      .withIndex("by_paystack_ref", (q) =>
+        q.eq("paystackTransactionRef", args.currentRef)
       )
       .first();
 
@@ -63,7 +63,31 @@ export const updatePaymentRef = internalMutation({
     }
 
     await ctx.db.patch(payment._id, {
-      squadTransactionRef: args.newRef,
+      paystackTransactionRef: args.newRef,
     });
   },
 });
+
+export const updateTransferCodes = internalMutation({
+  args: {
+    transactionRef: v.string(),
+    transferRecipientCode: v.string(),
+    transferCode: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const payment = await ctx.db
+      .query("payments")
+      .withIndex("by_paystack_ref", (q) =>
+        q.eq("paystackTransactionRef", args.transactionRef)
+      )
+      .first();
+
+    if (!payment) return;
+
+    await ctx.db.patch(payment._id, {
+      paystackTransferRecipientCode: args.transferRecipientCode,
+      paystackTransferCode: args.transferCode,
+    });
+  }
+});
+

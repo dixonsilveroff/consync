@@ -7,17 +7,10 @@ import { Id } from "@convex/_generated/dataModel";
 import { MilestoneList } from "@/components/milestone-list";
 import { EscrowBalance } from "@/components/escrow-balance";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Building2, Calendar, Loader2, Copy, CheckCircle2, X } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getStatusConfig, formatDate, formatNaira, cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-type DvaDetails = {
-  virtualAccountNumber: string;
-  bankName: string;
-  expectedAmountKobo: number;
-  expiresAt: number;
-};
 
 export default function OwnerProjectDashboard() {
   const params = useParams();
@@ -26,43 +19,9 @@ export default function OwnerProjectDashboard() {
 
   const project = useQuery(api.projects.getProject, { projectId });
   const milestones = useQuery(api.milestones.getMilestones, { projectId });
-  const initiateEscrow = useAction(api.squad.initiateEscrowViaDva);
+  const initiateEscrow = useAction(api.paystack.initiateEscrowFunding);
 
   const [funding, setFunding] = useState(false);
-  const [dvaDetails, setDvaDetails] = useState<DvaDetails | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<string>("");
-
-  useEffect(() => {
-    if (!dvaDetails) return;
-
-    const updateTimer = () => {
-      const now = Date.now();
-      const difference = dvaDetails.expiresAt - now;
-
-      if (difference <= 0) {
-        setTimeLeft("Expired");
-        return;
-      }
-
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
-      const seconds = Math.floor((difference / 1000) % 60);
-      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-    };
-
-    updateTimer(); // Initial call
-    const intervalId = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [dvaDetails]);
-
-  // Watch for successful funding to close modal and show toast
-  useEffect(() => {
-    if (dvaDetails && project?.status === "ACTIVE") {
-      setDvaDetails(null);
-      toast.success("Project funding was successful!");
-    }
-  }, [project?.status, dvaDetails]);
 
   // Loading state
   if (project === undefined || milestones === undefined) {
@@ -93,118 +52,23 @@ export default function OwnerProjectDashboard() {
   const handleFundEscrow = async () => {
     setFunding(true);
     try {
-      // 1 hour duration for DVA
       const result = await initiateEscrow({
         projectId,
         amountKobo: project.totalValueKobo,
-        ownerEmail: project.contractorEmail || "owner@example.com", // Assuming we have owner's email, using fallback for now
-        durationSecs: 3600
+        ownerEmail: project.contractorEmail || "owner@example.com",
       });
-      if (result) {
-        setDvaDetails({
-          virtualAccountNumber: result.virtualAccountNumber,
-          bankName: result.bankName,
-          expectedAmountKobo: result.expectedAmountKobo,
-          expiresAt: result.expiresAt
-        });
+      if (result?.authorizationUrl) {
+        window.location.href = result.authorizationUrl;
       }
     } catch (e) {
       console.error(e);
       alert("Failed to initiate escrow funding.");
-    } finally {
       setFunding(false);
-    }
-  };
-
-  const handleCopy = () => {
-    if (dvaDetails) {
-      navigator.clipboard.writeText(dvaDetails.virtualAccountNumber);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   return (
     <div className="animate-fade-in relative">
-      {/* DVA Modal */}
-      {dvaDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="glassmorphic-widget w-full max-w-md rounded-2xl overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
-            <div className="flex justify-between items-center p-5 border-b border-border/50 bg-background/50">
-              <h3 className="font-heading text-headline-sm text-foreground">Fund Escrow</h3>
-              <button
-                onClick={() => setDvaDetails(null)}
-                className="p-2 hover:bg-surface-raised rounded-full transition-colors text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 text-center">
-                <p className="text-body-sm text-muted-foreground mb-1 uppercase tracking-wider font-medium">Transfer Exactly</p>
-                <p className="font-mono text-4xl font-bold tracking-tight text-primary">
-                  {formatNaira(dvaDetails.expectedAmountKobo)}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="label-blueprint mb-1">Bank Name</p>
-                  <p className="font-medium text-foreground text-lg">{dvaDetails.bankName}</p>
-                </div>
-
-                <div>
-                  <p className="label-blueprint mb-1">Virtual Account Number</p>
-                  <div className="flex items-center justify-between bg-primary/10 p-4 rounded-xl border border-primary/20 group hover:border-primary/40 transition-colors">
-                    <span className="font-mono text-2xl font-bold tracking-widest text-primary">
-                      {dvaDetails.virtualAccountNumber}
-                    </span>
-                    <button
-                      onClick={handleCopy}
-                      className={`p-3 rounded-lg flex items-center gap-2 transition-all duration-300 ${copied ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground hover:bg-primary-dark shadow-md hover:shadow-lg'}`}
-                      title="Copy to clipboard"
-                    >
-                      {copied ? (
-                        <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span className="text-sm font-medium">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          <span className="text-sm font-medium">Copy</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="label-blueprint mb-1">Expires In</p>
-                  <p className={`text-body-md font-medium flex items-center gap-2 ${timeLeft === "Expired" ? "text-destructive font-bold" : "text-foreground"}`}>
-                    <Calendar className={`w-4 h-4 ${timeLeft === "Expired" ? "text-destructive" : "text-muted-foreground"}`} />
-                    {timeLeft === "Expired" ? "Expired" : `${timeLeft} minutes`}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-warning/10 text-warning p-4 rounded-xl text-sm leading-relaxed border border-warning/20">
-                <strong className="font-semibold block mb-1">⚠️ Important:</strong>
-                Send the <b>exact amount</b> shown above in a single transaction. Any other amount will be automatically refunded.
-              </div>
-
-              {timeLeft !== "Expired" && (
-                <div className="flex items-center justify-center gap-2 text-primary text-sm font-medium pt-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                  <span className="animate-pulse-subtle">Listening for secure transfer...</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Back Link */}
       <Button
         variant="ghost"
@@ -308,16 +172,6 @@ export default function OwnerProjectDashboard() {
                   </p>
                 </div>
               )}
-              {project.squadVirtualAccountNumber && (
-                <div>
-                  <p className="font-mono text-xs tracking-widest text-text-muted mb-2">ESCROW VAULT ID</p>
-                  <div className="bg-primary/5 border border-primary/20 p-3 flex justify-between items-center group">
-                    <p className="text-base text-primary font-mono font-bold tracking-widest">
-                      {project.squadVirtualAccountNumber}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -325,3 +179,4 @@ export default function OwnerProjectDashboard() {
     </div>
   );
 }
+

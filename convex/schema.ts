@@ -38,6 +38,10 @@ export default defineSchema({
     // Squad integration fields
     squadVirtualAccountNumber: v.optional(v.string()),
     squadCustomerIdentifier: v.optional(v.string()),
+    // Paystack integration fields
+    paymentProvider: v.optional(v.union(v.literal("squad"), v.literal("paystack"))),
+    paystackCustomerId: v.optional(v.string()),
+    paystackDVAAccountNumber: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_owner", ["ownerClerkId"])
@@ -146,14 +150,19 @@ export default defineSchema({
       v.literal("SUCCESS"),
       v.literal("FAILED")
     ),
-    squadTransactionRef: v.string(),
+    squadTransactionRef: v.optional(v.string()),
     squadGatewayRef: v.optional(v.string()),
+    paystackTransactionRef: v.optional(v.string()),
+    paystackTransferRecipientCode: v.optional(v.string()),
+    paystackTransferCode: v.optional(v.string()),
     checkoutUrl: v.optional(v.string()),
     dvaAccountNumber: v.optional(v.string()),
+    paymentProvider: v.optional(v.union(v.literal("squad"), v.literal("paystack"))),
     createdAt: v.number(),
   })
     .index("by_project", ["projectId"])
     .index("by_transaction_ref", ["squadTransactionRef"])
+    .index("by_paystack_ref", ["paystackTransactionRef"])
     .index("by_dva_account", ["dvaAccountNumber"]),
 
   // ─── INVITATIONS ───────────────────────────────────────────

@@ -63,7 +63,7 @@ export function formatRelativeTime(timestamp: number): string {
 }
 
 /**
- * Generate a unique transaction reference for Squad API
+ * Generate a unique transaction reference for Paystack API
  */
 export function generateTransactionRef(prefix: string, projectId: string): string {
   const timestamp = Date.now();

@@ -169,13 +169,13 @@ export const approveMilestone = mutation({
       type: "MILESTONE_RELEASE",
       amountKobo: milestone.valueKobo,
       status: "INITIATED",
-      squadTransactionRef: transactionRef,
-      squadGatewayRef: undefined,
+      paystackTransactionRef: transactionRef,
       checkoutUrl: undefined,
+      paymentProvider: "paystack",
       createdAt: Date.now(),
     });
 
-    await ctx.scheduler.runAfter(0, internal.squad.releaseMilestonePayment, {
+    await ctx.scheduler.runAfter(0, internal.paystack.releaseMilestonePayment, {
       milestoneId: milestone._id,
       amountKobo: milestone.valueKobo,
       bankCode: contractor.bankCode,

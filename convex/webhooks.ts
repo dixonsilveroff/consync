@@ -2,48 +2,35 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 
-export const handleSquadWebhook = mutation({
+export const handlePaystackWebhook = mutation({
   args: {
     event: v.string(),
-    transactionRef: v.string(),
-    gatewayRef: v.optional(v.string()),
+    transactionRef: v.string(), // Represents either transaction ref or transfer code based on the event
     amountKobo: v.number(),
     status: v.string(),
   },
   handler: async (ctx, args) => {
     let payment;
 
-    if (args.event === "DVA_FUNDING_SUCCESS" || args.event === "DVA_FUNDING_FAILED") {
-      // For DVA events, args.gatewayRef contains the virtual_account_number
+    if (args.event.startsWith("transfer.")) {
+      // Transfer events (milestone release) - look up by transfer code
       payment = await ctx.db
         .query("payments")
-        .withIndex("by_dva_account", (q) =>
-          q.eq("dvaAccountNumber", args.gatewayRef)
-        )
+        .filter((q) => q.eq(q.field("paystackTransferCode"), args.transactionRef))
         .first();
-
-      // Fallback: The Squad simulation webhook doesn't include the virtual_account_number in the payload,
-      // so we must look it up by the transactionRef instead.
-      if (!payment) {
-        payment = await ctx.db
-          .query("payments")
-          .withIndex("by_transaction_ref", (q) =>
-            q.eq("squadTransactionRef", args.transactionRef)
-          )
-          .first();
-      }
     } else {
-      // Standard payment gateway lookup
+      // Charge events (escrow funding) - look up by transaction reference
       payment = await ctx.db
         .query("payments")
-        .withIndex("by_transaction_ref", (q) =>
-          q.eq("squadTransactionRef", args.transactionRef)
+        .withIndex("by_paystack_ref", (q) =>
+          q.eq("paystackTransactionRef", args.transactionRef)
         )
         .first();
     }
 
     if (!payment) {
-      throw new ConvexError(`Payment not found for transaction ref or DVA account: ${args.transactionRef} / ${args.gatewayRef}`);
+      console.log(`Payment not found for ref/code: ${args.transactionRef}`);
+      return;
     }
 
     // Idempotency: Ignore if the payment has already reached a terminal state
@@ -58,7 +45,6 @@ export const handleSquadWebhook = mutation({
 
     await ctx.db.patch(payment._id, {
       status: nextStatus,
-      squadGatewayRef: args.gatewayRef,
     });
 
     if (!isSuccess) {
@@ -70,7 +56,7 @@ export const handleSquadWebhook = mutation({
       throw new ConvexError("Project not found for payment");
     }
 
-    if (payment.type === "ESCROW_FUNDING") {
+    if (payment.type === "ESCROW_FUNDING" && args.event === "charge.success") {
       const newBalance = project.escrowBalanceKobo + payment.amountKobo;
       await ctx.db.patch(project._id, {
         escrowBalanceKobo: newBalance,
@@ -79,7 +65,7 @@ export const handleSquadWebhook = mutation({
       return;
     }
 
-    if (payment.type === "MILESTONE_RELEASE") {
+    if (payment.type === "MILESTONE_RELEASE" && args.event === "transfer.success") {
       const newBalance = Math.max(0, project.escrowBalanceKobo - payment.amountKobo);
       await ctx.db.patch(project._id, {
         escrowBalanceKobo: newBalance,

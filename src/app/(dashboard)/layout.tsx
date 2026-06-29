@@ -70,7 +70,7 @@ export default function DashboardLayout({
     ? ownerProjects.reduce((sum, project) => sum + (project.escrowBalanceKobo || 0), 0)
     : 0;
 
-  const verifyBankDetails = useAction(api.squad.verifyAndSaveBankDetails);
+  const verifyBankDetails = useAction(api.paystack.verifyAndSaveBankDetails);
 
   const isOwnerPath = pathname.startsWith("/owner");
   const isContractorPath = pathname.startsWith("/contractor");
