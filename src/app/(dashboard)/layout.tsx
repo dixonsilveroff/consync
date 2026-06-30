@@ -234,7 +234,14 @@ export default function DashboardLayout({
             {isOwner ? "OWNER DIRECTORY" : "CONTRACTOR DIRECTORY"}
           </span>
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const activeHref = navItems.reduce((longest, current) => {
+              if (pathname === current.href || pathname.startsWith(`${current.href}/`)) {
+                return current.href.length > longest.length ? current.href : longest;
+              }
+              return longest;
+            }, "");
+            const isActive = item.href === activeHref;
+            
             return (
               <Link
                 key={item.href}
