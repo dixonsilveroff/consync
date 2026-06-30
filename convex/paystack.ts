@@ -320,3 +320,43 @@ export const releaseMilestonePayment = internalAction({
     throw new Error(`Transfer failed: ${transferRes.message}`);
   },
 });
+
+/**
+ * Public endpoint to manually trigger a verification from the frontend, 
+ * bypassing the webhook delay.
+ */
+export const verifyPaymentFrontend = action({
+  args: { transactionRef: v.string() },
+  handler: async (ctx, args) => {
+    const payment = await ctx.runQuery(internal.payments.getPaymentByPaystackRef, {
+      transactionRef: args.transactionRef,
+    });
+
+    if (!payment || payment.type !== "ESCROW_FUNDING") {
+      return { success: false, reason: "Payment not found or wrong type" };
+    }
+
+    if (payment.status !== "INITIATED") {
+      return { success: true, status: payment.status };
+    }
+
+    const response = await paystackRequest<{ status: boolean; data: { status: string; gateway_response: string } }>(
+      `/transaction/verify/${args.transactionRef}`,
+      "GET"
+    );
+
+    if (response.status && response.data) {
+      if (response.data.status === "success" || response.data.status === "failed") {
+        await ctx.runMutation(api.webhooks.handlePaystackWebhook, {
+          event: response.data.status === "success" ? "charge.success" : "charge.failed",
+          transactionRef: args.transactionRef,
+          amountKobo: payment.amountKobo,
+          status: response.data.status,
+        });
+        return { success: true, status: response.data.status === "success" ? "SUCCESS" : "FAILED" };
+      }
+    }
+    
+    return { success: false, reason: "Verification inconclusive" };
+  },
+});

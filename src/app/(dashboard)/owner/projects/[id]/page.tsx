@@ -21,20 +21,39 @@ export default function OwnerProjectDashboard() {
   const milestones = useQuery(api.milestones.getMilestones, { projectId });
   const initiateEscrow = useAction(api.paystack.initiateEscrowFunding);
 
+  const verifyPayment = useAction(api.paystack.verifyPaymentFrontend);
+
   const [funding, setFunding] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      if (url.searchParams.get("payment") === "success" || url.searchParams.has("trxref")) {
-        toast.success("Payment checkout completed! Escrow balance will update shortly.");
+      const trxref = url.searchParams.get("trxref") || url.searchParams.get("reference");
+      
+      if (url.searchParams.get("payment") === "success" || trxref) {
+        if (trxref) {
+          toast.loading("Verifying payment...", { id: "verify-toast" });
+          verifyPayment({ transactionRef: trxref }).then((res) => {
+             if (res?.success && res.status === "SUCCESS") {
+               toast.success("Escrow balance verified and updated!", { id: "verify-toast" });
+             } else {
+               toast.info("Waiting for webhooks to confirm payment...", { id: "verify-toast" });
+             }
+          }).catch(e => {
+             console.error("Verification error", e);
+             toast.error("Could not verify immediately. Waiting for webhooks.", { id: "verify-toast" });
+          });
+        } else {
+          toast.success("Payment checkout completed! Escrow balance will update shortly.");
+        }
+        
         url.searchParams.delete("payment");
         url.searchParams.delete("trxref");
         url.searchParams.delete("reference");
         window.history.replaceState({}, document.title, url.toString());
       }
     }
-  }, []);
+  }, [verifyPayment]);
 
   // Loading state
   if (project === undefined || milestones === undefined) {

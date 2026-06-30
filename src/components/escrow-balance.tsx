@@ -45,7 +45,7 @@ export function EscrowBalance({
 
         <div className="mb-2">
           <p className="font-mono text-[10px] sm:text-xs text-text-muted tracking-widest uppercase mb-1 sm:mb-2">CURRENT VAULT BALANCE</p>
-          <p className="font-display text-4xl sm:text-5xl font-semibold tracking-tighter">
+          <p className="font-display text-4xl sm:text-5xl font-semibold tracking-tighter break-all">
             {formatNaira(escrowBalanceKobo)}
           </p>
         </div>
@@ -73,7 +73,7 @@ export function EscrowBalance({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-surface p-4 border border-border-strong">
             <p className="font-mono text-[10px] sm:text-xs font-bold text-text-muted uppercase tracking-widest border-b border-border pb-2 mb-2 sm:mb-3">TOTAL VALUE</p>
-            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold break-all">
               {formatNaira(totalValueKobo)}
             </p>
           </div>
@@ -82,7 +82,7 @@ export function EscrowBalance({
               <TrendingDown className="w-3 h-3 text-danger" />
               DISBURSED
             </p>
-            <p className="font-mono text-base sm:text-lg text-text-primary font-bold">
+            <p className="font-mono text-base sm:text-lg text-text-primary font-bold break-all">
               {formatNaira(disbursed > 0 ? disbursed : 0)}
             </p>
           </div>
