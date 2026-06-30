@@ -33,12 +33,13 @@ export default defineSchema({
     escrowBalanceKobo: v.number(),
     projectType: v.union(
       v.literal("RESIDENTIAL_BUILDING"),
-      v.literal("ROAD_CONSTRUCTION")
+      v.literal("ROAD_CONSTRUCTION"),
+      v.literal("Residential")
     ),
-    geofenceType: v.union(
+    geofenceType: v.optional(v.union(
       v.literal("POINT_RADIUS"),
       v.literal("LINEAR_CORRIDOR")
-    ),
+    )),
     roadCentrelineCoords: v.optional(
       v.array(v.object({
         lat: v.number(),
