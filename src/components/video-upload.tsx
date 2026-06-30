@@ -41,9 +41,9 @@ export function VideoUpload({ milestoneId, milestoneName, project, onSuccess, by
       return;
     }
 
-    // Max 40MB
-    if (file.size > 40 * 1024 * 1024) {
-      setError("Video file exceeds the 40MB limit.");
+    // Max 100MB
+    if (file.size > 100 * 1024 * 1024) {
+      setError("Video file exceeds the 100MB limit.");
       return;
     }
 
@@ -229,7 +229,7 @@ export function VideoUpload({ milestoneId, milestoneName, project, onSuccess, by
             Click to select a video file
           </p>
           <p className="text-body-sm text-on-surface-variant mt-1">
-            MP4, MOV, WEBM · Up to 40MB · Max 3 mins
+            MP4, MOV, WEBM · Up to 100MB · Max 3 mins
           </p>
         </div>
       ) : (
