@@ -95,47 +95,29 @@ export default function OwnerProjectDashboard() {
         All Projects
       </Button>
 
-      {/* Money Bar */}
-      {project.status === "ACTIVE" && (
-        <div className="money-bar mb-6">
-          <div className="flex items-center gap-2">
-            <span className="label-blueprint text-primary/70">
-              ESCROW BALANCE
-            </span>
-          </div>
-          <span className="font-heading text-headline-sm text-primary">
-            {new Intl.NumberFormat("en-NG", {
-              style: "currency",
-              currency: "NGN",
-              minimumFractionDigits: 0,
-            }).format(project.escrowBalanceKobo / 100)}
+      {/* Project Header */}
+      <div className="flex flex-col items-start gap-4 mb-12 border-b-2 border-border-strong pb-8 mt-2">
+        <div className="w-full flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-text-primary uppercase leading-none break-words">
+            {project.name}
+          </h1>
+          <span className={cn(statusConfig.className, "shrink-0 rounded-none border-2 border-border-strong text-sm px-4 py-2 font-bold uppercase tracking-widest")}>
+            {statusConfig.label}
           </span>
         </div>
-      )}
-
-      {/* Project Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12 border-b border-border-strong pb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-text-primary uppercase">
-              {project.name}
-            </h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 font-mono text-xs tracking-widest text-text-secondary uppercase">
-            <span className="bg-primary/10 text-primary px-3 py-1 font-bold">{project.projectType}</span>
-            {project.location && (
-              <span className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                {project.location}
-              </span>
-            )}
-            <span className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              {formatDate(project.createdAt)}
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 font-mono text-[10px] sm:text-xs tracking-widest text-text-secondary uppercase mt-2">
+          <span className="bg-primary/10 text-primary px-3 py-1 font-bold border border-primary/20">{project.projectType}</span>
+          {project.location && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              {project.location}
             </span>
-          </div>
+          )}
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            {formatDate(project.createdAt)}
+          </span>
         </div>
-        <span className={cn(statusConfig.className, "rounded-none border border-border-strong text-sm px-4 py-2")}>{statusConfig.label}</span>
       </div>
 
       {/* Main Grid */}
