@@ -30,40 +30,23 @@ export function EscrowBalance({
   return (
     <div className="border-2 border-border-strong bg-background flex flex-col w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
       {/* Header Area */}
-      <div className="p-5 border-b-2 border-border-strong flex justify-between items-start bg-surface">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-primary" />
-          <h2 className="font-display text-lg font-bold uppercase tracking-tight text-text-primary">
-            Capital Vault
-          </h2>
-        </div>
-        <span className={cn(
+      <div className="p-5 border-b-2 border-border-strong flex items-center align-center gap-1 bg-surface">
+        <div className={cn(
           "font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-1 border-2",
           needsFunding ? "border-text-primary text-text-primary bg-background" : "border-success text-success bg-success/10"
         )}>
           {needsFunding ? "Awaiting Capital" : "Secured"}
-        </span>
+        </div>
       </div>
 
       {/* Main Balance Block */}
       <div className="p-6 bg-primary text-primary-foreground border-b-2 border-border-strong">
         <p className="font-mono text-[10px] font-bold uppercase tracking-widest mb-2 opacity-80">
-          Current Liquidity
+          Current Balance
         </p>
         <p className="font-display text-4xl xl:text-5xl font-bold tracking-tighter leading-none break-all">
           {formatNaira(escrowBalanceKobo)}
         </p>
-      </div>
-
-      {/* Ratio Block */}
-      <div className="p-5 border-b-2 border-border-strong bg-surface">
-        <div className="flex justify-between items-end mb-3">
-           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-text-muted">Liquidity Ratio</p>
-           <p className="font-mono text-sm font-bold text-primary">{fundedPercentage}%</p>
-        </div>
-        <div className="h-3 w-full bg-background border-2 border-border-strong">
-           <div className="h-full bg-primary" style={{ width: `${Math.min(fundedPercentage, 100)}%` }} />
-        </div>
       </div>
 
       {/* Stats Block */}
