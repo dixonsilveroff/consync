@@ -327,7 +327,7 @@ export const releaseMilestonePayment = internalAction({
  */
 export const verifyPaymentFrontend = action({
   args: { transactionRef: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ success: boolean; reason?: string; status?: string }> => {
     const payment = await ctx.runQuery(internal.payments.getPaymentByPaystackRef, {
       transactionRef: args.transactionRef,
     });

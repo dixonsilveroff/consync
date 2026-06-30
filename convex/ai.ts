@@ -49,9 +49,9 @@ export const runMilestoneAnalysis = internalAction({
           return url ? { id, url } : null;
         })
       );
-      const validCurrentUrls = currentUrls.filter((item): item is { id: string; url: string } => item !== null);
+      const validCurrentUrls = currentUrls.filter((item: any): item is { id: string; url: string } => item !== null);
 
-      const fetchPromises = validCurrentUrls.map(async ({ id, url }) => {
+      const fetchPromises = validCurrentUrls.map(async ({ id, url }: { id: string; url: string }) => {
         try {
           const response = await fetch(url);
           const arrayBuffer = await response.arrayBuffer();
@@ -66,7 +66,7 @@ export const runMilestoneAnalysis = internalAction({
         }
       });
 
-      const currentParts = (await Promise.all(fetchPromises)).flatMap(part => part ? [part] : []);
+      const currentParts = (await Promise.all(fetchPromises)).flatMap((part: any) => part ? [part] : []);
 
       if (currentParts.length === 0) {
         console.error("[AI] No current frames could be fetched.");
@@ -102,7 +102,7 @@ export const runMilestoneAnalysis = internalAction({
             status: prior.verificationStatus,
             plainSummary: prior.plainSummary,
             priorFrameCount: 0, // Will be updated below
-            unresolvedAnomalies: prior.anomalies.filter(a => a.severity === "HIGH" || a.severity === "CRITICAL").map(a => a.description)
+            unresolvedAnomalies: prior.anomalies.filter((a: any) => a.severity === "HIGH" || a.severity === "CRITICAL").map((a: any) => a.description)
           };
 
           // Fetch prior frames (up to 3 to save tokens)

@@ -67,7 +67,7 @@ export default function DashboardLayout({
   );
 
   const totalEscrowKobo = ownerProjects
-    ? ownerProjects.reduce((sum, project) => sum + (project.escrowBalanceKobo || 0), 0)
+    ? ownerProjects.reduce((sum: number, project: any) => sum + (project.escrowBalanceKobo || 0), 0)
     : 0;
 
   const verifyBankDetails = useAction(api.paystack.verifyAndSaveBankDetails);
