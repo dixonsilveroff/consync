@@ -29,7 +29,7 @@ export default function OwnerProjectDashboard() {
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       const trxref = url.searchParams.get("trxref") || url.searchParams.get("reference");
-      
+
       if (url.searchParams.get("payment") === "success" || trxref) {
         if (trxref) {
           toast.loading("Verifying payment...", { id: "verify-toast" });
@@ -46,7 +46,7 @@ export default function OwnerProjectDashboard() {
         } else {
           toast.success("Payment checkout completed! Escrow balance will update shortly.");
         }
-        
+
         url.searchParams.delete("payment");
         url.searchParams.delete("trxref");
         url.searchParams.delete("reference");
@@ -80,13 +80,17 @@ export default function OwnerProjectDashboard() {
   }
 
   const statusConfig = getStatusConfig(project.status);
+  const totalMilestonesKobo = milestones.reduce(
+    (sum: number, m: { valueKobo: number }) => sum + m.valueKobo,
+    0
+  );
 
-  const handleFundEscrow = async () => {
+  const handleFundEscrow = async (amountKobo: number) => {
     setFunding(true);
     try {
       const result = await initiateEscrow({
         projectId,
-        amountKobo: project.totalValueKobo,
+        amountKobo,
         ownerEmail: project.contractorEmail || "owner@example.com",
         callbackUrl: window.location.href.split('?')[0] + '?payment=success',
       });
@@ -95,7 +99,7 @@ export default function OwnerProjectDashboard() {
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to initiate escrow funding.");
+      toast.error("Failed to initiate escrow funding.");
       setFunding(false);
     }
   };
@@ -164,8 +168,10 @@ export default function OwnerProjectDashboard() {
         {/* Sidebar */}
         <div className="space-y-10">
           <EscrowBalance
+            projectId={projectId}
             totalValueKobo={project.totalValueKobo}
             escrowBalanceKobo={project.escrowBalanceKobo}
+            totalMilestonesKobo={totalMilestonesKobo}
             projectStatus={project.status}
             onFundEscrow={handleFundEscrow}
             isFunding={funding}
@@ -195,4 +201,3 @@ export default function OwnerProjectDashboard() {
     </div>
   );
 }
-

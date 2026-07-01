@@ -172,6 +172,48 @@ export const createProject = mutation({
 });
 
 /**
+ * Update the total project value (owner only)
+ */
+export const updateProjectTotalValue = mutation({
+  args: {
+    projectId: v.id("projects"),
+    totalValueKobo: v.number(),
+  },
+  handler: async (ctx, { projectId, totalValueKobo }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    const project = await ctx.db.get(projectId);
+    if (!project) throw new ConvexError("Project not found");
+    if (project.ownerClerkId !== identity.subject) {
+      throw new ConvexError("Only the project owner can update the total value");
+    }
+
+    if (totalValueKobo <= 0) {
+      throw new ConvexError("Total value must be greater than zero");
+    }
+
+    if (totalValueKobo < project.escrowBalanceKobo) {
+      throw new ConvexError("Total value cannot be less than the current escrow balance");
+    }
+
+    const milestones = await ctx.db
+      .query("milestones")
+      .withIndex("by_project", (q) => q.eq("projectId", projectId))
+      .collect();
+
+    const milestoneSum = milestones.reduce((sum, m) => sum + m.valueKobo, 0);
+    if (totalValueKobo < milestoneSum) {
+      throw new ConvexError(
+        "Total value cannot be less than the sum of milestone tranches. Reduce milestone values first."
+      );
+    }
+
+    await ctx.db.patch(projectId, { totalValueKobo });
+  },
+});
+
+/**
  * Link a contractor to a project by their Clerk ID
  */
 export const linkContractor = mutation({

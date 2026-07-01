@@ -110,6 +110,54 @@ export const getSubmissionHistory = query({
 });
 
 /**
+ * Update a milestone's payment value (owner only, before approval)
+ */
+export const updateMilestoneValue = mutation({
+  args: {
+    milestoneId: v.id("milestones"),
+    valueKobo: v.number(),
+  },
+  handler: async (ctx, { milestoneId, valueKobo }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    if (valueKobo <= 0) {
+      throw new ConvexError("Milestone value must be greater than zero");
+    }
+
+    const milestone = await ctx.db.get(milestoneId);
+    if (!milestone) throw new ConvexError("Milestone not found");
+
+    if (milestone.status === "APPROVED") {
+      throw new ConvexError("Cannot edit a milestone that has already been paid out");
+    }
+
+    const project = await ctx.db.get(milestone.projectId);
+    if (!project) throw new ConvexError("Project not found");
+    if (project.ownerClerkId !== identity.subject) {
+      throw new ConvexError("Only the project owner can update milestone values");
+    }
+
+    const milestones = await ctx.db
+      .query("milestones")
+      .withIndex("by_project", (q) => q.eq("projectId", milestone.projectId))
+      .collect();
+
+    const sumOthers = milestones
+      .filter((m) => m._id !== milestoneId)
+      .reduce((sum, m) => sum + m.valueKobo, 0);
+
+    if (sumOthers + valueKobo > project.totalValueKobo) {
+      throw new ConvexError(
+        "Milestone values cannot exceed the project total. Increase the project total first."
+      );
+    }
+
+    await ctx.db.patch(milestoneId, { valueKobo });
+  },
+});
+
+/**
  * Owner approves a milestone — marks milestone and latest submission as APPROVED
  */
 export const approveMilestone = mutation({
