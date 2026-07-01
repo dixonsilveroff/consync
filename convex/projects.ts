@@ -13,10 +13,24 @@ export const getOwnerProjects = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
-    return await ctx.db
+    const projects = await ctx.db
       .query("projects")
       .withIndex("by_owner", (q) => q.eq("ownerClerkId", identity.subject))
       .collect();
+
+    return Promise.all(
+      projects.map(async (project) => {
+        const milestones = await ctx.db
+          .query("milestones")
+          .withIndex("by_project", (q) => q.eq("projectId", project._id))
+          .collect();
+        return {
+          ...project,
+          milestoneCount: milestones.length,
+          approvedCount: milestones.filter((m) => m.status === "APPROVED").length,
+        };
+      })
+    );
   },
 });
 
@@ -28,12 +42,26 @@ export const getContractorProjects = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
-    return await ctx.db
+    const projects = await ctx.db
       .query("projects")
       .withIndex("by_contractor", (q) =>
         q.eq("contractorClerkId", identity.subject)
       )
       .collect();
+
+    return Promise.all(
+      projects.map(async (project) => {
+        const milestones = await ctx.db
+          .query("milestones")
+          .withIndex("by_project", (q) => q.eq("projectId", project._id))
+          .collect();
+        return {
+          ...project,
+          milestoneCount: milestones.length,
+          approvedCount: milestones.filter((m) => m.status === "APPROVED").length,
+        };
+      })
+    );
   },
 });
 

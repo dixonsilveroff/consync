@@ -77,6 +77,8 @@ export default function OwnerProjectsPage() {
             <ProjectCard
               key={project._id}
               project={project}
+              milestoneCount={project.milestoneCount}
+              approvedCount={project.approvedCount}
               role="owner"
             />
           ))}

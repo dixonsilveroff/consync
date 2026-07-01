@@ -66,6 +66,8 @@ export default function ContractorProjectsPage() {
             <ProjectCard
               key={project._id}
               project={project}
+              milestoneCount={project.milestoneCount}
+              approvedCount={project.approvedCount}
               role="contractor"
             />
           ))}
